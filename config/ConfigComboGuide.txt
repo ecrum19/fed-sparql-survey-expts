@@ -1,0 +1,168 @@
+/rdf-join/actors-inner.json (this AFTER VoID data is generated)
+1. default
+    1a. DEFAULT: inner-multi-bind-source --> "blockSize": 16
+    1b. SMALL: inner-multi-bind-source --> "blockSize": 4
+    1c. LARGE: inner-multi-bind-source --> "blockSize": 1000
+
+(with inner-none && inner-single && inner-multi-empty && inner-multi-smallest && inner-multi-smallest-filter-bindings)
+2. only: inner-hash-def && inner-hash-undef
+3. only: inner-nested-loop
+4. only: inner-asymetric-hash
+5. only: inner-multi-bind-source && inner-multi-bind
+
+
+/optimize-query-operation/actors.json
+1. ASK: prune-empty-source-operations --> "useAskIfSupported": true
+2. COUNT: prune-empty-source-operations --> "useAskIfSupported": false
+3. VOID: ActorRdfMetadataExtractVoid
+
+
+/optimize-query-operation/actors.json (check how many FILTER clauses are present in queries)
+1. AGGRESSIVE: filter-pushdown --> "aggressivePushdown": true
+2. DEFAULT: filter-pushdown --> "aggressivePushdown": false
+
+/something/rate-limiting/config.json (x)
+1. actors-limit-rate-on --> "limitByDefault": true, "correctionMultiplier": 1
+2. actors-limit-rate-off --> "limitByDefault": false
+
+optional:
+/optimize-query-operation/actors.json
+1. JoinConnectedOptimizer
+
+/rdf-join/actors-inner.json:
+5. remove: inner-multi-bind-source (bound join)
+6. remove: inner-multi-bind
+7. remove: inner-multi-bind-source && inner-multi-bind
+
+----
+
+Combinations possible:
+
+Matadata -- ASK / COUNT / VOID
+
+Algo - default / default-b4 / default-b1000 / asym-hash / sym-hash / nest-loop / bind
+
+http - rate-limit
+
+filterPushdown - aggresive-fp / default-fp
+
+default
+
+----
+
+Final Configs Used (all include: http/rate-on.json + rdf-join/default.json):
+
+FedX-ASK    =   default.json + query-source-identify-hypermedia/cardinality-ask.json + optimize-query-operation/def-ask.json
+FedX-COUNT  =   default.json + query-source-identify-hypermedia/cardinality-count.json + optimize-query-operation/def-count.json
+SPLENDID-ASK  =   default-VoID.json + query-source-identify-hypermedia/cardinality-ask.json + optimize-query-operation/def-ask.json
+SPLENDID-COUNT  =   default-VoID.json + query-source-identify-hypermedia/cardinality-count.json + optimize-query-operation/def-count.json
+
+-----
+
+
+
+For all experiments:
+    (add)
+    engines/config-query-sparql/config/http/actors-limit-rate.json -->
+        "limitByDefault": true,
+        "correctionMultiplier": 0.3,
+        "failureMultiplier": 1.0,
+
+    (add)
+    engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json --> 
+        "forceSourceType": true,
+    
+    (add)
+    engines/config-query-sparql/config/optimize-query-operation/actors-v4-3-0.json --> 
+        "useAskIfSupported": true
+
+-----
+
+(EX1 - FEDX)
+No VoID (at all) -- 
+    remove:
+    {
+      "@id": "urn:comunica:default:rdf-metadata-extract/actors#void",
+      "@type": "ActorRdfMetadataExtractVoid"
+    }
+    in: 
+        engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json
+
+No COUNT queries (at all) --
+    engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json --> 
+        "cardinalityCountQueries": false,
+        "cardinalityEstimateConstruction": false,
+
+(EX2 - FEDX + COUNT)
+No VoID (at all) -- 
+    remove:
+    {
+      "@id": "urn:comunica:default:rdf-metadata-extract/actors#void",
+      "@type": "ActorRdfMetadataExtractVoid"
+    }
+    in: 
+        engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json
+
+No COUNT queries (at all) --
+    engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json --> 
+        "cardinalityCountQueries": true,
+        "cardinalityEstimateConstruction": false,
+
+
+---------- ASSESS PERFORMANCE DIFFERENCES ----------
+
+*** ON TOP OF BETTER PERFORMER FROM ABOVE, ADD BELOW ***
+
+(EX3 - VoID [small estimates])
+Yes VoID (default in default-VoID-v4-3-0.json) -- 
+    add:
+    {
+      "@id": "urn:comunica:default:rdf-metadata-extract/actors#void",
+      "@type": "ActorRdfMetadataExtractVoid"
+    }
+    in: 
+        engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json
+
+No large estimation VoID --
+    engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json --> 
+        "cardinalityEstimateConstruction": false,
+
+
+(EX4 - VoID [large estimation])
+Yes VoID (default in default-VoID-v4-3-0.json) -- 
+    add:
+    {
+      "@id": "urn:comunica:default:rdf-metadata-extract/actors#void",
+      "@type": "ActorRdfMetadataExtractVoid"
+    }
+    in: 
+        engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json
+
+Yes large estimation VoID --
+    engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json --> 
+        "cardinalityEstimateConstruction": true,
+
+
+---------- ASSESS PERFORMANCE DIFFERENCES ----------
+*** ON TOP OF 2 BEST PERFORMERS FROM ABOVE, TEST BELOW ***
+
+Look at Bind Join Block size -->
+	engines/config-query-sparql/config/rdf-join/actors-inner.json -->
+	    1. DEFAULT: inner-multi-bind-source --> "blockSize": 16
+	    2. SMALL: inner-multi-bind-source --> "blockSize": 4
+	    3. LARGE: inner-multi-bind-source --> "blockSize": 1000
+
+Look at preferred bindings communication (The query operation for communicating bindings) -->
+	engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json -->
+		1. "bindMethod": 'values' (default)
+		2. "bindMethod": 'union'
+        3. "bindMethod": 'filter'
+
+
+-----
+
+
+Mock terminal command:
+node ../comunica/engines/query-sparql/bin/query-dynamic.js [source] [source2] -f [file_path] -t 'application/sparql-results+json' --httpRetryCount=2
+
+node ../comunica/engines/query-sparql/bin/query-dynamic.js https://sparql.rhea-db.org/sparql https://sparql.uniprot.org/sparql/ -f experiments/no-service/input/queries/13_ns.rq -t 'application/sparql-results+json' --httpRetryCount=2

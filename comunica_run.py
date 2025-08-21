@@ -3,8 +3,9 @@ import subprocess
 import argparse
 import datetime
 import time
+import sys
 
-def execute_queries(directory_path):
+def execute_queries(name, directory_path):
     """
     Iterate through all files in a directory, read each file as a query,
     and execute a CLI command with that query.
@@ -14,14 +15,14 @@ def execute_queries(directory_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
-    output_log_path = os.path.join(os.getcwd(), "output.log")
+    output_log_path = os.path.join(os.getcwd(), "experiments", f"{name}.log")
     n=1
     with open(output_log_path, "a", encoding="utf-8") as log_file:
         for filename in os.listdir(directory_path):
             file_path = os.path.join(directory_path, filename)
             sources = getSources(open(file_path, 'r'))
             # Format the CLI command
-            base_command = f"node ../comunica/engines/query-sparql/bin/query-dynamic.js "
+            base_command = f"node comunica/engines/query-sparql/bin/query-dynamic.js "
             for source in sources:
                 if source != "":
                     fixed_source = source.replace('\n', '')
@@ -54,7 +55,25 @@ def getSources(query_file):
 # Example usage
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Comunica tests script.")
-    parser.add_argument("-q", "--queries", type=str, required=True, help="Directory containing query files.")
+    parser.add_argument("-n", "--name", type=str, required=True, help="Name of the experiment run (please avoid using spaces)")    
+    parser.add_argument("-t", "--type", type=str, required=True, help="Type of queries to execute (SERVICE or NO SERVICE).")
     args = parser.parse_args()
 
-    execute_queries(args.queries)
+    if " " in args.name:
+        print("Invalid experiment name. Please avoid spaces.")
+        sys.exit(1)
+    else:
+        print(f"Experiment Name: {args.name}\n")
+
+    if args.type.lower() not in ["service", "noservice", "no-service", "no service"]:
+        print("Invalid query type. Please use 'service' or 'no service'.")
+        sys.exit(1)
+    else:
+        if args.type.lower() == "service":
+            input_directory = os.path.join(os.getcwd(), "queries", "service")
+        else:
+            input_directory = os.path.join(os.getcwd(), "queries", "no-service")
+
+    execute_queries(args.name, input_directory)
+
+    print(f"\nQuery execution completed, results can be found in experiments/{args.name}.log.")
