@@ -16,24 +16,24 @@ Navigate to the `comunica/` directory and run:
 bash install_comunica.sh
 ```
 
-### Installing Python dependencies
+### Installing Python dependencies [TODO]
 If a `requirements.txt` is present:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Workflow for Replicating Experiments
-1. **Configure Experiment Parameters**
-```bash
-python3 comunica_configuration.py -e [experiment]
-```
-
-2. **Prepare Query Files**
+1. **Prepare Query Files**
 ```bash
 python3 query_sort.py -i sib-swiss-federated-queries.json -t [service/noservice]
 ```
 
-3. **Run Experiments**
+2. **Configure Experiment Parameters**
+```bash
+python3 comunica_configuration.py -e [experiment]
+```
+
+3. **Run Experiment**
 ```bash
 python3 comunica_run.py -n [experiment_run_#] -t [service/noservice]
 ```

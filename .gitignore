@@ -1,20 +1,13 @@
 # Node modules
-node_modules/
 comunica/
+comunica/engines/config/*
 experiments/*
+queries/
 
 *.txt
 !ConfigComboGuide.txt
 
-/componentsjs-error-state.json
 /node_modules
-
-/experiments/*/
-!/experiments/*/output/
-/experiments/*/node_modules
-!/combinations/*/jbr-experiment.json
-/generated/*
-!/generated/.keep
 
 # Logs
 logs/

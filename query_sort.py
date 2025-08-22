@@ -19,9 +19,10 @@ def main():
     else:
         service_type = "service"
     
+    input_file_path = os.path.join(os.getcwd(), input_file)
     # checks input file validity
     try:
-        with open(input_file, 'r', encoding='utf-8') as f:
+        with open(input_file_path, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
     except Exception as e:
         print(f"Error reading {input_file}: {e}")
@@ -41,10 +42,10 @@ def main():
         print("JSON file does not contain a top-level 'data' key.")
         sys.exit(1)
 
+    # generate queries    
     if service_type == "service":
         withService(json_data, working_output_dir)
-    
-    if service_type == "noservice":
+    elif service_type == "no-service":
         withoutService(json_data, working_output_dir)
     
 
@@ -155,11 +156,16 @@ def withoutService(data, out_directory):
         # "001",
         "38", # uniprot broken query
         "49", # uniprot broken query
-
     ]
     included = [
-        "001",
-        "117_biosodafrontend_glioblastoma_orthologs_rat"
+        "42",
+        "117_biosodafrontend_glioblastoma_orthologs_rat",
+        "118_biosodafrontend_rat_brain_human_cancer",
+        "109_uniprot_transporter_in_liver",
+        "43",
+        "53",
+        "29",
+        "50"
     ]
 
     # Iterate over each item in the "data" dictionary.
@@ -249,7 +255,7 @@ def withoutService(data, out_directory):
         ns_output_filename = f"{base_name}_ns.rq"
         ns_full_output_path = os.path.join(out_directory, ns_output_filename)
 
-        if str(base_name) not in excluded:
+        if str(base_name) in included:
             total += 1
             # for without SERVICE descriptions
             try:
