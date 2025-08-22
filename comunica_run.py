@@ -29,7 +29,7 @@ def execute_queries(name, directory_path):
             if source != "":
                 fixed_source = source.replace('\n', '')
                 base_command += f"{fixed_source} "
-        print(f"Processing query {n}/53: {filename}")
+        print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
         base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
         start_time = datetime.datetime.now()
         with open(output_log_path, "a", encoding="utf-8") as log_file:
@@ -42,13 +42,13 @@ def execute_queries(name, directory_path):
                 log_file.write(f"Error executing command for {filename}: {e.stderr}\n")
             end_time = datetime.datetime.now()
             log_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
-        print(f"Finished with query {n}/53: {filename}")
+        print(f"Finished with query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
         n += 1
-        time.sleep(1)
-        print("\nShort 1 second break between queries\n")
-    
+        if n < len(os.listdir(directory_path)):
+            time.sleep(1)
+            print("\nShort 1 second break between queries\n")
+
     log_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
-    log_file.close()
 
 def getSources(query_file):
     """

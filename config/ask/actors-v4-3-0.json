@@ -1,13 +1,14 @@
 {
   "@context": [
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/runner/^4.0.0/components/context.jsonld",
-    
+
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-describe-to-constructs-subject/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-assign-sources-exhaustive/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-join-bgp/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-bgp-to-join/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-join-connected/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-prune-empty-source-operations/^4.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-leftjoin-expression-pushdown/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-filter-pushdown/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-group-sources/^4.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/actor-optimize-query-operation-rewrite-add/^4.0.0/components/context.jsonld",
@@ -69,6 +70,13 @@
       "@id": "urn:comunica:default:optimize-query-operation/actors#prune-empty-source-operations",
       "@type": "ActorOptimizeQueryOperationPruneEmptySourceOperations",
       "useAskIfSupported": true,
+      "beforeActors": [
+        { "@id": "urn:comunica:default:optimize-query-operation/actors#filter-pushdown" }
+      ]
+    },
+    {
+      "@id": "urn:comunica:default:optimize-query-operation/actors#leftjoin-expression-pushdown",
+      "@type": "ActorOptimizeQueryOperationLeftjoinExpressionPushdown",
       "beforeActors": [
         { "@id": "urn:comunica:default:optimize-query-operation/actors#filter-pushdown" }
       ]

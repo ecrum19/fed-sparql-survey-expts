@@ -68,12 +68,12 @@ def changeRateLimit(v1):
         src = os.path.join(os.getcwd(), 'config/rate-limit-on/actors-limit-rate.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/http/actors-limit-rate.json')
         shutil.copyfile(src, dst)
-        print(f"Rate limiting: ON ✅")
+        print(f"\tRate limiting: ON ✅")
     else:
         src = os.path.join(os.getcwd(), 'config/rate-limit-off/actors-limit-rate.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/http/actors-limit-rate.json')
         shutil.copyfile(src, dst)
-        print(f"Rate limiting: OFF ❌")
+        print(f"\tRate limiting: OFF ❌")
 
 def changeAsk(v2):
     if v2:

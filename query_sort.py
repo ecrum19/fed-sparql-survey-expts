@@ -167,6 +167,20 @@ def withoutService(data, out_directory):
         "29",
         "50"
     ]
+    bgee = [
+        "50",
+        "49",
+        "109_uniprot_transporter_in_liver",
+        "20",
+        "16",
+        "17",
+        "19",
+        "18",
+        "117_biosodafrontend_glioblastoma_orthologs_rat",
+        "118_biosodafrontend_rat_brain_human_cancer",
+        "028-biosodafrontend",
+        "027-biosodafrontend"
+    ]
 
     # Iterate over each item in the "data" dictionary.
     total = 0
@@ -255,7 +269,7 @@ def withoutService(data, out_directory):
         ns_output_filename = f"{base_name}_ns.rq"
         ns_full_output_path = os.path.join(out_directory, ns_output_filename)
 
-        if str(base_name) in included:
+        if str(base_name) in bgee:
             total += 1
             # for without SERVICE descriptions
             try:
