@@ -35,12 +35,12 @@ python3 comunica_configuration.py -e [experiment]
 
 3. **Run Experiment**
 ```bash
-python3 comunica_run.py -n [experiment_run_#] -t [service/noservice]
+python3 comunica_run.py -n [DATE-EX#] -t [service/noservice]
 ```
 
 4. **Analyze Results**
 ```bash
-python3 interpret_results.py -c [DATE-EX#]
+python3 interpret_results.py -c [experiments/experiment_run_#]
 ```
 
 ## Reproducibility
