@@ -17,7 +17,7 @@ def execute_queries(name, directory_path):
 
     output_log_path = os.path.join(os.getcwd(), "experiments", f"{name}.log")
     n=1
-    with open(output_log_path, "a", encoding="utf-8") as log_file:
+    with open(output_log_path, "w", encoding="utf-8") as log_file:
         for filename in os.listdir(directory_path):
             file_path = os.path.join(directory_path, filename)
             sources = getSources(open(file_path, 'r'))
