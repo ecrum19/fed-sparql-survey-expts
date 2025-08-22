@@ -15,9 +15,16 @@ def execute_queries(name, directory_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
-    output_log_path = os.path.join(os.getcwd(), "experiments", f"{name}.log")
+    output_log_path = os.path.join(os.getcwd(), "experiments")
+    output_log_file = os.path.join(output_log_path, f"{name}.log")
+
+    # checks if specified output path is valid
+    if not os.path.isdir(output_log_path):
+        print(f"Output directory {output_log_path} does not exist. Creating it...")
+        os.makedirs(output_log_path, exist_ok=False)
+        
     # Initialize the log file before anything else
-    with open(output_log_path, "w", encoding="utf-8") as log_file:
+    with open(output_log_file, "w", encoding="utf-8") as log_file:
         log_file.write(f"Experiment log for: {name}\nExperiment {name} began at {datetime.datetime.now().isoformat()}\n\n")
     n = 1
     for filename in os.listdir(directory_path):
@@ -32,7 +39,7 @@ def execute_queries(name, directory_path):
         print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
         base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
         start_time = datetime.datetime.now()
-        with open(output_log_path, "a", encoding="utf-8") as log_file:
+        with open(output_log_file, "a", encoding="utf-8") as log_file:
             log_file.write(f"Executing: {base_command}\n")
             log_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
             try:
