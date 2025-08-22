@@ -16,20 +16,23 @@ def execute_queries(name, directory_path):
     """
 
     output_log_path = os.path.join(os.getcwd(), "experiments", f"{name}.log")
-    n=1
+    # Initialize the log file before anything else
     with open(output_log_path, "w", encoding="utf-8") as log_file:
-        for filename in os.listdir(directory_path):
-            file_path = os.path.join(directory_path, filename)
-            sources = getSources(open(file_path, 'r'))
-            # Format the CLI command
-            base_command = f"node comunica/engines/query-sparql/bin/query-dynamic.js "
-            for source in sources:
-                if source != "":
-                    fixed_source = source.replace('\n', '')
-                    base_command += f"{fixed_source} "
-            print(f"Processing query {n}/53: {filename}")
-            base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
-            start_time = datetime.datetime.now()
+        log_file.write(f"Experiment log for: {name}\nExperiment {name} began at {datetime.datetime.now().isoformat()}\n\n")
+    n = 1
+    for filename in os.listdir(directory_path):
+        file_path = os.path.join(directory_path, filename)
+        sources = getSources(open(file_path, 'r'))
+        # Format the CLI command
+        base_command = f"node comunica/engines/query-sparql/bin/query-dynamic.js "
+        for source in sources:
+            if source != "":
+                fixed_source = source.replace('\n', '')
+                base_command += f"{fixed_source} "
+        print(f"Processing query {n}/53: {filename}")
+        base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
+        start_time = datetime.datetime.now()
+        with open(output_log_path, "a", encoding="utf-8") as log_file:
             log_file.write(f"Executing: {base_command}\n")
             log_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
             try:
@@ -39,10 +42,13 @@ def execute_queries(name, directory_path):
                 log_file.write(f"Error executing command for {filename}: {e.stderr}\n")
             end_time = datetime.datetime.now()
             log_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
-            print(f"Finished with query {n}/53: {filename}")
-            n += 1
-            time.sleep(1)
-            print("\nShort 1 second break between queries\n")
+        print(f"Finished with query {n}/53: {filename}")
+        n += 1
+        time.sleep(1)
+        print("\nShort 1 second break between queries\n")
+    
+    log_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
+    log_file.close()
 
 def getSources(query_file):
     """
@@ -52,7 +58,7 @@ def getSources(query_file):
     f = query_file.readlines()
     return f[0].split("# Datasources: ")[1].split(' ')
 
-# Example usage
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Comunica tests script.")
     parser.add_argument("-n", "--name", type=str, required=True, help="Name of the experiment run (please avoid using spaces)")    
