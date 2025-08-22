@@ -40,7 +40,7 @@ python3 comunica_run.py -n [experiment_run_#] -t [service/noservice]
 
 4. **Analyze Results**
 ```bash
-python3 interpret_results.py -c [experiments/experiment_run_#]
+python3 interpret_results.py -c [DATE-EX#]
 ```
 
 ## Reproducibility
