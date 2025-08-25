@@ -20,42 +20,41 @@ def execute_queries(name, directory_path):
 
     # checks if specified output path is valid
     if not os.path.isdir(output_log_path):
-        print(f"Output directory {output_log_path} does not exist. Creating it...")
         os.makedirs(output_log_path, exist_ok=False)
         
     # Initialize the log file before anything else
     with open(output_log_file, "w", encoding="utf-8") as log_file:
         log_file.write(f"Experiment log for: {name}\nExperiment {name} began at {datetime.datetime.now().isoformat()}\n\n")
-    n = 1
-    for filename in os.listdir(directory_path):
-        file_path = os.path.join(directory_path, filename)
-        sources = getSources(open(file_path, 'r'))
-        # Format the CLI command
-        base_command = f"node comunica/engines/query-sparql/bin/query-dynamic.js "
-        for source in sources:
-            if source != "":
-                fixed_source = source.replace('\n', '')
-                base_command += f"{fixed_source} "
-        print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
-        base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
-        start_time = datetime.datetime.now()
-        with open(output_log_file, "a", encoding="utf-8") as log_file:
-            log_file.write(f"Executing: {base_command}\n")
-            log_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
-            try:
-                result = subprocess.run(base_command, shell=True, check=True, text=True, capture_output=True)
-                log_file.write("Output:\n" + result.stdout + "\n")
-            except subprocess.CalledProcessError as e:
-                log_file.write(f"Error executing command for {filename}: {e.stderr}\n")
-            end_time = datetime.datetime.now()
-            log_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
-        print(f"Finished with query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
-        n += 1
-        if n < len(os.listdir(directory_path)):
-            time.sleep(1)
-            print("\nShort 1 second break between queries\n")
+        n = 1
+        for filename in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, filename)
+            sources = getSources(open(file_path, 'r'))
+            # Format the CLI command
+            base_command = f"node comunica/engines/query-sparql/bin/query-dynamic.js "
+            for source in sources:
+                if source != "":
+                    fixed_source = source.replace('\n', '')
+                    base_command += f"{fixed_source} "
+            print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
+            base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
+            start_time = datetime.datetime.now()
+            with open(output_log_file, "a", encoding="utf-8") as log_file:
+                log_file.write(f"Executing: {base_command}\n")
+                log_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
+                try:
+                    result = subprocess.run(base_command, shell=True, check=True, text=True, capture_output=True)
+                    log_file.write("Output:\n" + result.stdout + "\n")
+                except subprocess.CalledProcessError as e:
+                    log_file.write(f"Error executing command for {filename}: {e.stderr}\n")
+                end_time = datetime.datetime.now()
+                log_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
+            print(f"Finished with query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
+            n += 1
+            if n < len(os.listdir(directory_path)):
+                time.sleep(1)
+                print("\nShort 1 second break between queries\n")
 
-    log_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
+            log_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
 
 def getSources(query_file):
     """
