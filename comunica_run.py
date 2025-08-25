@@ -53,8 +53,8 @@ def execute_queries(name, directory_path):
         print(f"Finished with query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
         n += 1
         if n < len(os.listdir(directory_path)):
-            time.sleep(1)
-            print("\nShort 1 second break between queries\n")
+            time.sleep(10)
+            print("\nShort 10 second break between queries\n")
     
     # end of the experiment
     with open(output_log_file, "a", encoding="utf-8") as log_file:
