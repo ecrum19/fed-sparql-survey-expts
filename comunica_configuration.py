@@ -106,13 +106,7 @@ def countAndVoid(c, lv, g):
         src = os.path.join(os.getcwd(), 'config/only-count/actors.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
         shutil.copyfile(src, dst)
-        print(f"\tOnly GET: OFF ❌\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
-    # ONLY COUNT -- GET
-    if c and not lv and g:
-        src = os.path.join(os.getcwd(), 'config/only-count-get/actors.json')
-        dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
-        shutil.copyfile(src, dst)
-        print(f"\tOnly GET: ON ✅\n\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
+        print(f"\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
     # ONLY LARGE VoID
     elif not c and lv:
         src = os.path.join(os.getcwd(), 'config/void-large/actors.json')
@@ -120,11 +114,17 @@ def countAndVoid(c, lv, g):
         shutil.copyfile(src, dst)
         print(f"\tVoID (large): ON ✅\n\tCOUNT: OFF ❌")
     # NO COUNT OR LARGE VoID
-    elif not c and not lv:
+    elif not c and not lv and not g:
         src = os.path.join(os.getcwd(), 'config/no-count/actors.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
         shutil.copyfile(src, dst)
         print(f"\tVoID (large): OFF ❌\n\tCOUNT: OFF ❌")
+    # NO COUNT / NO LARGE VoID -- GET
+    elif not c and not lv and g:
+        src = os.path.join(os.getcwd(), 'config/no-count-get/actors.json')
+        dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
+        shutil.copyfile(src, dst)
+        print(f"\tOnly GET: ON ✅\n\tVoID (large): OFF ❌\n\tCOUNT: OFF ❌")
     else:
         print(f"\tVoID (large): DEFAULT (OFF) ❌\n\tCOUNT: DEFAULT (ON) ✅")
 
