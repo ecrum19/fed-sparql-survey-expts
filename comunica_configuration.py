@@ -144,7 +144,7 @@ def changeComunicaConfigs(config_options: ExperimentOptions):
     changeRateLimit(config_options.rate_limit)
     changeAsk(config_options.ask)
     generalVoid(config_options.void)
-    countAndVoid(config_options.count, config_options.large_void)
+    countAndVoid(config_options.count, config_options.large_void, config_options.get)
     print(f"Configuration changes have been applied 🎉")
 
 
