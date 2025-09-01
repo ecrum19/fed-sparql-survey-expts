@@ -37,7 +37,7 @@ experiment_options_dict = {
         block_size="default",
         bindings="default"
     ),
-    "EX1g": ExperimentOptions(
+    "EX1G": ExperimentOptions(
         rate_limit=True,
         ask=True,
         count=False,
