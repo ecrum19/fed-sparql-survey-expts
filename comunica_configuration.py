@@ -11,7 +11,7 @@ class ExperimentOptions:
         ask: bool = False,
         count: bool = False,
         void: bool = False,
-        get: bool = False,
+        method_get: bool = False,
         large_void: bool = False,
         block_size: str = "",
         bindings: str = ""
@@ -20,6 +20,7 @@ class ExperimentOptions:
         self.ask: bool = ask
         self.count: bool = count
         self.void: bool = void
+        self.method_get: bool = method_get
         self.large_void: bool = large_void
         self.block_size: str = block_size
         self.bindings: str = bindings
@@ -31,7 +32,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
-        get=False,
+        method_get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -41,7 +42,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
-        get=True,
+        method_get=True,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -51,7 +52,7 @@ experiment_options_dict = {
         ask=True,
         count=True,
         void=False,
-        get=False,
+        method_get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -61,7 +62,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
-        get=False,
+        method_get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -71,7 +72,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
-        get=False,
+        method_get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -144,7 +145,7 @@ def changeComunicaConfigs(config_options: ExperimentOptions):
     changeRateLimit(config_options.rate_limit)
     changeAsk(config_options.ask)
     generalVoid(config_options.void)
-    countAndVoid(config_options.count, config_options.large_void, config_options.get)
+    countAndVoid(config_options.count, config_options.large_void, config_options.method_get)
     print(f"Configuration changes have been applied 🎉")
 
 
