@@ -83,14 +83,14 @@ if __name__ == "__main__":
     else:
         print(f"Experiment Name: {args.name}\n")
 
-    if args.type.lower() not in ["service", "noservice", "no-service", "no service"]:
-        print("Invalid query type. Please use 'service' or 'no service'.")
-        sys.exit(1)
+    # if args.type.lower() not in ["service", "noservice", "no-service", "no service"]:
+    #     print("Invalid query type. Please use 'service' or 'no service'.")
+    #     sys.exit(1)
+    # else:
+    if args.type.lower() == "service":
+        input_directory = os.path.join(os.getcwd(), "queries", "service")
     else:
-        if args.type.lower() == "service":
-            input_directory = os.path.join(os.getcwd(), "queries", "service")
-        else:
-            input_directory = os.path.join(os.getcwd(), "queries", "no-service")
+        input_directory = os.path.join(os.getcwd(), "queries", args.type.lower())
 
     execute_queries(args.name, input_directory)
 
