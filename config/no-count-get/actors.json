@@ -21,6 +21,7 @@
       "@id": "urn:comunica:default:query-source-identify-hypermedia/actors#sparql",
       "@type": "ActorQuerySourceIdentifyHypermediaSparql",
       "forceSourceType": true,
+      "forceHttpGet": true,
       "cardinalityEstimateConstruction": false,
       "cardinalityCountQueries": false,
       "mediatorHttp": { "@id": "urn:comunica:default:http/mediators#main" },

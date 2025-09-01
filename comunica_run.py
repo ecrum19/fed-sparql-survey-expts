@@ -15,16 +15,17 @@ def execute_queries(name, directory_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
-    output_log_path = os.path.join(os.getcwd(), "experiments")
-    output_log_file = os.path.join(output_log_path, f"{name}.log")
+    output_path = os.path.join(os.getcwd(), "experiments")
+    output_log_file = os.path.join(output_path, f"{name}.log")
+    output_results_file =  os.path.join(output_path, f"{name}.txt")
 
     # checks if specified output path is valid
-    if not os.path.isdir(output_log_path):
-        os.makedirs(output_log_path, exist_ok=False)
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path, exist_ok=False)
         
     # Initialize the log file before anything else
-    with open(output_log_file, "w", encoding="utf-8") as log_file:
-        log_file.write(f"Experiment log for: {name}\nExperiment {name} began at {datetime.datetime.now().isoformat()}\n\n")
+    with open(output_results_file, "w", encoding="utf-8") as results_file:
+        results_file.write(f"Experiment log for: {name}\nExperiment {name} began at {datetime.datetime.now().isoformat()}\n\n")
     
     # record results and write them to the log file
     n = 1
@@ -38,27 +39,27 @@ def execute_queries(name, directory_path):
                 fixed_source = source.replace('\n', '')
                 base_command += f"{fixed_source} "
         print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
-        base_command += f"-f {file_path} -t 'application/sparql-results+json' --httpRetryCount=2"
+        base_command += f"-f {file_path} -t 'application/sparql-results+json' -l debug 2> {output_log_file} --httpRetryCount=10000"
         start_time = datetime.datetime.now()
-        with open(output_log_file, "a", encoding="utf-8") as log_file:
-            log_file.write(f"Executing: {base_command}\n")
-            log_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
+        with open(output_results_file, "a", encoding="utf-8") as results_file:
+            results_file.write(f"Executing: {base_command}\n")
+            results_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
             try:
                 result = subprocess.run(base_command, shell=True, check=True, text=True, capture_output=True)
-                log_file.write("Output:\n" + result.stdout + "\n")
+                results_file.write("Output:\n" + result.stdout + "\n")
             except subprocess.CalledProcessError as e:
-                log_file.write(f"Error executing command for {filename}: {e.stderr}\n")
+                results_file.write(f"Error executing command for {filename}: {e.stderr}\n")
             end_time = datetime.datetime.now()
-            log_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
+            results_file.write(f"Timestamp (end): {end_time.isoformat()}\n\n")
         print(f"Finished with query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
         n += 1
-        if n < len(os.listdir(directory_path)):
-            time.sleep(10)
-            print("\nShort 10 second break between queries\n")
-    
+        if n < len(os.listdir(directory_path)) + 1:
+            print("\nShort 1 second break between queries\n")
+            time.sleep(1)
+
     # end of the experiment
-    with open(output_log_file, "a", encoding="utf-8") as log_file:
-        log_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
+    with open(output_results_file, "a", encoding="utf-8") as results_file:
+        results_file.write(f"Experiment {name} completed at {datetime.datetime.now().isoformat()}\n")
 
 
 def getSources(query_file):

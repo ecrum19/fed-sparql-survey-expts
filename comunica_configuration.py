@@ -11,6 +11,7 @@ class ExperimentOptions:
         ask: bool = False,
         count: bool = False,
         void: bool = False,
+        get: bool = False,
         large_void: bool = False,
         block_size: str = "",
         bindings: str = ""
@@ -30,6 +31,17 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
+        get=False,
+        large_void=False,
+        block_size="default",
+        bindings="default"
+    ),
+    "EX1g": ExperimentOptions(
+        rate_limit=True,
+        ask=True,
+        count=False,
+        void=False,
+        get=True,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -39,6 +51,7 @@ experiment_options_dict = {
         ask=True,
         count=True,
         void=False,
+        get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -48,6 +61,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
+        get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -57,6 +71,7 @@ experiment_options_dict = {
         ask=True,
         count=False,
         void=False,
+        get=False,
         large_void=False,
         block_size="default",
         bindings="default"
@@ -84,13 +99,19 @@ def changeAsk(v2):
     else:
         print(f"\tASK: DEFAULT (OFF ❌)")
 
-def countAndVoid(c, lv):
+def countAndVoid(c, lv, g):
     # ONLY COUNT
-    if c and not lv:
+    if c and not lv and not g:
         src = os.path.join(os.getcwd(), 'config/only-count/actors.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
         shutil.copyfile(src, dst)
-        print(f"\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
+        print(f"\tOnly GET: OFF ❌\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
+    # ONLY COUNT -- GET
+    if c and not lv and g:
+        src = os.path.join(os.getcwd(), 'config/only-count-get/actors.json')
+        dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
+        shutil.copyfile(src, dst)
+        print(f"\tOnly GET: ON ✅\n\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
     # ONLY LARGE VoID
     elif not c and lv:
         src = os.path.join(os.getcwd(), 'config/void-large/actors.json')
