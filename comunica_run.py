@@ -15,8 +15,8 @@ def execute_queries(name, directory_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
-    output_path = os.path.join(os.getcwd(), "experiments")
-    output_log_file = os.path.join(output_path, f"{name}.log")
+    os.makedirs(os.path.join(os.getcwd(), "experiments", name), exist_ok=False)
+    output_path = os.path.join(os.getcwd(), "experiments", name)
     output_results_file =  os.path.join(output_path, f"{name}.txt")
 
     # checks if specified output path is valid
@@ -30,6 +30,7 @@ def execute_queries(name, directory_path):
     # record results and write them to the log file
     n = 1
     for filename in os.listdir(directory_path):
+        output_log_file = os.path.join(output_path, f"{filename}.log")
         file_path = os.path.join(directory_path, filename)
         sources = getSources(open(file_path, 'r'))
         # Format the CLI command
