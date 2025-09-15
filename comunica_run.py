@@ -5,7 +5,7 @@ import datetime
 import time
 import sys
 
-def execute_queries(name, directory_path):
+def execute_queries(name, directory_path, output_base_path):
     """
     Iterate through all files in a directory, read each file as a query,
     and execute a CLI command with that query.
@@ -15,6 +15,7 @@ def execute_queries(name, directory_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
+    
     os.makedirs(os.path.join(os.getcwd(), "experiments", name), exist_ok=False)
     output_path = os.path.join(os.getcwd(), "experiments", name)
     output_results_file =  os.path.join(output_path, f"{name}.txt")
@@ -47,7 +48,7 @@ def execute_queries(name, directory_path):
             results_file.write(f"Timestamp (start): {start_time.isoformat()}\n")
             try:
                 result = subprocess.run(base_command, shell=True, check=True, text=True, capture_output=True)
-                results_file.write("Output:\n" + result.stdout + "\n")
+                results_file.write("Output:\n" + result.stdout)
             except subprocess.CalledProcessError as e:
                 results_file.write(f"Error executing command for {filename}: {e.stderr}\n")
             end_time = datetime.datetime.now()
@@ -74,8 +75,9 @@ def getSources(query_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Comunica tests script.")
-    parser.add_argument("-n", "--name", type=str, required=True, help="Name of the experiment run (please avoid using spaces)")    
-    parser.add_argument("-t", "--type", type=str, required=True, help="Type of queries to execute (SERVICE or NO SERVICE).")
+    parser.add_argument("-n", "--name", type=str, required=True, help="Name of the experiment run (please avoid using spaces)")
+    parser.add_argument("-o", "--output", type=str, default="queries", help="The base directory for output files.")
+    parser.add_argument("-t", "--type", type=str, required=True, help="The directory of queries to execute.")
     args = parser.parse_args()
 
     if " " in args.name:
@@ -84,15 +86,12 @@ if __name__ == "__main__":
     else:
         print(f"Experiment Name: {args.name}\n")
 
-    # if args.type.lower() not in ["service", "noservice", "no-service", "no service"]:
-    #     print("Invalid query type. Please use 'service' or 'no service'.")
-    #     sys.exit(1)
-    # else:
+
     if args.type.lower() == "service":
         input_directory = os.path.join(os.getcwd(), "queries", "service")
     else:
         input_directory = os.path.join(os.getcwd(), "queries", args.type.lower())
 
-    execute_queries(args.name, input_directory)
+    execute_queries(args.name, input_directory, args.output)
 
     print(f"\nQuery execution completed, results can be found in experiments/{args.name}.log.")
