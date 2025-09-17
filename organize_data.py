@@ -254,6 +254,8 @@ def main():
         print(f"[WARN] No .txt files found in {input_dir}")
         sys.exit(0)
 
+    print(f"[INFO] Running summary generation for {len(inputs)} batch file(s)...")
+
     # Process each file and combine results
     overall_summary = {
         "general_stats": {
