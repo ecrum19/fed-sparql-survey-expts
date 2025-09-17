@@ -144,9 +144,9 @@ def parse_batch_log(path: str) -> Dict[str, Any]:
 
 def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
     entries = summary["entries"]
-    run_start = _parse_iso(summary["run_start"])
-    run_end = _parse_iso(summary["run_end"])
-    run_duration_s = summary["run_duration_seconds"]
+    run_start = _parse_iso(summary["general_stats"]["run_start"])
+    run_end = _parse_iso(summary["general_stats"]["run_end"])
+    run_duration_s = summary["general_stats"]["run_duration_seconds"]
     # Compute aggregate counts across all queries (BEFORE inserting the summary row)
     num_with_num_results = sum(1 for e in entries if e.get("results_count", 0) > 0)
     num_with_results = sum(1 for e in entries if e.get("produced_results", False))
