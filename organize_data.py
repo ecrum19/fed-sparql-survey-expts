@@ -172,7 +172,7 @@ def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
 
 
 def write_csv(summary: {Dict[str, Any]}, out_path: str):
-    df = pd.DataFrame(summary)
+    df = pd.DataFrame(summary['entries'])
     df.to_csv(out_path, index=False)
 
 
