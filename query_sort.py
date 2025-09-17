@@ -210,9 +210,6 @@ def withoutService(data, out_directory):
 
     ]
     batch_dirs = ["ns_batch1", "ns_batch2", "ns_batch3", "ns_batch4"]
-    # Create output directories
-    ns_get_dir = os.path.join(out_directory, "ns_get")
-    os.makedirs(ns_get_dir, exist_ok=True)
     total = 0
     for bd in batch_dirs:
         os.makedirs(os.path.join(out_directory, bd), exist_ok=True)

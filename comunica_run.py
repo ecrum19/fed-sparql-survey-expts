@@ -41,7 +41,7 @@ def execute_queries(name, directory_path, output_base_path):
                 fixed_source = source.replace('\n', '')
                 base_command += f"{fixed_source} "
         print(f"Processing query {n}/{str(len(os.listdir(directory_path)))}: {filename}")
-        base_command += f"-f {file_path} -t 'application/sparql-results+json' -l debug 2> {output_log_file} --httpRetryCount=10000"
+        base_command += f"-f {file_path} -t 'application/sparql-results+json' -l debug 2> {output_log_file} --httpRetryCount=50"
         start_time = datetime.datetime.now()
         with open(output_results_file, "a", encoding="utf-8") as results_file:
             results_file.write(f"Executing: {base_command}\n")
