@@ -307,7 +307,7 @@ def main():
     if args.csv:
         csv_path = Path(input_dir / args.output).with_suffix(".csv")
         write_csv(added_general_stats_row, str(csv_path))
-        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {csv_path}.")
+        print(f"[OK] Wrote {len(overall_summary['entries']) - 1} total query records to {csv_path}.")
     else:
         print("[INFO] Did not write summary to CSV, include '--csv' if you wish for this file to be created.")
 
