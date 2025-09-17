@@ -168,7 +168,6 @@ def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
 def write_csv(summary: {Dict[str, Any]}, out_path: str):
     df = pd.DataFrame(summary)
     df.to_csv(out_path, index=False)
-    print(f"[INFO] Wrote {len(df)} query records to {out_path}")
 
 
 def getErrorFromZipped(file, member: Optional[str] = None) -> str:
@@ -294,17 +293,17 @@ def main():
     added_general_stats_row = get_general_stats(overall_summary, input_dir)
 
     # Always write JSON
-    with open(args.output, "w", encoding="utf-8") as f:
+    with open(input_dir / args.output, "w", encoding="utf-8") as f:
         json.dump(added_general_stats_row, f, ensure_ascii=False, indent=2)
     print(f"[OK] Wrote combined JSON summary for {len(inputs)} file(s) to {args.output}.")
 
     # Also write a CSV of entries if there are any
     if args.csv:
-        csv_path = Path(args.output).with_suffix(".csv")
+        csv_path = Path(input_dir / args.output).with_suffix(".csv")
         write_csv(added_general_stats_row, str(csv_path))
-        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {csv_path}.")
+        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {input_dir / csv_path}.")
     else:
-        print("[INFO] No entries to write to CSV.")
+        print("[INFO] Did not write summary to CSV, include '--csv' if you wish for this file to be created.")
 
 if __name__ == "__main__":
     main()
