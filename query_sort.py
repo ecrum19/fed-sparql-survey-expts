@@ -107,10 +107,10 @@ def withService(data, out_directory):
 def withoutService(data, out_directory):
     """
     Splits no-service queries into four batches:
-    1. Bgee queries (dir: ns_get)
-    2. Batch 1 (dir: ns_batch1)
-    3. Batch 2 (dir: ns_batch2)
-    4. Batch 3 (dir: ns_batch3)
+    1. Batch 1 (dir: ns_batch1)
+    2. Batch 2 (dir: ns_batch2)
+    3. Batch 3 (dir: ns_batch3)
+    4. Batch 4 (dir: ns_batch4)
     """
     excluded = [
         "14", # server-side error
@@ -199,16 +199,17 @@ def withoutService(data, out_directory):
             continue
         all_queries.append((item_key, item_value))
     # Separate Bgee queries
-    bgee_queries = [q for q in all_queries if os.path.basename(q[0]) in bgee or q[0] in bgee]
-    other_queries = [q for q in all_queries if not (os.path.basename(q[0]) in bgee or q[0] in bgee)]
-    # Split other queries into 3 roughly equal batches
-    batch_size = (len(other_queries) + 2) // 3  # ensures all queries are included
+    queries = [q for q in all_queries if not (os.path.basename(q[0]) in excluded or q[0] in excluded)]
+    # Split other queries into 4 roughly equal batches
+    batch_size = (len(queries) + 2) // 4  # ensures all queries are included
     batches = [
-        other_queries[0:batch_size],
-        other_queries[batch_size:2*batch_size],
-        other_queries[2*batch_size:]
+        queries[0:batch_size],
+        queries[batch_size:2*batch_size],
+        queries[2*batch_size:3*batch_size],
+        queries[3*batch_size:]
+
     ]
-    batch_dirs = ["ns_batch1", "ns_batch2", "ns_batch3"]
+    batch_dirs = ["ns_batch1", "ns_batch2", "ns_batch3", "ns_batch4"]
     # Create output directories
     ns_get_dir = os.path.join(out_directory, "ns_get")
     os.makedirs(ns_get_dir, exist_ok=True)
@@ -216,9 +217,9 @@ def withoutService(data, out_directory):
     for bd in batch_dirs:
         os.makedirs(os.path.join(out_directory, bd), exist_ok=True)
     # Write Bgee queries
-    print(f"Writing {len(bgee_queries)} Bgee queries to {ns_get_dir}")
-    total = total + len(bgee_queries)
-    write_no_service_queries(bgee_queries, ns_get_dir)
+    print(f"Writing {len(queries)} Bgee queries to {ns_get_dir}")
+    total = total + len(queries)
+    write_no_service_queries(queries, ns_get_dir)
     # Write other batches
     for i, batch in enumerate(batches):
         total = total + len(batch)
