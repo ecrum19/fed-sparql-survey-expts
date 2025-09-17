@@ -119,8 +119,8 @@ def parse_batch_log(path: str) -> Dict[str, Any]:
             if em:
                 if file_exists(parent_dir, query_name + ".log"):
                     error_text = getErrorFromNorm(os.path.join(parent_dir, query_name + ".log"))
-                elif file_exists(parent_dir, "c" + query_name + ".log"):
-                    error_text = getErrorFromZipped(os.path.join(parent_dir, "c" + query_name + ".log"))
+                elif file_exists(parent_dir, query_name + ".log.zip"):
+                    error_text = getErrorFromZipped(os.path.join(parent_dir, query_name + ".log.zip"))
                 else:
                     error_text = "Unknown Error"
 

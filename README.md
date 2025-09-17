@@ -41,6 +41,10 @@ python3 comunica_run.py -n EX1-09-25 -t no-service/ns_batch1
 
 4. **Analyze Results**
 ```bash
+bash process_and_copy.sh /path/to/source /path/to/dest
+
+```
+```bash
 python3 organize_data.py --input [overall-batch.txt] --output [overall-batch-summary.csv]
 python3 organize_data.py --input ../fed-survey-results/experiments/testbatch2/testbatch2.txt --output ../fed-survey-results/experiments/testbatch2/testbatch2-summary.csv
 ```
