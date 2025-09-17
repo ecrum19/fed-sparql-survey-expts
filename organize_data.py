@@ -165,6 +165,12 @@ def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
     }
     entries.insert(0, general_row)
 
+    return {
+        "general_stats": summary["general_stats"],
+        "entries": entries
+    }
+
+
 def write_csv(summary: {Dict[str, Any]}, out_path: str):
     df = pd.DataFrame(summary)
     df.to_csv(out_path, index=False)
@@ -301,7 +307,7 @@ def main():
     if args.csv:
         csv_path = Path(input_dir / args.output).with_suffix(".csv")
         write_csv(added_general_stats_row, str(csv_path))
-        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {input_dir / csv_path}.")
+        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {csv_path}.")
     else:
         print("[INFO] Did not write summary to CSV, include '--csv' if you wish for this file to be created.")
 
