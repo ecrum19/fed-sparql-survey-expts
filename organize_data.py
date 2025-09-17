@@ -1,5 +1,5 @@
 from __future__ import annotations
-import re, json, os, argparse, io
+import re, json, os, argparse, io, sys
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import pandas as pd
@@ -135,6 +135,18 @@ def parse_batch_log(path: str) -> Dict[str, Any]:
             "error": "None" if produced_results else error_text,
         })
 
+    return {
+        "run_start": run_start.isoformat(),
+        "run_end": run_end.isoformat(),
+        "run_duration_seconds": run_duration_s,
+        "entries": entries,
+    }
+
+def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
+    entries = summary["entries"]
+    run_start = _parse_iso(summary["run_start"])
+    run_end = _parse_iso(summary["run_end"])
+    run_duration_s = summary["run_duration_seconds"]
     # Compute aggregate counts across all queries (BEFORE inserting the summary row)
     num_with_num_results = sum(1 for e in entries if e.get("results_count", 0) > 0)
     num_with_results = sum(1 for e in entries if e.get("produced_results", False))
@@ -142,7 +154,7 @@ def parse_batch_log(path: str) -> Dict[str, Any]:
 
     # Build the "general" summary row and put it at index 0
     general_row = {
-        "query_name": str(os.path.basename(os.path.normpath(str(parent_dir)))),
+        "query_name": str(os.path.basename(os.path.normpath(str(input_dirc)))),
         "sources": "None",                           # record "None" as a string
         "start": run_start.isoformat(),
         "end": run_end.isoformat(),
@@ -152,13 +164,6 @@ def parse_batch_log(path: str) -> Dict[str, Any]:
         "error": num_errors,                        # number of queries that produced an error
     }
     entries.insert(0, general_row)
-
-    return {
-        "run_start": run_start.isoformat(),
-        "run_end": run_end.isoformat(),
-        "run_duration_seconds": run_duration_s,
-        "entries": entries,
-    }
 
 def write_csv(summary: Dict[str, Any], out_path: str):
     df = pd.DataFrame(summary["entries"])
@@ -231,13 +236,73 @@ def file_exists(directory: str, filename: str) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Parse batch log and output CSV summary.")
-    parser.add_argument("--input", help="Path to input batch log file")
-    parser.add_argument("--output", help="Name of output CSV file")
+    parser = argparse.ArgumentParser(description="Summarize all .txt query run logs in a directory.")
+    parser.add_argument("input_dir", help="Directory containing .txt files to summarize.")
+    parser.add_argument("-o", "--output", default="summary.json",
+                        help="Path to write combined JSON summary (default: summary.json)")
+    parser.add_argument("-c", "--csv", action="store_true",
+                        help="Also write a CSV file version of the summary")
     args = parser.parse_args()
 
-    summary = parse_batch_log(args.input)
-    write_csv(summary, args.output)
+    # Collect all .txt files in the directory (non-recursive)
+    input_dir = Path(args.input_dir)
+    if not input_dir.is_dir():
+        print(f"[ERROR] Input directory does not exist: {input_dir}", file=sys.stderr)
+        sys.exit(1)
+    inputs = sorted(input_dir.glob("*.txt"))
+    if not inputs:
+        print(f"[WARN] No .txt files found in {input_dir}")
+        sys.exit(0)
+
+    # Process each file and combine results
+    overall_summary = {
+        "general_stats": {
+            "run_start": None,
+            "run_end": None,
+            "run_duration_seconds": 0.0,
+        },
+        "entries": []
+    }
+    earliest: Optional[datetime] = None
+    latest: Optional[datetime] = None
+    total_duration: float = 0.0
+
+    for inp in inputs:
+        working_summary = parse_batch_log(str(inp))
+
+        # general stats aggergation
+        if not earliest:
+            earliest = _parse_iso(working_summary["run_start"])
+        else:
+            earliest = min(earliest, _parse_iso(working_summary["run_start"]))
+        if not latest:
+            latest = _parse_iso(working_summary["run_end"])
+        else:
+            latest = max(latest, _parse_iso(working_summary["run_end"]))
+        total_duration += working_summary.get("run_duration_seconds", 0.0)
+        
+        # record general stats
+        overall_summary["general_stats"]["run_start"] = earliest.isoformat() if earliest else None
+        overall_summary["general_stats"]["run_end"] = latest.isoformat() if latest else None
+        overall_summary["general_stats"]["run_duration_seconds"] = total_duration
+
+        # entries aggregation
+        overall_summary["entries"].extend(working_summary["entries"])
+
+    added_general_stats_row = get_general_stats(overall_summary, input_dir)
+
+    # Always write JSON
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(added_general_stats_row, f, ensure_ascii=False, indent=2)
+    print(f"[OK] Wrote combined JSON summary for {len(inputs)} file(s) to {args.output}.")
+
+    # Also write a CSV of entries if there are any
+    if args.csv:
+        csv_path = Path(args.output).with_suffix(".csv")
+        write_csv(added_general_stats_row, str(csv_path))
+        print(f"[OK] Wrote {len(overall_summary['entries'])} total query records to {csv_path}.")
+    else:
+        print("[INFO] No entries to write to CSV.")
 
 if __name__ == "__main__":
     main()
