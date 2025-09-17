@@ -165,8 +165,8 @@ def get_general_stats(summary: Dict[str, Any], input_dirc) -> Dict[str, Any]:
     }
     entries.insert(0, general_row)
 
-def write_csv(summary: Dict[str, Any], out_path: str):
-    df = pd.DataFrame(summary["entries"])
+def write_csv(summary: {Dict[str, Any]}, out_path: str):
+    df = pd.DataFrame(summary)
     df.to_csv(out_path, index=False)
     print(f"[INFO] Wrote {len(df)} query records to {out_path}")
 
