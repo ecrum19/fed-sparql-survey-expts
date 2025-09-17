@@ -36,7 +36,7 @@ python3 comunica_configuration.py -e [experiment]
 3. **Run Experiment**
 ```bash
 python3 comunica_run.py -n [DATE-EX#] -t [service/noservice]
-python3 comunica_run.py -n EX1-09-25 -t no-service/ns_batch1
+python3 comunica_run.py -n EX1-17-9-25 -t no-service/ns_batch1
 ```
 
 4. **Analyze Results**
