@@ -216,10 +216,6 @@ def withoutService(data, out_directory):
     total = 0
     for bd in batch_dirs:
         os.makedirs(os.path.join(out_directory, bd), exist_ok=True)
-    # Write Bgee queries
-    print(f"Writing {len(queries)} Bgee queries to {ns_get_dir}")
-    total = total + len(queries)
-    write_no_service_queries(queries, ns_get_dir)
     # Write other batches
     for i, batch in enumerate(batches):
         total = total + len(batch)
