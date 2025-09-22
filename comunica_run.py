@@ -16,7 +16,7 @@ def execute_queries(name, directory_path, output_base_path):
     """
 
     output_path = os.path.join(os.getcwd(), "experiments", name)
-    batch_name = directory_path.split("/")[-2]
+    batch_name = os.path.basename(directory_path)
     output_results_file =  os.path.join(output_path, f"{name}-{batch_name}.txt")
 
     # checks if specified output path is valid
