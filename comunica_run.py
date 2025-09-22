@@ -15,10 +15,8 @@ def execute_queries(name, directory_path, output_base_path):
     - cli_command_template: Command with '{}' as placeholder for the query.
     """
 
-    
-    os.makedirs(os.path.join(os.getcwd(), "experiments", name), exist_ok=False)
     output_path = os.path.join(os.getcwd(), "experiments", name)
-    batch_name = directory_path.split("/")[-1]
+    batch_name = directory_path.split("/")[-2]
     output_results_file =  os.path.join(output_path, f"{name}-{batch_name}.txt")
 
     # checks if specified output path is valid
