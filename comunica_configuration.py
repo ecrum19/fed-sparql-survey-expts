@@ -60,8 +60,8 @@ experiment_options_dict = {
     "EX3": ExperimentOptions(
         rate_limit=True,
         ask=True,
-        count=False,
-        void=False,
+        count=True,
+        void=True,
         method_get=False,
         large_void=False,
         block_size="default",
@@ -70,10 +70,10 @@ experiment_options_dict = {
     "EX4": ExperimentOptions(
         rate_limit=True,
         ask=True,
-        count=False,
-        void=False,
+        count=True,
+        void=True,
         method_get=False,
-        large_void=False,
+        large_void=True,
         block_size="default",
         bindings="default"
     ),
