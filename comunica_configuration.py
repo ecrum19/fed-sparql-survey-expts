@@ -133,7 +133,7 @@ def generalVoid(v3):
         src = os.path.join(os.getcwd(), 'config/void/actors-v4-1-0.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json')
         shutil.copyfile(src, dst)
-        print(f"\tVOID (general): ON")
+        print(f"\tVOID (general): ON ✅")
     else:
         src = os.path.join(os.getcwd(), 'config/no-void/actors-v4-1-0.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/rdf-metadata-extract/actors-v4-1-0.json')
