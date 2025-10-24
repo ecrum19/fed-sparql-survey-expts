@@ -108,11 +108,11 @@ def countAndVoid(c, lv, g):
         shutil.copyfile(src, dst)
         print(f"\tVoID (large): OFF ❌\n\tCOUNT: ON ✅")
     # ONLY LARGE VoID
-    elif not c and lv:
+    elif c and lv:
         src = os.path.join(os.getcwd(), 'config/void-large/actors.json')
         dst = os.path.join(os.getcwd(), 'comunica/engines/config-query-sparql/config/query-source-identify-hypermedia/actors.json')
         shutil.copyfile(src, dst)
-        print(f"\tVoID (large): ON ✅\n\tCOUNT: OFF ❌")
+        print(f"\tVoID (large): ON ✅\n\tCOUNT: ON ✅")
     # NO COUNT OR LARGE VoID
     elif not c and not lv and not g:
         src = os.path.join(os.getcwd(), 'config/no-count/actors.json')
