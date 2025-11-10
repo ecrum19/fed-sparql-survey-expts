@@ -4,6 +4,8 @@ comunica/engines/config/*
 experiments/*
 queries/
 
+figures/
+
 *.txt
 !ConfigComboGuide.txt
 
