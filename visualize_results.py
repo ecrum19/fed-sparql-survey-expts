@@ -8,6 +8,7 @@ from matplotlib.patches import Patch
 import matplotlib.colors as mcolors
 import colorsys
 import os
+from pathlib import Path
 
 def make_analogous_palette(n, base_hue_deg=200, spread_deg=40, s=0.50, l=0.62, pastel=0.25):
     """
@@ -225,6 +226,128 @@ def bar_chart(batch_df, graph_title, batch_idx, run_order, y_label, MAX_BAR,
     plt.close(fig)
 
 
+def materialize_summaries(
+    file_paths,
+    output_csv="figures/combined_summary.csv",
+    query_col="query_name",
+    suffix_sep="__EX-",
+    add_run_col=True,
+):
+    """
+    Combine multiple summary.csv files into one table:
+        - drops the *second* row (index 1) from each file
+        - appends run number to each query name: "<query_name>__run<k>"
+        - optionally adds a 'Run' column for convenience
+        - returns a single DataFrame and optionally saves it
+
+    Parameters
+    ----------
+    file_paths : list[str | Path]
+        Paths to the 4 summary.csv files (one per experiment).
+    output_csv : str | Path | None
+        If provided, saves the combined table here.
+    query_col : str
+        Column containing the query name. If missing, the CSV index is used.
+    suffix_sep : str
+        Separator used before experiment number in the modified query name.
+    add_run_col : bool
+        Whether to include a 'Run' column (e.g., EX-1, EX-2).
+
+    Returns
+    -------
+    pd.DataFrame
+        Combined results table.
+    """
+    def infer_run_number(p: Path, fallback: int) -> int:
+        """
+        Infer a run number from the filename if possible, else use fallback.
+        Looks for e.g. run1 / _1 / -2 / summary3 etc.
+        """
+        stem = p.stem.lower()
+        m = re.search(r"(?:run[_-]?|summary[_-]?|_)(\d+)", stem)
+        if m:
+            return int(m.group(1))
+        # last-resort: any number in the stem
+        m2 = re.search(r"(\d+)", stem)
+        return int(m2.group(1)) if m2 else fallback
+
+    def _safe_numeric_cast(df, query_col):
+        """Convert only columns that look numeric; leave list-like/object columns alone."""
+        for col in df.columns:
+            if col == query_col:
+                continue
+            if pd.api.types.is_numeric_dtype(df[col]):
+                continue  # already numeric
+            if pd.api.types.is_datetime64_any_dtype(df[col]):
+                continue
+
+            # Try a safe numeric conversion
+            converted = pd.to_numeric(df[col], errors="coerce")
+
+            # Heuristic: only adopt if most values became valid numbers (>=80%)
+            if converted.notna().mean() >= 0.8:
+                df[col] = converted
+        return df
+
+    dfs = []
+    for i, fp in enumerate(file_paths, start=1):
+        p = Path(fp)
+        if not p.exists():
+            raise FileNotFoundError(f"File not found: {p}")
+
+        df = pd.read_csv(p)
+
+        # drop the whole Experiment summary line
+        run_row_pattern = r"\bEX-\d+\b"  # matches EX-1, EX-2, ...
+        # Ensure we have a query column to check
+        if query_col in df.columns:
+            qseries = df[query_col].astype(str)
+        else:
+            df = df.reset_index().rename(columns={"index": query_col})
+            qseries = df[query_col].astype(str)
+        # Exclude any row whose query name contains an EX-# token
+        df = df.loc[~qseries.str.contains(run_row_pattern, na=False)].reset_index(drop=True)
+
+        # pick run number
+        run_num = infer_run_number(p, fallback=i)
+
+        # determine query names (column or index)
+        if query_col in df.columns:
+            qnames = df[query_col].astype(str)
+        else:
+            # use the index as query name if column not present
+            df = df.reset_index().rename(columns={"index": query_col})
+            qnames = df[query_col].astype(str)
+
+        # append run number to query name
+        df[query_col] = qnames + f"{suffix_sep}{run_num}"
+
+        # optional 'Run' column (nice for plotting/grouping)
+        if add_run_col:
+            df["Run"] = f"EX-{run_num}"
+
+        # try to coerce obvious numeric columns (except query_col / non-numeric)
+        for col in df.columns:
+            if col == query_col:
+                continue
+            df[col] = pd.to_numeric(df[col], errors="ignore")
+
+        # keep a hint of the source file if helpful
+        df["source_file"] = p.name
+
+        dfs.append(df)
+
+    combined = pd.concat(dfs, ignore_index=True, sort=False)
+    combined = combined.sort_values(by=query_col, kind="mergesort").reset_index(drop=True)
+
+    # save if requested
+    if output_csv:
+        out_path = Path(output_csv)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        combined.to_csv(out_path, index=False)
+
+    return combined
+
 def scatter_plot(df, x_col, y_col, title, xlabel, ylabel):
     plt.figure(figsize=(10, 6))
     plt.scatter(df[x_col], df[y_col], color='salmon')
@@ -258,6 +381,10 @@ def main():
     "/EX4-24-10-25/summary.csv"
     ]
     labels = ["EX-1", "EX-2", "EX-3", "EX-4"]
+
+    # Combine summaries into one table
+    full_path_files = [args.input_summaries + f for f in files]
+    materialize_summaries(full_path_files)
 
     # Combine data from multiple experiments
     dfs = []
