@@ -55,6 +55,7 @@ def split_data(big_df, column, n_parts, output_prefix,
         df['plot_value'] = df['duration_seconds']
         df['produced_results'] = big_df['produced_results'].astype(bool).fillna(False)
         y_label = "Execution Duration (s)"
+        graph_title = "Query Execution Duration Plot"
         MAX_BAR = float(max_bar)
     elif column == 'http_requests':
         df = big_df.dropna(subset=['query_name', 'Run', 'http_requests']).copy()
@@ -63,6 +64,7 @@ def split_data(big_df, column, n_parts, output_prefix,
         df['plot_value'] = df['http_requests']
         df['produced_results'] = big_df['produced_results'].astype(bool).fillna(False)
         y_label = "HTTP Requests"
+        graph_title = "HTTP Requests Plot"
         MAX_BAR = float(max_bar)
 
     # Stable ordering
@@ -77,7 +79,7 @@ def split_data(big_df, column, n_parts, output_prefix,
         if not queries:
             continue
         batch_df = df[df['query_name'].isin(queries)]
-        bar_chart(batch_df, batch_idx, run_order, y_label, MAX_BAR,
+        bar_chart(batch_df, graph_title, batch_idx, run_order, y_label, MAX_BAR,
                   output_prefix=output_prefix,
                   bar_thinness=bar_thinness,
                   no_inner_spacing=no_inner_spacing,
@@ -109,7 +111,7 @@ def shorten_label(q, limit=12):
     return q
 
 
-def bar_chart(batch_df, batch_idx, run_order, y_label, MAX_BAR,
+def bar_chart(batch_df, graph_title, batch_idx, run_order, y_label, MAX_BAR,
               output_prefix, bar_thinness, no_inner_spacing, group_width):
     """
     Take batch data, create a plot, and save to f"{output_prefix}_{batch_idx}.png".
@@ -127,7 +129,7 @@ def bar_chart(batch_df, batch_idx, run_order, y_label, MAX_BAR,
     run_slot = group_width / n_runs         # each run gets a slice inside the query slot
 
     fig, ax = plt.subplots(figsize=(12, 6)) # consistent width
-    ax.set_title(f"Query Execution Durations — Part {batch_idx}")
+    ax.set_title(f"{graph_title} - {batch_idx}")
     ax.set_xlabel("Query Name")
     ax.set_ylabel(y_label)
     ax.set_ylim(0, MAX_BAR * 1.1)
