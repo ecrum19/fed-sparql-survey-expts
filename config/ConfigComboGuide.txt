@@ -143,6 +143,14 @@ Yes large estimation VoID --
         "cardinalityEstimateConstruction": true,
 
 
+(EX1 - No Rate-Limit)
+(add)
+    engines/config-query-sparql/config/http/actors-limit-rate.json -->
+        "limitByDefault": false,
+
+
+
+
 ---------- ASSESS PERFORMANCE DIFFERENCES ----------
 *** ON TOP OF 2 BEST PERFORMERS FROM ABOVE, TEST BELOW ***
 

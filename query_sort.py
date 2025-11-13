@@ -118,13 +118,13 @@ def withoutService(data, out_directory):
         "46", # server-side error
         "99_uniprot_identifiers_org_translation",   # server-side error
         "90_uniprot_affected_by_metabolic_diseases_using_MeSH", # server-side error
-        "70_enzymes_interacting_with_molecules_similar_to_dopamine", # IDSM
-        "71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease", # IDSM
-        "52",  # IDSM
-        "54",  # IDSM
-        "60",  # IDSM
-        "002", # IDSM
-        "18a", # IDSM
+        # "70_enzymes_interacting_with_molecules_similar_to_dopamine", # IDSM
+        # "71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease", # IDSM
+        # "52",  # IDSM
+        # "54",  # IDSM
+        # "60",  # IDSM
+        # "002", # IDSM
+        # "18a", # IDSM
         # "29", # UniProt stress
         # "36", # UniProt stress
         # "19", # UniProt stress
@@ -188,8 +188,16 @@ def withoutService(data, out_directory):
         "028-biosodafrontend",
         "027-biosodafrontend"
     ]
+    idsmqueries = [
+        "70_enzymes_interacting_with_molecules_similar_to_dopamine", # IDSM
+        "71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease", # IDSM
+        "52",  # IDSM
+        "54",  # IDSM
+        "60",  # IDSM
+        "002", # IDSM
+    ]
 
-    # Collect all eligible queries
+    # Collect all eligible queries (skip excluded)
     all_queries = []
     for item_key, item_value in data["data"].items():
         base_name = os.path.basename(item_key)
@@ -197,32 +205,47 @@ def withoutService(data, out_directory):
             base_name = item_key.replace('https://', '00').replace('/', '_')
         if base_name in excluded:
             continue
-        all_queries.append((item_key, item_value))
-    # Separate Bgee queries
-    queries = [q for q in all_queries if not (os.path.basename(q[0]) in excluded or q[0] in excluded)]
-    # Split other queries into 4 roughly equal batches
-    batch_size = (len(queries) + 2) // 4  # ensures all queries are included
-    batches = [
-        queries[0:batch_size],
-        queries[batch_size:2*batch_size],
-        queries[2*batch_size:3*batch_size],
-        queries[3*batch_size:]
+        all_queries.append((item_key, item_value, base_name))
 
-    ]
-    batch_dirs = ["ns_batch1", "ns_batch2", "ns_batch3", "ns_batch4"]
-    total = 0
+    # Extract IDSM queries into batch5 and keep the rest for four batches
+    idsm_batch = [ (k,v) for (k,v,bn) in all_queries if bn in idsmqueries or k in idsmqueries ]
+    remaining = [ (k,v) for (k,v,bn) in all_queries if not (bn in idsmqueries or k in idsmqueries) ]
+
+    # Split remaining queries into 4 roughly equal batches
+    batch_count = 4
+    if remaining:
+        batch_size = (len(remaining) + batch_count - 1) // batch_count  # ceil division
+        batches = [ remaining[i*batch_size:(i+1)*batch_size] for i in range(batch_count) ]
+    else:
+        batches = [ [], [], [], [] ]
+
+    batch_dirs = ["ns_batch1", "ns_batch2", "ns_batch3", "ns_batch4", "ns_batch5"]
+
+    # Create output directories
     for bd in batch_dirs:
         os.makedirs(os.path.join(out_directory, bd), exist_ok=True)
-    # Write other batches
+
+    # Write non-IDSM batches
+    total = 0
+    past_names = []
     for i, batch in enumerate(batches):
-        total = total + len(batch)
+        # each batch element is a tuple (key, value)
+        simple_batch = [(k,v) for (k,v) in batch]
         batch_dir = os.path.join(out_directory, batch_dirs[i])
-        print(f"Writing {len(batch)} queries to {batch_dir}")
-        write_no_service_queries(batch, batch_dir)
+        print(f"Writing {len(simple_batch)} queries to {batch_dir}")
+        past_names = write_no_service_queries(simple_batch, batch_dir, past_names)
+        total += len(simple_batch)
+
+    # Write IDSM queries to ns_batch5
+    idsm_simple = [ (k,v) for (k,v) in idsm_batch ]
+    batch5_dir = os.path.join(out_directory, "ns_batch5")
+    print(f"Writing {len(idsm_simple)} IDSM queries to {batch5_dir}")
+    past_names = write_no_service_queries(idsm_simple, batch5_dir, past_names)
+    total += len(idsm_simple)
+
     print("\nTotal no-service queries:", total)
 
-def write_no_service_queries(queries, out_directory):
-    past_names = []
+def write_no_service_queries(queries, out_directory, past_names):
     for item_key, item_value in queries:
         s_query_text = item_value.get("query")
         ns_query_source = item_value.get("target")
@@ -279,6 +302,7 @@ def write_no_service_queries(queries, out_directory):
                 out_file.write("# Datasources: %s\n%s" % (ns_query_source, ns_query_text.rstrip('\n')))
         except Exception as e:
             print(f"Error writing {ns_output_filename}: {e}")
+    return past_names
 
 
     # # Iterate over each item in the "data" dictionary.

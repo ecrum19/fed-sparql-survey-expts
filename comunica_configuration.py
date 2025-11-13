@@ -27,6 +27,16 @@ class ExperimentOptions:
 
 # Experiments and their specific config options
 experiment_options_dict = {
+    "EX1-NRL": ExperimentOptions(
+        rate_limit=False,
+        ask=True,
+        count=False,
+        void=False,
+        method_get=False,
+        large_void=False,
+        block_size="default",
+        bindings="default"
+    ),
     "EX1": ExperimentOptions(
         rate_limit=True,
         ask=True,
