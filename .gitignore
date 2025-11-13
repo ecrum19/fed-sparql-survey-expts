@@ -8,6 +8,8 @@ figures/
 
 *.txt
 !ConfigComboGuide.txt
+!Interesting_Queries.txt
+
 
 /node_modules
 

@@ -52,12 +52,12 @@ def main():
 def withService(data, out_directory):
 
     excluded = [
-        "13", # server-side error
-        "14", # server-side error
-        "20", # server-side error
-        "46", # server-side error
-        "99_uniprot_identifiers_org_translation",   # server-side error
-        "90_uniprot_affected_by_metabolic_diseases_using_MeSH", # server-side error
+        # "13", # server-side error
+        # "14", # server-side error
+        # "20", # server-side error
+        # "46", # server-side error
+        # "99_uniprot_identifiers_org_translation",   # server-side error
+        # "90_uniprot_affected_by_metabolic_diseases_using_MeSH", # server-side error
     ]
     total = 0
     past_names = []

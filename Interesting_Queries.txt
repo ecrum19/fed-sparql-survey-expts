@@ -1,0 +1,42 @@
+Interesting Queries:
+
+
+109_uniprot_transporter_in_liver_ns.rq__EX-1 / EX-2 / EX-3 -- 0 results
+SERVICE -- Query Timeout
+
+12_ns.rq__EX-3 // EX-4 -- 52700 results
+SERVICE -- 13175 results
+
+13_ns.rq__EX-1 / EX-2 / EX-3 -- 8584 results
+SERVICE -- Query Error
+
+16_ns.rq__EX-2 // EX-3 -- 608 results
+SERVICE -- 38 results
+
+17_ns.rq__EX-1 -- 0 results
+SERVICE -- 3 results
+
+42_ns.rq__(all) -- 66 results
+SERVICE -- 66 results
+
+43_ns.rq__(all) -- 71 results
+SERVICE -- 71 results
+
+48_ns.rq__EX-2 // EX-3 -- 0 results
+SERVICE -- Query Error
+
+5_ns.rq__EX-1 // EX-4 == 266 results
+SERVICE -- 266 results
+
+6_ns.rq__EX-2 // EX-3 == 1216 results
+SERVICE -- 38 results
+
+7_ns.rq__(all) == 0 results
+SERVICE -- 0 results
+
+92_uniprot_bioregistry_iri_translation_ns.rq__EX-1 -- 194 results
+92_uniprot_bioregistry_iri_translation_ns.rq__EX-2 / EX-3 / EX-4 -- 0 results
+SERVICE - 194 results
+
+
+(All SERVICE "truth" sets were obtained on 13/11/2025)
