@@ -37,6 +37,16 @@ experiment_options_dict = {
         block_size="default",
         bindings="default"
     ),
+    "EX2-NRL": ExperimentOptions(
+        rate_limit=False,
+        ask=True,
+        count=True,
+        void=False,
+        method_get=False,
+        large_void=False,
+        block_size="default",
+        bindings="default"
+    ),
     "EX1": ExperimentOptions(
         rate_limit=True,
         ask=True,
