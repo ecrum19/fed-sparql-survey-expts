@@ -15,6 +15,7 @@ To run the experiments, you will need:
 Run:
 ```bash
 bash install_ubuntu_dependencies.sh
+source .venv/bin/activate
 ```
 
 ### Installing Comunica
