@@ -7,17 +7,24 @@ To run the experiments, you will need:
 - **Python 3.8+**
 - **Node.js (v18+)**
 - **Git**
-- Python packages: `argparse`, `json`, `os`, `sys`, `shutil`
-- These packages are detailed in "requirements.txt"
+- **Yarn**
+- Python standard-library modules such as `argparse`, `json`, `os`, `sys`, `shutil` (already included with Python)
+- Third-party Python packages listed in `requirements.txt` (`pandas`, `numpy`, `matplotlib`)
+
+### Installing dependencies on Ubuntu
+Run:
+```bash
+bash install_ubuntu_dependencies.sh
+```
 
 ### Installing Comunica
-Navigate to the `comunica/` directory and run:
+If needed, install directly by navigating to the `comunica/` directory and run:
 ```bash
 bash install_comunica.sh
 ```
 
-### Installing Python dependencies [TODO]
-If a `requirements.txt` is present:
+### Installing Python dependencies manually
+If needed, install directly with:
 ```bash
 pip install -r requirements.txt
 ```

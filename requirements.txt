@@ -1,0 +1,13 @@
+# Third-party Python dependencies used by the analysis/visualization scripts.
+# Standard-library modules (argparse, json, os, sys, shutil, etc.) are built into Python
+# and are intentionally not listed here.
+
+# Python 3.8-compatible set
+numpy>=1.24.4,<2.0; python_version < "3.9"
+pandas>=1.5.3,<2.1; python_version < "3.9"
+matplotlib>=3.7.5,<3.8; python_version < "3.9"
+
+# Python 3.9+ set
+numpy>=1.26.4,<3.0; python_version >= "3.9"
+pandas>=2.2.3,<3.0; python_version >= "3.9"
+matplotlib>=3.8.4,<4.0; python_version >= "3.9"
