@@ -28,7 +28,6 @@ fi
 
 echo "[1/6] Installing Ubuntu system packages..."
 export DEBIAN_FRONTEND=noninteractive
-${SUDO} apt-get update
 ${SUDO} apt-get install -y \
   ca-certificates \
   curl \
@@ -63,8 +62,11 @@ else
   if command -v corepack >/dev/null 2>&1; then
     ${SUDO} corepack enable
     corepack prepare yarn@stable --activate
-  else
+  elif command -v npm >/dev/null 2>&1; then
     ${SUDO} npm install -g yarn
+  else
+    echo "Error: neither corepack nor npm is available"
+    exit 1
   fi
   echo "Yarn installed: $(yarn --version)"
 fi
