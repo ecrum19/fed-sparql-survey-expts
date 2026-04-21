@@ -54,7 +54,7 @@ bash localize_results.sh /experiments/testbatch1 ../fed-survey-results/EX1-09-25
 ```
 ```bash
 python3 organize_data.py /path/to/dir -o summary.json --csv
-python3 organize_data.py ../fed-query-results/EX1-09-25 -o summary.json --csv
+python3 organize_data.py ../fed-survey-results/EX1-09-25 -o summary.json --csv
 ```
 
 ## Reproducibility
