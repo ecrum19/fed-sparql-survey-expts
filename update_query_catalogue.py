@@ -14,8 +14,10 @@ Subcommands
 build   Apply ENDPOINT_MAP and PREFIX_MAP to the original catalogue and write the
         updated file. Query text is only changed where it names a moved endpoint
         (SERVICE IRIs) or declares a PREFIX whose namespace changed with the
-        target endpoint's data; no query logic is changed and no new upstream
-        queries are added. Rebuilding an existing file keeps its checks: a check
+        target endpoint's data. Exceptions: queries in UPSTREAM_REPLACEMENTS get
+        their current upstream text, and queries in REMOVED_QUERIES or using an
+        endpoint in UNAVAILABLE_ENDPOINTS are left out (listed in the metadata).
+        No new upstream queries are added. Rebuilding an existing file keeps its checks: a check
         stays current if the query did not change, otherwise it moves to
         previousVerifications and the query is checked again by `verify`.
 
@@ -127,6 +129,141 @@ PREFIX_MAP = OrderedDict([
     ]),
 ])
 
+# Queries whose text and description are replaced with their current upstream
+# version, because upstream reworked them and the old version does not work on
+# the new endpoint even after the endpoint and PREFIX fixes. The key stays the
+# same, but results for these keys are not comparable with earlier experiments.
+# Texts copied verbatim from sparql-examples@45e5b53.
+UPSTREAM_REPLACEMENTS = OrderedDict([
+    ("https://purl.org/emi#examples012", OrderedDict([
+        ("upstreamFile", "examples/emi/013.ttl"),
+        ("upstreamId", "https://kg.earthmetabolome.org/metrin/api/.well-known/examples/013"),
+        ("reason", (
+            "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query is "
+            "examples/emi/013.ttl (same description), which reads species names with "
+            "rdfs:label and filters seed dry mass >= 100 instead of >= 626. The old version "
+            "returned 0 rows on the new EMI endpoint even with the PREFIX fix (run 3, "
+            "2026-11-19), so it was replaced with the upstream text and description."
+        )),
+        ("description", "List all metabolites produced by species with near threatened (wd:Q719675) IUCN status (wdt:P141) and with values available (or greater than a specific value) for trait 'Seed dry mass'."),
+        ("query", """PREFIX emi: <https://w3id.org/emi#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?structure_inchikey ?wd_chem ?source_wdx ?sourceName WHERE {
+	# trait data
+	?trySpObs sosa:isSampleOf ?trySpName ; # trait/non-trait data for trySpName (scientific name of plant species as listed in trydb)
+		rdfs:label ?sourceName ;
+		sosa:isFeatureOfInterestOf ?tryObId .
+	?tryObId sosa:hasResult ?tryData .
+	?trySpName emi:inTaxon ?source_wdx . # wikidata-ids wdx for trySpName
+	?tryData rdfs:label ?tryDataLab ;
+		rdf:type emi:Trait ; #retrieve data which is labelled as 'Trait' and its values
+		rdf:value ?tryDataVal .
+	FILTER (STR(?tryDataLab) = 'Seed dry mass' ) #filter on data label 'Seed dry mass'
+	FILTER (?tryDataVal >= 100)
+	SERVICE <https://qlever.dev/api/wikidata> {
+        	?source_wdx wdt:P141 wd:Q719675 . # filter wikidata-ids for trySpName, which have IUCN status (wdt:P141) as near threatened (wd:Q719675)
+        }
+	# metabolite data
+	{
+		SELECT ?source_wdx ?structure_inchikey ?wd_chem WHERE {
+			?material sosa:hasSample ?extract ;
+		        	sosa:isSampleOf ?organe .
+			?organe emi:inTaxon ?source_wdx . # filter metabolite data which is found in wikidata-ids wdx
+			?extract sosa:isFeatureOfInterestOf ?lcms .
+		    	?lcms sosa:hasResult ?feature_list .
+			?feature_list emi:hasLCMSFeature ?feature .
+			?feature emi:hasAnnotation ?sirius_annotation .
+			?sirius_annotation a emi:StructuralAnnotation ;
+				emi:hasChemicalStructure ?ik2d .
+			?ik2d emi:hasSMILES ?smiles ;
+		    		emi:isInChIKey2DOf ?structure_inchikey .
+			?structure_inchikey emi:isInChIKeyOf ?wd_chem .	# wikidata-ids for metabolites
+		}
+	}
+	UNION # union with data from lotus (integrated in wikidata)
+	{
+		SERVICE <https://qlever.dev/api/wikidata> {
+			?wd_chem wdt:P235 ?structure_inchikey;
+   				wdt:P703 ?source_wdx .
+		}
+	}
+} LIMIT 1000"""),
+    ])),
+    ("https://purl.org/emi#examples019a", OrderedDict([
+        ("upstreamFile", "examples/emi/019.ttl"),
+        ("upstreamId", "https://kg.earthmetabolome.org/metrin/api/.well-known/examples/019"),
+        ("reason", (
+            "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query is "
+            "examples/emi/019.ttl (same description), which selects the interaction type "
+            "with VALUES instead of a REGEX filter and reads names with rdfs:label. The old "
+            "version hit the endpoint's 60 s gateway limit (HTTP 504) even with the PREFIX "
+            "fix (run 3, 2026-11-19), so it was replaced with the upstream text and description."
+        )),
+        ("description", 'A list of interactions depicting connections between parasatoids harmful for insects living as parasites on plants.'),
+        ("query", """PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX emi: <https://w3id.org/emi#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT DISTINCT ?parasitoidX_WD ?parasitoidName ?intxn2Label ?parasiteX_WD ?parasiteName ?intxn3Label ?hostPlant_WD ?hostPlantName ?study2_DOI ?study3_DOI WHERE {
+	# part-1 interaction data parasite and parasitoid
+	{
+		SELECT DISTINCT ?parasitoidName ?parasiteName ?parasiteX_WD ?intxn2Label ?parasitoidX_WD ?study2_DOI WHERE {
+			?intxn2 emi:hasSource ?parasitoidX ; # retrieve interaction pairs part-1
+	    			emi:hasTarget ?parasiteX ;
+	    			emi:isClassifiedWith ?intxnName2 .
+			VALUES ?intxnName2 { <http://purl.obolibrary.org/obo/RO_0002208> } # keep interactions only if the interaction-id is RO_0002208 (parasitoidOf), e.g: 'parasitoidX' is 'parasitoidOf' 'parasiteX'
+			?intxnName2 rdfs:label ?intxn2Label .
+			?parasitoidX emi:inTaxon ?parasitoidX_WD ; # retreieve wikidata-ids for parasitoidX
+			     	rdfs:label ?parasitoidName ;
+			     	sosa:isSampleOf ?parasitoidSample . # retrieve scientific name of parasitoidX as listed in GloBI
+			?parasiteX emi:inTaxon ?parasiteX_WD ; # retreieve wikidata-ids for parasiteX
+				rdfs:label ?parasiteName ;
+				sosa:isSampleOf ?parasiteSample . # retreieve scientific name for parasiteX as listed in GloBI
+			OPTIONAL {
+				?intxn2 dcterms:bibliographicCitation ?study2_DOI . # optionally retrieve the doi of the study for parasitoid-parasite pairs
+			}
+		}
+	}
+
+	# part-2 interaction data parasite and host plant
+	?parasiteX1 emi:inTaxon ?parasiteX_WD .	# check pasarsiteX1 is in wikidata-id parasiteX_WD (the ones obtained from interaction-pairs part-1)
+	?intxn3 emi:hasSource ?parasiteX1 ; # retrieve interaction pairs part-2
+    		emi:hasTarget ?hostPlant ;
+    		emi:isClassifiedWith ?intxnName3 .
+	?intxnName3 rdfs:label ?intxn3Label .
+	?hostPlant emi:inTaxon ?hostPlant_WD ;	# retreieve wikidata-ids for hostPlant
+		rdfs:label ?hostPlantName ;
+		sosa:isSampleOf ?hostPlantSample . # retreieve scientific name for hostPlant as listed in GloBI
+	OPTIONAL {
+		?intxn3 dcterms:bibliographicCitation ?study3_DOI .
+	}
+    	FILTER (!(STR(?intxn3Label) IN ('visits', 'visitsFlowersOf', 'pollinates')))	# keep interactions only if the interaction-names are not 'visits', 'visitsFlowersOf' or 'pollinates'. e.g.: 'parasiteX1' is 'pathogenOf/parasiteOf/..' 'hostPlant'
+	SERVICE <https://qlever.dev/api/wikidata> {
+	 	?hostPlant_WD wdt:P171* wd:Q879246 . # keep the interaction pairs part-2 only if hostPlant_WD has Kingdom Archaeplastida (wd:Q879246) in its lineage, this is to ensure the hostPlant is really a plant
+	}
+} LIMIT 1000"""),
+    ])),
+])
+
+# Queries left out of the updated catalogue (they stay in the original file).
+# Queries that use an endpoint in UNAVAILABLE_ENDPOINTS are left out as well.
+REMOVED_QUERIES = OrderedDict([
+    ("https://purl.org/emi#examples019b", (
+        "Removed because it was dropped from the upstream SIB catalogue: at sparql-examples@45e5b53 "
+        "examples/emi/ has a single 019 example, the new version of 019a. This version also has a typo "
+        "(emi:hasTarget ?parasitoidX where ?parasiteX is meant) and returned 0 rows on the new "
+        "EMI endpoint (run 3, 2026-11-19)."
+    )),
+])
+
 # Endpoints that did not answer as SPARQL endpoints on 2026-11-18 and have no
 # known successor. Queries using them are left unchanged and flagged.
 UNAVAILABLE_ENDPOINTS = OrderedDict([
@@ -147,23 +284,35 @@ ENDPOINT_NOTES = OrderedDict([
      "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi# "
      "instead of https://purl.org/emi#; the PREFIX is updated in this catalogue (see the prefix "
      "changes). Upstream sparql-examples@45e5b53 also reworked and renumbered the EMI examples "
-     "011-023 (e.g. names are read with rdfs:label); that rework was not applied here. "
+     "011-023 (e.g. names are read with rdfs:label); that rework was only applied to the two "
+     "queries replaced with their upstream version (see upstreamReplacements). "
      "Its gateway (nginx) ends requests that run longer than 60 s with HTTP 504 (seen on 2026-11-19)."),
 ])
 
-# Hints added to a query's manualFixNotes when its check did not succeed,
-# keyed by target endpoint.
-FAILURE_HINTS = {
-    "https://qlever.earthmetabolome.org/api/metrin-kg":
-        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand "
-        "or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but "
-        "upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples "
-        "(examples/emi/); compare with the closest upstream query.",
-    "https://www.bgee.org/sparql":
-        "Hint: HTTP 524 means Cloudflare ended the request after ~125 s; the query itself may still be valid.",
-    "https://www.bgee.org/sparql/":
-        "Hint: HTTP 524 means Cloudflare ended the request after ~125 s; the query itself may still be valid.",
-}
+# Hints added to a query's manualFixNotes when its check did not succeed. Keyed by
+# target endpoint ("*" = any); each hint is used when its regex matches
+# "<outcome> <error message>".
+FAILURE_HINTS = OrderedDict([
+    ("https://qlever.earthmetabolome.org/api/metrin-kg", [
+        (r"HTTP 504", "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the "
+                      "query by hand or ask the maintainers."),
+        (r"^empty", "Hint: the PREFIX namespaces are already updated, but upstream "
+                    "sparql-examples@45e5b53 reworked and renumbered the EMI examples "
+                    "(examples/emi/); compare with the closest upstream query."),
+    ]),
+    ("https://www.bgee.org/sparql", [
+        (r"HTTP 524", "Hint: HTTP 524 means Cloudflare ended the request after ~125 s; the query "
+                      "itself may still be valid."),
+    ]),
+    ("https://www.bgee.org/sparql/", [
+        (r"HTTP 524", "Hint: HTTP 524 means Cloudflare ended the request after ~125 s; the query "
+                      "itself may still be valid."),
+    ]),
+    ("*", [
+        (r"\b429\b", "Hint: an endpoint answered 429 Too Many Requests (rate limit); try again "
+                     "later by hand."),
+    ]),
+])
 
 USER_AGENT = "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)"
 ACCEPT = "application/sparql-results+json"
@@ -229,16 +378,30 @@ def build(args):
 
     original = load_json(args.input)
     data = original["data"]
+    src_commit = (original.get("metadata") or {}).get("commit", "?")
     out_data = OrderedDict()
+    removed = []
     counts = defaultdict(int)
 
     for key, entry in data.items():
         new = OrderedDict()
         changes = []
 
+        # 0. queries replaced with their current upstream version
+        query, description = entry["query"], entry["description"]
+        rep = UPSTREAM_REPLACEMENTS.get(key)
+        if rep:
+            query, description = rep["query"], rep["description"]
+            changes.append(OrderedDict([
+                ("field", "queryAndDescription"),
+                ("from", f"{short_id(key)} as in the original catalogue (sparql-examples@{src_commit})"),
+                ("to", f"{rep['upstreamFile']} at sparql-examples@{UPSTREAM_COMMIT_CHECKED[:7]}"),
+                ("upstreamId", rep["upstreamId"]),
+                ("reason", rep["reason"]),
+            ]))
+
         # 1. query text: only rewrite IRIs that name a moved endpoint, e.g.
         #    SERVICE <old> -> SERVICE <new>. Data IRIs and PREFIXes are untouched.
-        query = entry["query"]
         for old, spec in ENDPOINT_MAP.items():
             token = f"<{old}>"
             n = query.count(token)
@@ -283,23 +446,32 @@ def build(args):
                     ("to", spec["to"]), ("occurrences", n), ("reason", spec["reason"]),
                 ]))
 
-        notes = []
-        for ep in sorted(set(all_endpoints(OrderedDict(query=query, target=target, federatesWith=fed)))):
-            if ep in UNAVAILABLE_ENDPOINTS:
-                notes.append(f"Uses unavailable endpoint {ep}: {UNAVAILABLE_ENDPOINTS[ep]}")
+        # 5. leave out queries listed in REMOVED_QUERIES or using an unavailable endpoint
+        dead = sorted(ep for ep in set(all_endpoints(OrderedDict(query=query, target=target, federatesWith=fed)))
+                      if ep in UNAVAILABLE_ENDPOINTS)
+        if key in REMOVED_QUERIES or dead:
+            reason = REMOVED_QUERIES.get(key) or (
+                "Removed because it uses a dead endpoint: "
+                + "; ".join(f"{ep} ({UNAVAILABLE_ENDPOINTS[ep]})" for ep in dead))
+            removed.append(OrderedDict([("key", key), ("target", target), ("reason", reason)]
+                                       + ([("unavailableEndpoints", dead)] if dead else [])))
+            continue
 
         new["query"] = query
-        new["description"] = entry["description"]
+        new["description"] = description
         new["federatesWith"] = fed
         new["target"] = target
-        endpoint_changed = any(c["field"] != "queryPrefix" for c in changes)
-        new["changeStatus"] = {(False, False): "unchanged", (True, False): "endpoint-updated",
-                               (False, True): "prefix-updated",
-                               (True, True): "endpoint-and-prefix-updated"}[
-                                   (endpoint_changed, prefix_changed)]
+        endpoint_changed = any(c["field"] not in ("queryPrefix", "queryAndDescription") for c in changes)
+        if rep:
+            new["changeStatus"] = "replaced-with-upstream"
+        else:
+            new["changeStatus"] = {(False, False): "unchanged", (True, False): "endpoint-updated",
+                                   (False, True): "prefix-updated",
+                                   (True, True): "endpoint-and-prefix-updated"}[
+                                       (endpoint_changed, prefix_changed)]
         new["changes"] = changes
         new["status"] = "unverified"
-        new["manualFixNotes"] = notes
+        new["manualFixNotes"] = []
         new["verification"] = None
         out_data[key] = new
         counts[new["changeStatus"]] += 1
@@ -316,17 +488,26 @@ def build(args):
     meta["upstream"] = OrderedDict([
         ("repository", UPSTREAM_REPO),
         ("commitConsultedForEndpointUrls", UPSTREAM_COMMIT_CHECKED),
-        ("note", "Only endpoint URLs and changed PREFIX namespaces were taken from upstream; "
-                 "query logic was not synced and no newer upstream queries were added."),
+        ("note", "Endpoint URLs and changed PREFIX namespaces were taken from upstream. Query "
+                 "logic was not synced, except for the queries in upstreamReplacements, which "
+                 "changed in the upstream SIB catalogue and are replaced with their upstream "
+                 "version. No newer upstream queries were added."),
     ])
     meta["policy"] = ("Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE "
                       "clauses, and PREFIX namespaces that changed together with an endpoint's "
-                      "data (see prefixMap). Query keys are unchanged so results can be joined "
-                      "with earlier experiments.")
+                      "data (see prefixMap). Queries that no longer work and were reworked "
+                      "upstream are replaced with the upstream version (see upstreamReplacements); "
+                      "queries that use an unavailable endpoint or were dropped upstream are left "
+                      "out (see removedQueries). Query keys are unchanged so results can be joined "
+                      "with earlier experiments, except for replaced queries.")
     meta["endpointMap"] = [OrderedDict([("from", k), ("to", v["to"]), ("reason", v["reason"])])
                            for k, v in ENDPOINT_MAP.items()]
     meta["prefixMap"] = [OrderedDict([("endpoint", ep)] + list(spec.items()))
                          for ep, specs in PREFIX_MAP.items() for spec in specs]
+    meta["upstreamReplacements"] = [OrderedDict([("key", k), ("upstreamFile", v["upstreamFile"]),
+                                                 ("upstreamId", v["upstreamId"]), ("reason", v["reason"])])
+                                    for k, v in UPSTREAM_REPLACEMENTS.items() if k in out_data]
+    meta["removedQueries"] = removed
     meta["unavailableEndpoints"] = [OrderedDict([("endpoint", k), ("note", v)])
                                     for k, v in UNAVAILABLE_ENDPOINTS.items()]
     meta["endpointNotes"] = [OrderedDict([("endpoint", k), ("note", v)])
@@ -339,6 +520,8 @@ def build(args):
     save_json_atomic(OrderedDict([("data", out_data), ("metadata", meta)]), args.output)
     print(f"Wrote {args.output}: {len(out_data)} queries ("
           + ", ".join(f"{n} {k}" for k, n in sorted(counts.items())) + ")")
+    if removed:
+        print(f"Left out {len(removed)}: " + ", ".join(short_id(r["key"]) for r in removed))
     if kept:
         print(f"Kept earlier checks: {kept['current']} still current."
               + (f" {kept['stale']} queries changed, so their check moved to previousVerifications "
@@ -353,6 +536,12 @@ def carry_over_checks(previous, out_data, meta):
     marked unverified, so `verify` checks it again.
     """
     meta["verificationRuns"] = migrate_runs(previous["metadata"])
+    earlier_removed = {r["key"]: r for r in previous["metadata"].get("removedQueries") or []}
+    for r in meta.get("removedQueries") or []:
+        old = previous["data"].get(r["key"]) or earlier_removed.get(r["key"]) or {}
+        for field in ("verification", "previousVerifications"):
+            if old.get(field):
+                r[field] = old[field]
     kept = {"current": 0, "stale": 0}
     for key, entry in out_data.items():
         old = previous["data"].get(key)
@@ -528,11 +717,12 @@ def run_query(endpoint, query, timeout, max_bytes):
     return res
 
 def squash(text, limit=600):
-    """Turn an (HTML) error page into a short readable message."""
-    text = re.sub(r"(?is)<(script|style|svg|head)\b.*?</\1>", " ", text)
-    text = re.sub(r"data:[^\s\"'>)]+", "", text)  # inline images
-    text = re.sub(r"<[^>]+>", " ", text)       # strip HTML tags from error pages
-    text = html.unescape(text)                 # &quot; -> " etc. (after stripping tags)
+    """Turn an error body (HTML page, JSON or plain text) into a short readable message."""
+    if text.lstrip("﻿ \t\r\n").startswith("<"):  # HTML/XML error page; JSON bodies keep their <IRI>s
+        text = re.sub(r"(?is)<(script|style|svg|head)\b.*?</\1>", " ", text)
+        text = re.sub(r"data:[^\s\"'>)]+", "", text)  # inline images
+        text = re.sub(r"<[^>]+>", " ", text)       # strip HTML tags
+        text = html.unescape(text)                 # &quot; -> " etc. (after stripping tags)
     text = re.sub(r"\s+", " ", text).strip()
     return text[:limit] + ("…" if len(text) > limit else "")
 
@@ -561,9 +751,11 @@ def classify(entry):
                          f"result; confirm by hand.")
         else:
             notes.append(f"Failed: {v.get('error')}")
-        hint = FAILURE_HINTS.get(entry["target"])
-        if hint and v["outcome"] != "ok":
-            notes.append(hint)
+        if v["outcome"] != "ok":
+            text = f"{v['outcome']} {v.get('error') or ''}"
+            for pattern, hint in FAILURE_HINTS.get(entry["target"], []) + FAILURE_HINTS.get("*", []):
+                if re.search(pattern, text):
+                    notes.append(hint)
     entry["manualFixNotes"] = notes
 
 
@@ -770,9 +962,11 @@ def report(args):
     L = []
     L.append(f"# Query catalogue update ({meta['catalogueVersion']})")
     L.append("")
+    n_src = src_meta.get("number_of_queries")
+    left_out = (f"; {n_src - len(data)} left out, see *Queries removed*" if n_src and n_src != len(data) else "")
     L.append(f"Generated by `update_query_catalogue.py` from `{src['file']}` "
-             f"(sparql-examples commit `{src_meta.get('commit')}`, "
-             f"{len(data)} queries). The original file is unchanged.")
+             f"(sparql-examples commit `{src_meta.get('commit')}`, {n_src or len(data)} queries). "
+             f"The updated catalogue has {len(data)} queries{left_out}. The original file is unchanged.")
     L.append("")
     L.append(f"- **Policy:** {meta['policy']}")
     L.append(f"- **Upstream consulted:** {meta['upstream']['repository']} "
@@ -805,11 +999,15 @@ def report(args):
         n = sum(1 for e in data.values() if any(c["from"] == m["from"] for c in e["changes"]))
         L.append(f"| `{m['from']}` | `{m['to']}` | {n} | {md_escape(m['reason'])} |")
     L.append("")
-    L.append("### Unavailable endpoints (no replacement; queries left unchanged)")
+    L.append("### Unavailable endpoints (no replacement; queries using them were removed)")
     L.append("")
+    removed = meta.get("removedQueries") or []
     for u in meta["unavailableEndpoints"]:
-        n = sum(1 for e in data.values() if u["endpoint"] in all_endpoints(e))
-        L.append(f"- `{u['endpoint']}` ({n} {'query' if n == 1 else 'queries'}): {u['note']}")
+        gone = [short_id(r["key"]) for r in removed if u["endpoint"] in r.get("unavailableEndpoints", [])]
+        left = sum(1 for e in data.values() if u["endpoint"] in all_endpoints(e))
+        used = (f"removed: {', '.join(f'`{g}`' for g in gone)}" if gone else "no removed queries")
+        used += f"; still used by {left} {'query' if left == 1 else 'queries'}" if left else ""
+        L.append(f"- `{u['endpoint']}` ({used}): {u['note']}")
     if meta.get("endpointNotes"):
         L.append("")
         L.append("### Other endpoint notes")
@@ -831,6 +1029,30 @@ def report(args):
             L.append(f"| `{m['endpoint']}` | `{m['prefix']}:` | `{m['from']}` | `{m['to']}` | {n} | "
                      f"{md_escape(m['reason'])} |")
         L.append("")
+    reps = meta.get("upstreamReplacements") or []
+    if reps:
+        L.append(f"## Queries replaced with their upstream version ({len(reps)})")
+        L.append("")
+        L.append("These queries changed in the upstream SIB catalogue (sparql-examples). Their key is "
+                 "unchanged, but their query text and description now come from upstream, so their "
+                 "results are not comparable with earlier experiments.")
+        L.append("")
+        for r in reps:
+            L.append(f"- `{short_id(r['key'])}` → upstream `{r['upstreamFile']}` "
+                     f"(<{r['upstreamId']}>): {md_escape(r['reason'])}")
+        L.append("")
+    if removed:
+        L.append(f"## Queries removed from the updated catalogue ({len(removed)})")
+        L.append("")
+        L.append("These queries are left out of the updated catalogue. They are still in the original "
+                 "catalogue, and their earlier checks are kept in `metadata.removedQueries`.")
+        L.append("")
+        for r in removed:
+            v = r.get("verification")
+            last = f" Last check: {fmt_check(v)}." if v else ""
+            L.append(f"- `{short_id(r['key'])}` (target `{r['target']}`): {md_escape(r['reason'])}{last}")
+        L.append("")
+
     manual = [(k, e) for k, e in data.items() if e["status"] == "needs-manual-fix"]
     L.append(f"## Queries to fix or check by hand ({len(manual)})")
     L.append("")
