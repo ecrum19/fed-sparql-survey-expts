@@ -35,20 +35,33 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Timed out: No complete response within 180 s (client timeout). Run by hand with a longer timeout."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T14:49:05+00:00",
+        "date": "2026-11-19T08:08:07+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
-        "durationSeconds": 180.2,
-        "outcome": "timeout",
-        "error": "No complete response within 180 s (client timeout)",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 34418,
+        "responseBytes": 22397984,
+        "outcome": "ok",
+        "durationSeconds": 411.3,
         "queryHash": "d10cab5b92d9a000",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T14:49:05+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "durationSeconds": 180.2,
+          "outcome": "timeout",
+          "error": "No complete response within 180 s (client timeout)",
+          "queryHash": "d10cab5b92d9a000",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/45": {
       "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX chebihash: <http://purl.obolibrary.org/obo/chebi#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\n\nSELECT DISTINCT ?protein ?proteinFullName ?wikiChemical ?wikiChemicalLabel ?medicalConditionTreatedLabel\nWHERE {\n  # ChEBI: retrieve members of the ChEBI class ChEBI:15889 (sterol)\n  # Rhea: retrieve the reactions involving these ChEBI as participants\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?reaction rdfs:subClassOf rh:Reaction ;\n      rh:status rh:Approved ;\n      rh:side ?reactionSide .\n    ?reactionSide\n      rh:contains ?participant .\n    ?participant rh:compound ?compound\n    {\n      ?compound rh:chebi ?chebi .\n      ?chebi (rdfs:subClassOf)+ CHEBI:15889\n    } UNION {\n      ?compound rh:chebi ?chebi .\n      ?chebi2 rdfs:subClassOf ?chebiRestriction .\n      ?chebiRestriction\n\t\ta owl:Restriction ;\n\t\towl:onProperty chebihash:has_major_microspecies_at_pH_7_3 ;\n\t\towl:someValuesFrom ?chebi .\n      ?chebi2 (rdfs:subClassOf)+ CHEBI:15889\n    }\n  }\n  # UniProt: retrieve the human (taxid:9606) enzymes catalyzing these Rhea reactions\n  ?ca up:catalyzedReaction  ?reaction .\n  ?a up:catalyticActivity  ?ca .\n  ?proteinIRI  up:annotation ?a ;\n    up:organism taxon:9606 ;\n    up:recommendedName ?proteinRecName .\n  ?proteinRecName up:fullName ?proteinFullName .\n  # Find drugs in wikidata that interact with the UniProt Proteins\n  BIND (SUBSTR(STR(?proteinIRI), STRLEN(STR(uniprotkb:))+1) AS ?protein)\n  SERVICE <https://query.wikidata.org/sparql> {\n    ?wp wdt:P352  ?protein .\n    ?wikiChemical wdt:P129 ?wp . # Physically interacts with\n    ?wikiChemical rdfs:label ?wikiChemicalLabel .\n    ?wikiChemical wdt:P2175 ?wmc . # Medical conndition treated\n    ?wmc rdfs:label ?medicalConditionTreatedLabel .\n    FILTER(lang(?medicalConditionTreatedLabel) = 'en')\n    FILTER(lang(?wikiChemicalLabel) = 'en')\n  }\n}",
@@ -140,20 +153,33 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Timed out: No complete response within 180 s (client timeout). Run by hand with a longer timeout."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:12:04+00:00",
+        "date": "2026-11-19T08:31:44+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
-        "durationSeconds": 180.2,
-        "outcome": "timeout",
-        "error": "No complete response within 180 s (client timeout)",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 57,
+        "responseBytes": 15942,
+        "outcome": "ok",
+        "durationSeconds": 391.4,
         "queryHash": "96726199ea358e0c",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:12:04+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "durationSeconds": 180.2,
+          "outcome": "timeout",
+          "error": "No complete response within 180 s (client timeout)",
+          "queryHash": "96726199ea358e0c",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/53": {
       "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?chebi\n    ?reaction\n    ?humanProtein\n    ?mouseProtein\n    ?cluster \nWHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?reaction rdfs:subClassOf rh:Reaction .\n    ?reaction rh:side/rh:contains/rh:compound ?compound .\n    ?compound rh:chebi ?chebi .\n    ?chebi rdfs:subClassOf* CHEBI:15889\n  }\n\n  ?humanProtein up:organism taxon:9606 .\n  ?humanProtein up:annotation ?a .\n  ?a a up:Catalytic_Activity_Annotation .\n  ?a up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?reaction .\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {\n    ?cluster a orth:ParalogsCluster .\n    ?cluster orth:hasHomologousMember ?node1 , ?node2 .\n    ?node1 orth:hasHomologousMember* ?orthoProtein1 .\n    ?node2 orth:hasHomologousMember* ?orthoProtein2 .\n    ?orthoProtein1 lscr:xrefUniprot ?mouseProtein .\n    ?orthoProtein2 lscr:xrefUniprot ?humanProtein .\n    # inTaxon mouse\n    ?orthoProtein1 orth:organism/<http://purl.obolibrary.org/obo/RO_0002162> taxon:10090 . \n  }\n}",
@@ -182,18 +208,33 @@
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Timed out: No complete response within 180 s (client timeout). Run by hand with a longer timeout."
+        "Returned 0 results: check by hand whether that is expected."
       ],
       "verification": {
-        "date": "2026-11-18T15:18:31+00:00",
+        "date": "2026-11-19T08:39:38+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
-        "durationSeconds": 181.2,
-        "outcome": "timeout",
-        "error": "No complete response within 180 s (client timeout)",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 0,
+        "responseBytes": 176,
+        "outcome": "empty",
+        "durationSeconds": 760.2,
         "queryHash": "da4dafb60b037c2a",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:18:31+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "durationSeconds": 181.2,
+          "outcome": "timeout",
+          "error": "No complete response within 180 s (client timeout)",
+          "queryHash": "da4dafb60b037c2a",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/99_uniprot_identifiers_org_translation": {
       "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    ?otherIdentifier\nWHERE {\n    VALUES (?protein) {(uniprotkb:P00750) (uniprotkb:P05067)}\n    ?protein a up:Protein .\n    SERVICE <https://sparql.api.identifiers.org/sparql> {\n        ?protein owl:sameAs ?otherIdentifier .\n    }\n}",
@@ -232,17 +273,22 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Returned 0 results: check by hand whether that is expected."
       ],
       "verification": {
-        "date": "2026-11-18T15:27:19+00:00",
+        "date": "2026-11-19T08:53:44+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 0,
+        "responseBytes": 230,
+        "outcome": "empty",
+        "durationSeconds": 0.5,
         "queryHash": "202731827987aa25",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/50": {
@@ -256,17 +302,21 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936669964\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …"
       ],
       "verification": {
-        "date": "2026-11-18T15:28:20+00:00",
+        "date": "2026-11-19T08:54:48+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936669964\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …",
+        "durationSeconds": 0.9,
         "queryHash": "abcd81b98b76a58f",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/54": {
@@ -279,17 +329,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:29:21+00:00",
+        "date": "2026-11-19T08:55:53+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 650302,
+        "responseBytes": 423478098,
+        "outcome": "ok",
+        "durationSeconds": 25.2,
         "queryHash": "a64998dfae84ddc3",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/42": {
@@ -302,17 +355,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:30:21+00:00",
+        "date": "2026-11-19T08:57:18+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 66,
+        "responseBytes": 34675,
+        "outcome": "ok",
+        "durationSeconds": 69.4,
         "queryHash": "c93a92f308b60d5f",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/43": {
@@ -325,17 +381,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:31:21+00:00",
+        "date": "2026-11-19T08:59:27+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 71,
+        "responseBytes": 38717,
+        "outcome": "ok",
+        "durationSeconds": 31.6,
         "queryHash": "fa56caf4accd53ca",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/70_enzymes_interacting_with_molecules_similar_to_dopamine": {
@@ -348,17 +407,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:32:22+00:00",
+        "date": "2026-11-19T09:00:59+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 479,
+        "responseBytes": 175260,
+        "outcome": "ok",
+        "durationSeconds": 2.0,
         "queryHash": "d33d42cefb56ed2a",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/38": {
@@ -371,17 +433,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:33:23+00:00",
+        "date": "2026-11-19T09:02:01+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 2,
+        "responseBytes": 1264,
+        "outcome": "ok",
+        "durationSeconds": 1.4,
         "queryHash": "0b248951aba50cac",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/48": {
@@ -394,17 +459,22 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Returned 0 results: check by hand whether that is expected."
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:03:03+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 0,
+        "responseBytes": 162,
+        "outcome": "empty",
+        "durationSeconds": 0.1,
         "queryHash": "76a6feec04da896f",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease": {
@@ -417,17 +487,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:04:03+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 83,
+        "responseBytes": 40327,
+        "outcome": "ok",
+        "durationSeconds": 2.7,
         "queryHash": "bb6c42819818172b",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/90_uniprot_affected_by_metabolic_diseases_using_MeSH": {
@@ -440,17 +513,21 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://id.nlm.nih.gov:443/mesh/sparql>: QLever requires the endpoint of a SERVICE to send the result as 'application/sparql-results+json' but the endpoint sent 'text/plain;charset=utf-8'. First 100 bytes of the response: '<http://id.nlm.nih.gov/mesh/sparql>\\n a <http://www.w3.org/ns/sparql-service-description'\", \"query\": \"#1936673213\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX up: <h…"
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:05:05+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://id.nlm.nih.gov:443/mesh/sparql>: QLever requires the endpoint of a SERVICE to send the result as 'application/sparql-results+json' but the endpoint sent 'text/plain;charset=utf-8'. First 100 bytes of the response: '<http://id.nlm.nih.gov/mesh/sparql>\\n a <http://www.w3.org/ns/sparql-service-description'\", \"query\": \"#1936673213\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX up: <h…",
+        "durationSeconds": 1.1,
         "queryHash": "8950b09ad6e7285b",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/29": {
@@ -463,17 +540,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:06:07+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 83,
+        "responseBytes": 21532,
+        "outcome": "ok",
+        "durationSeconds": 102.0,
         "queryHash": "93fdb1d8b4a3969f",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome": {
@@ -486,17 +566,22 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Returned 0 results: check by hand whether that is expected."
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:08:49+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 0,
+        "responseBytes": 180,
+        "outcome": "empty",
+        "durationSeconds": 0.6,
         "queryHash": "0b63602caa38af21",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.rhea-db.org/.well-known/sparql-examples/19_draft_human_metabolome": {
@@ -537,17 +622,21 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1960055620\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …"
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:09:49+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1960055620\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …",
+        "durationSeconds": 11.0,
         "queryHash": "2ab5e40b819fe1ea",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/109_uniprot_transporter_in_liver": {
@@ -560,17 +649,21 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936674975\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: <http://purl.org/lscr#>\\nPREFIX obo: <http://purl.ob…"
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:11:00+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936674975\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: <http://purl.org/lscr#>\\nPREFIX obo: <http://purl.ob…",
+        "durationSeconds": 4.5,
         "queryHash": "f93c95011b493047",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/60": {
@@ -584,17 +677,20 @@
       "target": "https://sparql.uniprot.org/sparql/",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:12:05+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 33,
+        "responseBytes": 19849,
+        "outcome": "ok",
+        "durationSeconds": 3.3,
         "queryHash": "2b98fddc33c40f6f",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/26": {
@@ -610,20 +706,35 @@
       "changes": [],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Response larger than 209715200 bytes; not parsed. The query probably works but returns a very large result; confirm by hand."
+        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
       ],
       "verification": {
-        "date": "2026-11-18T14:52:58+00:00",
+        "date": "2026-11-19T08:15:18+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 22.6,
         "outcome": "too-large",
-        "error": "Response larger than 209715200 bytes; not parsed",
+        "responseBytes": 2148532224,
+        "error": "Response larger than 2147483648 bytes; stopped reading",
+        "durationSeconds": 45.2,
         "queryHash": "a6915450f1dc9fe3",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T14:52:58+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 22.6,
+          "outcome": "too-large",
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "queryHash": "a6915450f1dc9fe3",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/27": {
       "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  ?organism {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite .\n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism ?organism .\n  }\n  ?swisslipidIsomericSubpecies rdfs:subClassOf ?swisslipid ;\n        SWISSLIPID:rank SWISSLIPID:Isomeric_Subspecies .\n}",
@@ -638,20 +749,35 @@
       "changes": [],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Response larger than 209715200 bytes; not parsed. The query probably works but returns a very large result; confirm by hand."
+        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
       ],
       "verification": {
-        "date": "2026-11-18T14:57:00+00:00",
+        "date": "2026-11-19T08:38:35+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 20.4,
         "outcome": "too-large",
-        "error": "Response larger than 209715200 bytes; not parsed",
+        "responseBytes": 2148532224,
+        "error": "Response larger than 2147483648 bytes; stopped reading",
+        "durationSeconds": 42.9,
         "queryHash": "e7c4effc28bab734",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T14:57:00+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 20.4,
+          "outcome": "too-large",
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "queryHash": "e7c4effc28bab734",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/34": {
       "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n\t?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite . \n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism taxon:9606 .\n  }\n}",
@@ -666,20 +792,35 @@
       "changes": [],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Response larger than 209715200 bytes; not parsed. The query probably works but returns a very large result; confirm by hand."
+        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
       ],
       "verification": {
-        "date": "2026-11-18T15:03:07+00:00",
+        "date": "2026-11-19T08:52:38+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 13.8,
         "outcome": "too-large",
-        "error": "Response larger than 209715200 bytes; not parsed",
+        "responseBytes": 2148532224,
+        "error": "Response larger than 2147483648 bytes; stopped reading",
+        "durationSeconds": 45.7,
         "queryHash": "eb0fd6e1c9d17f05",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:03:07+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 13.8,
+          "outcome": "too-large",
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "queryHash": "eb0fd6e1c9d17f05",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/16": {
       "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\n# Example 16\nSELECT ?startId ?startName ?uniprot\nWHERE\n{\n  # SwissLipids query (list of) identifier(s)\n  VALUES ?startId { SWISSLIPID:000399814 }\n  # name\n  ?startId rdfs:label ?startName .\n  # ChEBI x-ref\n  ?startId owl:equivalentClass ?chebi .\n  # federated query to Rhea\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n  \t?rhea rh:side/rh:contains/rh:compound/rh:chebi ?chebi .\n  }    \n  # federated query to UniProt\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?uniprot up:reviewed true .\n    ?uniprot up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea .\n  }\n} \nORDER BY ?startId",
@@ -692,17 +833,20 @@
       "target": "https://beta.sparql.swisslipids.org/sparql",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:08:32+00:00",
+        "date": "2026-11-19T08:54:24+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
-        "outcome": "not-run",
-        "error": "stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 52,
+        "responseBytes": 18618,
+        "outcome": "ok",
+        "durationSeconds": 4.3,
         "queryHash": "dc39e03227772e65",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/6": {
@@ -716,17 +860,20 @@
       "target": "https://beta.sparql.swisslipids.org/sparql",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:15:26+00:00",
+        "date": "2026-11-19T08:55:28+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
-        "outcome": "not-run",
-        "error": "stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 52,
+        "responseBytes": 46492,
+        "outcome": "ok",
+        "durationSeconds": 4.2,
         "queryHash": "f7e60343e0b4b084",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/7": {
@@ -740,17 +887,22 @@
       "target": "https://beta.sparql.swisslipids.org/sparql",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Returned 0 results: check by hand whether that is expected."
       ],
       "verification": {
-        "date": "2026-11-18T15:21:57+00:00",
+        "date": "2026-11-19T08:56:38+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
-        "outcome": "not-run",
-        "error": "stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 0,
+        "responseBytes": 145,
+        "outcome": "empty",
+        "durationSeconds": 0.5,
         "queryHash": "11408872a689be69",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/5": {
@@ -763,17 +915,20 @@
       "target": "https://beta.sparql.swisslipids.org/sparql",
       "changeStatus": "unchanged",
       "changes": [],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:24:33+00:00",
+        "date": "2026-11-19T08:58:47+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
-        "outcome": "not-run",
-        "error": "stopped contacting beta.sparql.swisslipids.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 290,
+        "responseBytes": 263062,
+        "outcome": "ok",
+        "durationSeconds": 7.3,
         "queryHash": "89aee29ae6a8bee8",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.orthodb.org/.well-known/sparql-examples/18": {
@@ -817,18 +972,30 @@
       "changes": [],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Timed out: No complete response within 180 s (client timeout). Run by hand with a longer timeout."
+        "Timed out: No complete response within 900.0 s (client timeout). Run by hand with a longer timeout."
       ],
       "verification": {
-        "date": "2026-11-18T14:57:41+00:00",
+        "date": "2026-11-19T08:16:24+00:00",
         "endpoint": "https://sparql.orthodb.org/sparql/",
         "method": "GET",
-        "durationSeconds": 180.1,
         "outcome": "timeout",
-        "error": "No complete response within 180 s (client timeout)",
+        "error": "No complete response within 900.0 s (client timeout)",
+        "durationSeconds": 900.2,
         "queryHash": "25f02f2ca4a16ec4",
-        "run": 1
-      }
+        "run": 2
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T14:57:41+00:00",
+          "endpoint": "https://sparql.orthodb.org/sparql/",
+          "method": "GET",
+          "durationSeconds": 180.1,
+          "outcome": "timeout",
+          "error": "No complete response within 180 s (client timeout)",
+          "queryHash": "25f02f2ca4a16ec4",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.orthodb.org/.well-known/sparql-examples/17": {
       "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX odbgroup: <http://purl.orthodb.org/odbgroup/>\nPREFIX : <http://purl.orthodb.org/>\n\nSELECT *\nWHERE {\n    ?gene a :Gene;\n        :memberOf odbgroup:6400at314295 .\n    ?gene :xref [a :Xref; :xrefResource ?xref] .\n    ?xref a :Uniprot .\n    SERVICE <https://sparql.uniprot.org/sparql/> {\n        ?xref a up:Protein ;\n            up:recommendedName [up:fullName ?name] .\n    }\n}\n",
@@ -1249,14 +1416,14 @@
       }
     },
     "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/006": {
-      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT ?family_name ?genus_name ?species_name ?wd_sp ?feature ?sub_rt ?sub_parent_mass ?count\nWHERE {\n    # Subquery to get the top N hits with their Wikidata IDs\n    {\n        SELECT ?wd_sp ?feature (SAMPLE(?rt) AS ?sub_rt) (SAMPLE(?parent_mass) AS ?sub_parent_mass) (COUNT(?peakloss) AS ?count)\n        WHERE {\n            ?material sosa:hasSample ?extract ;\n                sosa:isSampleOf* ?organism.\n            ?organism emi:inTaxon ?wd_sp .\n            ?extract a emi:ExtractSample ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?lcms a emi:LCMSAnalysisPos ;\n                sosa:hasResult ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            ?feature a emi:LCMSFeature ;\n                emi:hasSpec2VecDoc ?doc ;\n                emi:hasParentMass ?parent_mass ;\n                emi:hasRetentionTime ?rt .\n            ?doc emi:hasSpec2VecLoss|emi:hasSpec2VecPeak ?peakloss .\n\n            {\n                SELECT ?peakloss WHERE {\n                    ?lcms a emi:LCMSAnalysisPos ;\n                        sosa:hasResult ?feature_list ;\n                        sosa:hasFeatureOfInterest ?sample .\n                    ?sample dcterms:identifier \"VGF151_E05\" ;\n                        sosa:isSampleOf* ?organism .\n                    ?organism emi:inTaxon/rdfs:label \"datura stramonium\".\n                    ?feature_list emi:hasLCMSFeature ?feature .\n                    ?feature a emi:LCMSFeature ;\n                        emi:hasSpec2VecDoc ?doc .\n                    ?doc emi:hasSpec2VecLoss|emi:hasSpec2VecPeak ?peakloss .\n                }\n            }\n        }\n        GROUP BY ?wd_sp ?feature\n        ORDER BY DESC(?count)\n        LIMIT 5\n    }\n\n    # Outer query to fetch species names from Wikidata\n    # Fetching taxonomic information from Wikidata\n    SERVICE <https://query.wikidata.org/sparql> {\n        ?wd_sp wdt:P225 ?species_name .\n        OPTIONAL {\n            ?family wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q35409 ;\n                wdt:P225 ?family_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n        OPTIONAL {\n            ?genus wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q34740 ;\n                wdt:P225 ?genus_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n    }\n} GROUP BY ?family_name ?genus_name ?species_name ?wd_sp ?feature ?sub_rt ?sub_parent_mass ?count\nORDER BY DESC(?count)",
+      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT ?family_name ?genus_name ?species_name ?wd_sp ?feature ?sub_rt ?sub_parent_mass ?count\nWHERE {\n    # Subquery to get the top N hits with their Wikidata IDs\n    {\n        SELECT ?wd_sp ?feature (SAMPLE(?rt) AS ?sub_rt) (SAMPLE(?parent_mass) AS ?sub_parent_mass) (COUNT(?peakloss) AS ?count)\n        WHERE {\n            ?material sosa:hasSample ?extract ;\n                sosa:isSampleOf* ?organism.\n            ?organism emi:inTaxon ?wd_sp .\n            ?extract a emi:ExtractSample ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?lcms a emi:LCMSAnalysisPos ;\n                sosa:hasResult ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            ?feature a emi:LCMSFeature ;\n                emi:hasSpec2VecDoc ?doc ;\n                emi:hasParentMass ?parent_mass ;\n                emi:hasRetentionTime ?rt .\n            ?doc emi:hasSpec2VecLoss|emi:hasSpec2VecPeak ?peakloss .\n\n            {\n                SELECT ?peakloss WHERE {\n                    ?lcms a emi:LCMSAnalysisPos ;\n                        sosa:hasResult ?feature_list ;\n                        sosa:hasFeatureOfInterest ?sample .\n                    ?sample dcterms:identifier \"VGF151_E05\" ;\n                        sosa:isSampleOf* ?organism .\n                    ?organism emi:inTaxon/rdfs:label \"datura stramonium\".\n                    ?feature_list emi:hasLCMSFeature ?feature .\n                    ?feature a emi:LCMSFeature ;\n                        emi:hasSpec2VecDoc ?doc .\n                    ?doc emi:hasSpec2VecLoss|emi:hasSpec2VecPeak ?peakloss .\n                }\n            }\n        }\n        GROUP BY ?wd_sp ?feature\n        ORDER BY DESC(?count)\n        LIMIT 5\n    }\n\n    # Outer query to fetch species names from Wikidata\n    # Fetching taxonomic information from Wikidata\n    SERVICE <https://query.wikidata.org/sparql> {\n        ?wd_sp wdt:P225 ?species_name .\n        OPTIONAL {\n            ?family wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q35409 ;\n                wdt:P225 ?family_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n        OPTIONAL {\n            ?genus wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q34740 ;\n                wdt:P225 ?genus_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n    }\n} GROUP BY ?family_name ?genus_name ?species_name ?wd_sp ?feature ?sub_rt ?sub_parent_mass ?count\nORDER BY DESC(?count)",
       "description": "Search spectrally related features with and within the VGF151_E05 sample of a datura stramonium through counts of common peaks and loss. Return their species, family and genus names",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://query.wikidata.org/sparql"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "target",
@@ -1269,35 +1436,57 @@
           "from": "https://biosoda.unil.ch/emi/sparql",
           "to": "https://qlever.earthmetabolome.org/api/metrin-kg",
           "reason": "BioSODA federation proxy is deprecated: the URL now 301-redirects to an HTML page (https://biosoda.unil.ch/pdn-agent). Upstream sparql-examples@45e5b53 lists the EMI endpoint as https://kg.earthmetabolome.org/metrin/api/, which 302-redirects to this URL; the direct URL is used because 302 redirects drop POST bodies in most SPARQL clients."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
+        "Failed: HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples (examples/emi/); compare with the closest upstream query."
       ],
       "verification": {
-        "date": "2026-11-18T14:55:40+00:00",
+        "date": "2026-11-19T10:00:05+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
-        "httpStatus": 200,
-        "contentType": "application/sparql-results+json",
-        "durationSeconds": 11.0,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "b434ae65dca3aa55",
-        "run": 1
-      }
+        "httpStatus": 504,
+        "contentType": "text/html",
+        "outcome": "error",
+        "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "durationSeconds": 60.3,
+        "queryHash": "8fc2ba5e9f1a1c8b",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T14:55:40+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 11.0,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "b434ae65dca3aa55",
+          "run": 1
+        }
+      ]
     },
     "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/001": {
-      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX pr: <http://www.wikidata.org/prop/reference/>\n\nSELECT DISTINCT ?ik2d ?genus\nWHERE\n    {\n    ?material sosa:hasSample ?extract ;\n        sosa:isSampleOf ?organe .\n    ?organe emi:inTaxon ?wd_sp .\n    ?wd_sp rdfs:label \"tabernaemontana coffeoides\" .\n    ?extract sosa:isFeatureOfInterestOf ?lcms .\n    ?lcms sosa:hasResult ?feature_list .\n    ?feature_list emi:hasLCMSFeature ?feature .\n    ?feature emi:hasAnnotation ?sirius_annotation .\n    ?sirius_annotation a emi:StructuralAnnotation ;\n        prov:wasGeneratedBy ?activity ;\n        emi:hasChemicalStructure ?ik2d .\n    ?activity prov:wasAssociatedWith <https://bio.informatik.uni-jena.de/software/sirius> .\n    ?ik2d emi:hasSMILES ?smiles ;\n        emi:isInChIKey2DOf ?ik .\n    ?ik emi:isInChIKeyOf ?wd_id .\n\t{\n        SELECT DISTINCT ?wd_id ?genus WHERE {\n            ?material sosa:hasSample ?extract ;\n                sosa:isSampleOf ?organe .\n            ?organe emi:inTaxon ?wd_sp .\n            ?wd_sp rdfs:label \"tabernaemontana coffeoides\" .\n           # OPTIONAL {\n                SERVICE <https://query.wikidata.org/sparql> {\n                    ?wd_sp wdt:P225 ?species_name .\n                    ?genus wdt:P31 wd:Q16521 ;\n                        wdt:P105 wd:Q34740 ;\n                        ^wdt:P171* ?wd_sp .\n                    ?childtaxa wdt:P171* ?genus .\n                    ?wd_id wdt:P703 ?childtaxa\n                }\n           # }\n        } LIMIT 100\n    }\n}",
+      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX pr: <http://www.wikidata.org/prop/reference/>\n\nSELECT DISTINCT ?ik2d ?genus\nWHERE\n    {\n    ?material sosa:hasSample ?extract ;\n        sosa:isSampleOf ?organe .\n    ?organe emi:inTaxon ?wd_sp .\n    ?wd_sp rdfs:label \"tabernaemontana coffeoides\" .\n    ?extract sosa:isFeatureOfInterestOf ?lcms .\n    ?lcms sosa:hasResult ?feature_list .\n    ?feature_list emi:hasLCMSFeature ?feature .\n    ?feature emi:hasAnnotation ?sirius_annotation .\n    ?sirius_annotation a emi:StructuralAnnotation ;\n        prov:wasGeneratedBy ?activity ;\n        emi:hasChemicalStructure ?ik2d .\n    ?activity prov:wasAssociatedWith <https://bio.informatik.uni-jena.de/software/sirius> .\n    ?ik2d emi:hasSMILES ?smiles ;\n        emi:isInChIKey2DOf ?ik .\n    ?ik emi:isInChIKeyOf ?wd_id .\n\t{\n        SELECT DISTINCT ?wd_id ?genus WHERE {\n            ?material sosa:hasSample ?extract ;\n                sosa:isSampleOf ?organe .\n            ?organe emi:inTaxon ?wd_sp .\n            ?wd_sp rdfs:label \"tabernaemontana coffeoides\" .\n           # OPTIONAL {\n                SERVICE <https://query.wikidata.org/sparql> {\n                    ?wd_sp wdt:P225 ?species_name .\n                    ?genus wdt:P31 wd:Q16521 ;\n                        wdt:P105 wd:Q34740 ;\n                        ^wdt:P171* ?wd_sp .\n                    ?childtaxa wdt:P171* ?genus .\n                    ?wd_id wdt:P703 ?childtaxa\n                }\n           # }\n        } LIMIT 100\n    }\n}",
       "description": "Among the SIRIUS structural annotations from Tabernaemontana coffeoides (Apocynaceae) seeds extract, which ones are reported in the Tabernaemontana genus?",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://query.wikidata.org/sparql"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "target",
@@ -1310,35 +1499,55 @@
           "from": "https://biosoda.unil.ch/emi/sparql",
           "to": "https://qlever.earthmetabolome.org/api/metrin-kg",
           "reason": "BioSODA federation proxy is deprecated: the URL now 301-redirects to an HTML page (https://biosoda.unil.ch/pdn-agent). Upstream sparql-examples@45e5b53 lists the EMI endpoint as https://kg.earthmetabolome.org/metrin/api/, which 302-redirects to this URL; the direct URL is used because 302 redirects drop POST bodies in most SPARQL clients."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:01:52+00:00",
+        "date": "2026-11-19T10:04:05+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 1.1,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "eac1594d342c89bd",
-        "run": 1
-      }
+        "resultCount": 8,
+        "responseBytes": 1235,
+        "outcome": "ok",
+        "durationSeconds": 3.7,
+        "queryHash": "0a77bbde58357689",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:01:52+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 1.1,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "eac1594d342c89bd",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples011a": {
-      "query": "PREFIX emi: <https://purl.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nSELECT DISTINCT ?wdx_Source ?sourceNameURI ?intxnLabel ?intxnType ?wdx_Target ?targetNameURI\nWHERE {\n\t{\n\t\tSELECT DISTINCT ?wdx_Target ?targetName ?sourceName ?wdx_Source ?intxnType\n\t\tWHERE {\n\t\t\t# first select the source-target interaction-pairs\n\t\t\t?intxn emi:hasSource ?source ;\n\t\t\temi:hasTarget ?target ;\n\t\t\t\temi:isClassifiedWith ?intxnType .    # unidirectional interaction, e.g.: source-X hosts target target-Y\n\t\t\t?intxnType rdfs:label ?intxnLabel .\n\t\t\t?source emi:inTaxon ?wdx_Source ;          # retrieve wikidata-id for source\n\t\t\t\tsosa:isSampleOf ?sourceName .       # scientific name of source as given in GloBI\n\t\t\t?target emi:inTaxon ?wdx_Target ;          # retrieve wikidata-id for target\n\t\t\t\tsosa:isSampleOf ?targetName .        # scientific name of target as given in GloBI\n\t\t}\n\t}\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t{\n\t\t\t?wdx_Source wdt:P141 wd:Q719675 ;        # filter source wikidata ids, which have IUCN status (wdt:P141) as near threatened (wd:Q719675) and which is a plant\n\t\t\t\twdt:P171* wd:Q879246 .\n\t\t} UNION {\n\t\t\t?wdx_Target wdt:P141 wd:Q719675 ;        # filter target wikidata ids, which have IUCN status (wdt:P141) as near threatened (wd:Q719675) and which is a plant\n\t\t\t\twdt:P171* wd:Q879246 .\n\t\t}\n\t}\n\tBIND(REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX)    # remove percent-encoding for scientific names of source-X\n\tBIND(IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND(REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)    # remove percent-encoding for scientific names of target-Y\n\tBIND(IRI(?targetNameX) AS ?targetNameURI)\n}",
+      "query": "PREFIX emi: <https://w3id.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nSELECT DISTINCT ?wdx_Source ?sourceNameURI ?intxnLabel ?intxnType ?wdx_Target ?targetNameURI\nWHERE {\n\t{\n\t\tSELECT DISTINCT ?wdx_Target ?targetName ?sourceName ?wdx_Source ?intxnType\n\t\tWHERE {\n\t\t\t# first select the source-target interaction-pairs\n\t\t\t?intxn emi:hasSource ?source ;\n\t\t\temi:hasTarget ?target ;\n\t\t\t\temi:isClassifiedWith ?intxnType .    # unidirectional interaction, e.g.: source-X hosts target target-Y\n\t\t\t?intxnType rdfs:label ?intxnLabel .\n\t\t\t?source emi:inTaxon ?wdx_Source ;          # retrieve wikidata-id for source\n\t\t\t\tsosa:isSampleOf ?sourceName .       # scientific name of source as given in GloBI\n\t\t\t?target emi:inTaxon ?wdx_Target ;          # retrieve wikidata-id for target\n\t\t\t\tsosa:isSampleOf ?targetName .        # scientific name of target as given in GloBI\n\t\t}\n\t}\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t{\n\t\t\t?wdx_Source wdt:P141 wd:Q719675 ;        # filter source wikidata ids, which have IUCN status (wdt:P141) as near threatened (wd:Q719675) and which is a plant\n\t\t\t\twdt:P171* wd:Q879246 .\n\t\t} UNION {\n\t\t\t?wdx_Target wdt:P141 wd:Q719675 ;        # filter target wikidata ids, which have IUCN status (wdt:P141) as near threatened (wd:Q719675) and which is a plant\n\t\t\t\twdt:P171* wd:Q879246 .\n\t\t}\n\t}\n\tBIND(REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX)    # remove percent-encoding for scientific names of source-X\n\tBIND(IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND(REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)    # remove percent-encoding for scientific names of target-Y\n\tBIND(IRI(?targetNameX) AS ?targetNameURI)\n}",
       "description": "List interactions of all species which have an IUCN status (wdt:P141) of near threatened (wd:Q719675).",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1364,35 +1573,55 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:04:53+00:00",
+        "date": "2026-11-19T10:05:09+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 5.2,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "3968c67999879185",
-        "run": 1
-      }
+        "resultCount": 12396,
+        "responseBytes": 5297280,
+        "outcome": "ok",
+        "durationSeconds": 23.4,
+        "queryHash": "f5337aa90ac0efc6",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:04:53+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 5.2,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "3968c67999879185",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples011b": {
-      "query": "PREFIX emi: <https://purl.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX qudt: <https://qudt.org/2.1/schema/qudt#>\n\nSELECT DISTINCT ?source_wd ?sourceNameURI ?tryDataLab ?tryDataVal ?unit ?unitComment\nWHERE {\n\t?trySpObs sosa:isSampleOf ?source_trySpName ;\n\t\tsosa:isFeatureOfInterestOf ?tryObId .\n\t?source_trySpName emi:inTaxon ?source_wd .\n\t?tryObId sosa:hasResult ?tryData .\n\t?tryData rdfs:label ?tryDataLab ;\n\t\trdf:type emi:Trait ;\n\t\trdf:value ?tryDataVal ;\n\t\tqudt:hasUnit ?unit .\n\tOPTIONAL { ?tryData rdfs:comment ?unitComment . }\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?source_wd wdt:P141 wd:Q719675 .\n\t}\n\tBIND(REPLACE(STR(?source_trySpName), \"%20\", \" \") AS ?sourceNameX)\n\tBIND(IRI(?sourceNameX) AS ?sourceNameURI)\n}",
+      "query": "PREFIX emi: <https://w3id.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX qudt: <https://qudt.org/schema/qudt/>\n\nSELECT DISTINCT ?source_wd ?sourceNameURI ?tryDataLab ?tryDataVal ?unit ?unitComment\nWHERE {\n\t?trySpObs sosa:isSampleOf ?source_trySpName ;\n\t\tsosa:isFeatureOfInterestOf ?tryObId .\n\t?source_trySpName emi:inTaxon ?source_wd .\n\t?tryObId sosa:hasResult ?tryData .\n\t?tryData rdfs:label ?tryDataLab ;\n\t\trdf:type emi:Trait ;\n\t\trdf:value ?tryDataVal ;\n\t\tqudt:hasUnit ?unit .\n\tOPTIONAL { ?tryData rdfs:comment ?unitComment . }\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?source_wd wdt:P141 wd:Q719675 .\n\t}\n\tBIND(REPLACE(STR(?source_trySpName), \"%20\", \" \") AS ?sourceNameX)\n\tBIND(IRI(?sourceNameX) AS ?sourceNameURI)\n}",
       "description": "List interactions and traits of all species which have an IUCN status (wdt:P141) of near threatened (wd:Q719675).",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1418,35 +1647,63 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "qudt",
+          "from": "https://qudt.org/2.1/schema/qudt#",
+          "to": "https://qudt.org/schema/qudt/",
+          "occurrences": 1,
+          "reason": "Namespace used for qudt:hasUnit in the corresponding upstream EMI queries (sparql-examples@45e5b53 examples/emi/012.ttl and 014.ttl)."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:11:44+00:00",
+        "date": "2026-11-19T10:06:32+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.2,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "05f49a2d35cb1018",
-        "run": 1
-      }
+        "resultCount": 19280,
+        "responseBytes": 11531370,
+        "outcome": "ok",
+        "durationSeconds": 4.8,
+        "queryHash": "4f95f90d306185fb",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:11:44+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.2,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "05f49a2d35cb1018",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples019a": {
-      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX emiBox: <https://purl.org/emi/abox#>\nPREFIX wikibase: <http://wikiba.se/ontology#>\nPREFIX bd: <http://www.bigdata.com/rdf#>\nSELECT DISTINCT ?parasitoidX_WD ?parasitoidNameURI ?intxn2Label ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI ?study1_DOI ?study2_DOI WHERE {\n\t{\n\t\tSELECT DISTINCT ?parasitoidName ?parasiteName ?parasiteX_WD ?intxn2Label ?parasitoidX_WD ?study1_DOI WHERE {\n\t\t\t?intxn2 emi:hasSource ?parasitoidX ; #retrieve interaction pairs part-1\n\t\t\t\temi:hasTarget ?parasiteX ;\n\t\t\t\temi:isClassifiedWith ?intxnName2 .\n\t\t\tFILTER (REGEX(STR(?intxnName2),\"RO_0002208\")) #keep interactions only if the interaction-id is RO_0002208 (parasitoidOf), e.g: 'parasitoidX' is 'parasitoidOf' 'parasiteX'\n\t\t\t?intxnName2 rdfs:label ?intxn2Label .\n\t\t\t?parasitoidX emi:inTaxon ?parasitoidX_WD ; #retreieve wikidata-ids for parasitoidX\n\t\t\t\tsosa:isSampleOf ?parasitoidName . #retrieve scientific name of parasitoidX as listed in GloBI\n\t\t\t?parasiteX emi:inTaxon ?parasiteX_WD ; #retreieve wikidata-ids for parasiteX\n\t\t\t\tsosa:isSampleOf ?parasiteName . #retreieve scientific name for parasiteX as listed in GloBI\n\t\t\tOPTIONAL {\n\t\t\t\t?intxn2 dcterms:bibliographicCitation ?study1_DOI . #optionally retrieve the doi of the study for parasitoid-parasite pairs\n\t\t\t}\n\t\t}\n\t}\n\t?parasiteX1 emi:inTaxon ?parasiteX_WD . #check pasarsiteX1 is in wikidata-id parasiteX_WD (the ones obtained from interaction-pairs part-1)\n\t?intxn3 emi:hasSource ?parasiteX1 ; #retrieve interaction pairs part-2\n\t\temi:hasTarget ?hostPlant ;\n\t\temi:isClassifiedWith ?intxnName3 .\n\t?intxnName3 rdfs:label ?intxn3Label .\n\t?hostPlant emi:inTaxon ?hostPlant_WD ; #retreieve wikidata-ids for hostPlant\n\t\tsosa:isSampleOf ?hostPlantName . #retreieve scientific name for hostPlant as listed in GloBI\n\tOPTIONAL {\n\t\t?intxn3 dcterms:bibliographicCitation ?study2_DOI .\n\t}\n\tFILTER (!(?intxn3Label IN (\"visits\", \"visitsFlowersOf\", \"pollinates\"))) #keep interactions only if the interaction-names are not 'visits', 'visitsFlowersOf' or 'pollinates'. e.g.: 'parasiteX1' is 'pathogenOf/parasiteOf/..' 'hostPlant'\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?hostPlant_WD wdt:P171* wd:Q879246 . #keep the interaction pairs part-2 only if hostPlant_WD has Kingdom Archaeplastida (wd:Q879246) in its lineage, this is to ensure the hostPlant is really a plant\n\t}\n\tBIND (REPLACE(STR(?parasiteName), \"%20\", \" \") AS ?parasiteNameX) #remove percent encodings from parasite scientific name\n\tBIND (IRI(?parasiteNameX) AS ?parasiteNameURI)\n\tBIND (REPLACE(STR(?parasitoidName), \"%20\", \" \") AS ?parasitoidNameX) #remove percent encodings from parasitoid scientific name\n\tBIND (IRI(?parasitoidNameX) AS ?parasitoidNameURI)\n\tBIND (REPLACE(STR(?hostPlantName), \"%20\", \" \") AS ?hostPlantNameX) #remove percent encodings from hostPlant scientific name\n\tBIND (IRI(?hostPlantNameX) AS ?hostPlantNameURI)\n}\nLIMIT 1000",
+      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX emiBox: <https://purl.org/emi/abox#>\nPREFIX wikibase: <http://wikiba.se/ontology#>\nPREFIX bd: <http://www.bigdata.com/rdf#>\nSELECT DISTINCT ?parasitoidX_WD ?parasitoidNameURI ?intxn2Label ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI ?study1_DOI ?study2_DOI WHERE {\n\t{\n\t\tSELECT DISTINCT ?parasitoidName ?parasiteName ?parasiteX_WD ?intxn2Label ?parasitoidX_WD ?study1_DOI WHERE {\n\t\t\t?intxn2 emi:hasSource ?parasitoidX ; #retrieve interaction pairs part-1\n\t\t\t\temi:hasTarget ?parasiteX ;\n\t\t\t\temi:isClassifiedWith ?intxnName2 .\n\t\t\tFILTER (REGEX(STR(?intxnName2),\"RO_0002208\")) #keep interactions only if the interaction-id is RO_0002208 (parasitoidOf), e.g: 'parasitoidX' is 'parasitoidOf' 'parasiteX'\n\t\t\t?intxnName2 rdfs:label ?intxn2Label .\n\t\t\t?parasitoidX emi:inTaxon ?parasitoidX_WD ; #retreieve wikidata-ids for parasitoidX\n\t\t\t\tsosa:isSampleOf ?parasitoidName . #retrieve scientific name of parasitoidX as listed in GloBI\n\t\t\t?parasiteX emi:inTaxon ?parasiteX_WD ; #retreieve wikidata-ids for parasiteX\n\t\t\t\tsosa:isSampleOf ?parasiteName . #retreieve scientific name for parasiteX as listed in GloBI\n\t\t\tOPTIONAL {\n\t\t\t\t?intxn2 dcterms:bibliographicCitation ?study1_DOI . #optionally retrieve the doi of the study for parasitoid-parasite pairs\n\t\t\t}\n\t\t}\n\t}\n\t?parasiteX1 emi:inTaxon ?parasiteX_WD . #check pasarsiteX1 is in wikidata-id parasiteX_WD (the ones obtained from interaction-pairs part-1)\n\t?intxn3 emi:hasSource ?parasiteX1 ; #retrieve interaction pairs part-2\n\t\temi:hasTarget ?hostPlant ;\n\t\temi:isClassifiedWith ?intxnName3 .\n\t?intxnName3 rdfs:label ?intxn3Label .\n\t?hostPlant emi:inTaxon ?hostPlant_WD ; #retreieve wikidata-ids for hostPlant\n\t\tsosa:isSampleOf ?hostPlantName . #retreieve scientific name for hostPlant as listed in GloBI\n\tOPTIONAL {\n\t\t?intxn3 dcterms:bibliographicCitation ?study2_DOI .\n\t}\n\tFILTER (!(?intxn3Label IN (\"visits\", \"visitsFlowersOf\", \"pollinates\"))) #keep interactions only if the interaction-names are not 'visits', 'visitsFlowersOf' or 'pollinates'. e.g.: 'parasiteX1' is 'pathogenOf/parasiteOf/..' 'hostPlant'\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?hostPlant_WD wdt:P171* wd:Q879246 . #keep the interaction pairs part-2 only if hostPlant_WD has Kingdom Archaeplastida (wd:Q879246) in its lineage, this is to ensure the hostPlant is really a plant\n\t}\n\tBIND (REPLACE(STR(?parasiteName), \"%20\", \" \") AS ?parasiteNameX) #remove percent encodings from parasite scientific name\n\tBIND (IRI(?parasiteNameX) AS ?parasiteNameURI)\n\tBIND (REPLACE(STR(?parasitoidName), \"%20\", \" \") AS ?parasitoidNameX) #remove percent encodings from parasitoid scientific name\n\tBIND (IRI(?parasitoidNameX) AS ?parasitoidNameURI)\n\tBIND (REPLACE(STR(?hostPlantName), \"%20\", \" \") AS ?hostPlantNameX) #remove percent encodings from hostPlant scientific name\n\tBIND (IRI(?hostPlantNameX) AS ?hostPlantNameURI)\n}\nLIMIT 1000",
       "description": "## A list of interactions depicting connections between parasatoids harmful for insects living as parasites on plants.",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1472,35 +1729,57 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
+        "Failed: HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples (examples/emi/); compare with the closest upstream query."
       ],
       "verification": {
-        "date": "2026-11-18T15:18:11+00:00",
+        "date": "2026-11-19T10:07:37+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
-        "httpStatus": 200,
-        "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.3,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "abf8540f9f58a182",
-        "run": 1
-      }
+        "httpStatus": 504,
+        "contentType": "text/html",
+        "outcome": "error",
+        "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "durationSeconds": 60.2,
+        "queryHash": "4b4648165f7fb1ee",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:18:11+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.3,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "abf8540f9f58a182",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples019b": {
-      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX emiBox: <https://purl.org/emi/abox#>\nPREFIX wikibase: <http://wikiba.se/ontology#>\nPREFIX bd: <http://www.bigdata.com/rdf#>\nSELECT DISTINCT ?wd_chem ?structure_inchikey ?parasitoidX_WD ?parasitoidNameURI ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?parasitoidX_WD ?parasitoidNameURI ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI WHERE {\n\t\t\t{\n\t\t\t\tSELECT DISTINCT ?parasitoidName ?parasiteName ?parasiteX_WD ?parasitoidX_WD WHERE {\n\t\t\t\t\t?intxn2 emi:hasSource ?parasitoidX ; #retrieve interaction pairs part-1\n\t\t\t\t\t\temi:hasTarget ?parasitoidX ;\n\t\t\t\t\t\temi:isClassifiedWith ?intxnName2 .\n\t\t\t\t\tFILTER (REGEX(STR(?intxnName2),\"RO_0002208\")) #keep interactions only if the interaction-id is RO_0002208 (parasitoidOf), e.g: 'parasitoidX' is 'parasitoidOf' 'parasiteX'\n\t\t\t\t\t?parasitoidX emi:inTaxon ?parasitoidX_WD ; #retreieve wikidata-ids for parasitoidX\n\t\t\t\t\t\tsosa:isSampleOf ?parasitoidName . #retrieve scientific name of parasitoidX as listed in GloBI\n\t\t\t\t\t?parasiteX emi:inTaxon ?parasiteX_WD ; #retreieve wikidata-ids for parasiteX\n\t\t\t\t\t\tsosa:isSampleOf ?parasiteName . #retreieve scientific name for parasiteX as listed in GloBI\n\t\t\t\t}\n\t\t\t}\n\t\t\t?parasiteX1 emi:inTaxon ?parasiteX_WD . #check pasarsiteX1 is in wikidata-id parasiteX_WD (the ones obtained from interaction-pairs part-1)\n\t\t\t?intxn3 emi:hasSource ?parasiteX1 ; #retrieve interaction pairs part-2\n\t\t\t\temi:hasTarget ?hostPlant ;\n\t\t\t\temi:isClassifiedWith ?intxnName3 .\n\t\t\t?intxnName3 rdfs:label ?intxn3Label .\n\t\t\t?hostPlant emi:inTaxon ?hostPlant_WD ; #retreieve wikidata-ids for hostPlant\n\t\t\t\tsosa:isSampleOf ?hostPlantName . #retreieve scientific name for hostPlant as listed in GloBI\n\t\t\tFILTER (!(?intxn3Label IN (\"visits\", \"visitsFlowersOf\", \"pollinates\"))) #keep interactions only if the interaction-names are not 'visits', 'visitsFlowersOf' or 'pollinates'. e.g.: 'parasiteX1' is 'pathogenOf/parasiteOf/..' 'hostPlant'\n\t\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t\t?hostPlant_WD wdt:P171* wd:Q879246 . #keep the interaction pairs part-2 only if hostPlant_WD has Kingdom Archaeplastida (wd:Q879246) in its lineage, this is to ensure the hostPlant is really a plant\n\t\t\t}\n\t\t\tBIND (REPLACE(STR(?parasiteName), \"%20\", \" \") AS ?parasiteNameX) #remove percent encodings from parasite scientific name\n\t\t\tBIND (IRI(?parasiteNameX) AS ?parasiteNameURI)\n\t\t\tBIND (REPLACE(STR(?parasitoidName), \"%20\", \" \") AS ?parasitoidNameX) #remove percent encodings from parasitoid scientific name\n\t\t\tBIND (IRI(?parasitoidNameX) AS ?parasitoidNameURI)\n\t\t\tBIND (REPLACE(STR(?hostPlantName), \"%20\", \" \") AS ?hostPlantNameX) #remove percent encodings from hostPlant scientific name\n\t\t\tBIND (IRI(?hostPlantNameX) AS ?hostPlantNameURI)\n\t\t\tVALUES ?hostPlant_WD { wd:Q25408 } #filter on the host plant Achillea millefolium wikidata-id\n\t\t}\n\t\tLIMIT 1000\n\t}\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> { #get metabolites and their inchikey from lotus (integrated in wikidata)\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\twdt:P703 ?parasitoidX_WD .\n\t\t}\n\t}\n}\n",
+      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX emiBox: <https://purl.org/emi/abox#>\nPREFIX wikibase: <http://wikiba.se/ontology#>\nPREFIX bd: <http://www.bigdata.com/rdf#>\nSELECT DISTINCT ?wd_chem ?structure_inchikey ?parasitoidX_WD ?parasitoidNameURI ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?parasitoidX_WD ?parasitoidNameURI ?parasiteX_WD ?parasiteNameURI ?intxn3Label ?hostPlant_WD ?hostPlantNameURI WHERE {\n\t\t\t{\n\t\t\t\tSELECT DISTINCT ?parasitoidName ?parasiteName ?parasiteX_WD ?parasitoidX_WD WHERE {\n\t\t\t\t\t?intxn2 emi:hasSource ?parasitoidX ; #retrieve interaction pairs part-1\n\t\t\t\t\t\temi:hasTarget ?parasitoidX ;\n\t\t\t\t\t\temi:isClassifiedWith ?intxnName2 .\n\t\t\t\t\tFILTER (REGEX(STR(?intxnName2),\"RO_0002208\")) #keep interactions only if the interaction-id is RO_0002208 (parasitoidOf), e.g: 'parasitoidX' is 'parasitoidOf' 'parasiteX'\n\t\t\t\t\t?parasitoidX emi:inTaxon ?parasitoidX_WD ; #retreieve wikidata-ids for parasitoidX\n\t\t\t\t\t\tsosa:isSampleOf ?parasitoidName . #retrieve scientific name of parasitoidX as listed in GloBI\n\t\t\t\t\t?parasiteX emi:inTaxon ?parasiteX_WD ; #retreieve wikidata-ids for parasiteX\n\t\t\t\t\t\tsosa:isSampleOf ?parasiteName . #retreieve scientific name for parasiteX as listed in GloBI\n\t\t\t\t}\n\t\t\t}\n\t\t\t?parasiteX1 emi:inTaxon ?parasiteX_WD . #check pasarsiteX1 is in wikidata-id parasiteX_WD (the ones obtained from interaction-pairs part-1)\n\t\t\t?intxn3 emi:hasSource ?parasiteX1 ; #retrieve interaction pairs part-2\n\t\t\t\temi:hasTarget ?hostPlant ;\n\t\t\t\temi:isClassifiedWith ?intxnName3 .\n\t\t\t?intxnName3 rdfs:label ?intxn3Label .\n\t\t\t?hostPlant emi:inTaxon ?hostPlant_WD ; #retreieve wikidata-ids for hostPlant\n\t\t\t\tsosa:isSampleOf ?hostPlantName . #retreieve scientific name for hostPlant as listed in GloBI\n\t\t\tFILTER (!(?intxn3Label IN (\"visits\", \"visitsFlowersOf\", \"pollinates\"))) #keep interactions only if the interaction-names are not 'visits', 'visitsFlowersOf' or 'pollinates'. e.g.: 'parasiteX1' is 'pathogenOf/parasiteOf/..' 'hostPlant'\n\t\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t\t?hostPlant_WD wdt:P171* wd:Q879246 . #keep the interaction pairs part-2 only if hostPlant_WD has Kingdom Archaeplastida (wd:Q879246) in its lineage, this is to ensure the hostPlant is really a plant\n\t\t\t}\n\t\t\tBIND (REPLACE(STR(?parasiteName), \"%20\", \" \") AS ?parasiteNameX) #remove percent encodings from parasite scientific name\n\t\t\tBIND (IRI(?parasiteNameX) AS ?parasiteNameURI)\n\t\t\tBIND (REPLACE(STR(?parasitoidName), \"%20\", \" \") AS ?parasitoidNameX) #remove percent encodings from parasitoid scientific name\n\t\t\tBIND (IRI(?parasitoidNameX) AS ?parasitoidNameURI)\n\t\t\tBIND (REPLACE(STR(?hostPlantName), \"%20\", \" \") AS ?hostPlantNameX) #remove percent encodings from hostPlant scientific name\n\t\t\tBIND (IRI(?hostPlantNameX) AS ?hostPlantNameURI)\n\t\t\tVALUES ?hostPlant_WD { wd:Q25408 } #filter on the host plant Achillea millefolium wikidata-id\n\t\t}\n\t\tLIMIT 1000\n\t}\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> { #get metabolites and their inchikey from lotus (integrated in wikidata)\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\twdt:P703 ?parasitoidX_WD .\n\t\t}\n\t}\n}\n",
       "description": "## A list of chemicals produced by parasatoids harmful for insects living as parasites on livestock feed plant Achillea millefolium (wd:Q25408) Archaeplastida: Q879246).",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1526,35 +1805,58 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
         "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples (examples/emi/); compare with the closest upstream query."
       ],
       "verification": {
-        "date": "2026-11-18T15:22:44+00:00",
+        "date": "2026-11-19T10:11:37+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.3,
         "resultCount": 0,
+        "responseBytes": 194,
         "outcome": "empty",
-        "queryHash": "b307563ba042de25",
-        "run": 1
-      }
+        "durationSeconds": 33.2,
+        "queryHash": "b96bbb855cfe198d",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:22:44+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.3,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "b307563ba042de25",
+          "run": 1
+        }
+      ]
     },
     "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/009": {
-      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT ?extract ?organe ?species_name ?genus_name ?family_name ?count_of_selected_class\nWHERE {\n    ?material sosa:hasSample ?extract ;\n        sosa:isSampleOf ?organe .\n    ?organe emi:inTaxon ?wd_sp .\n    #OPTIONAL {\n        SERVICE <https://query.wikidata.org/sparql> {\n            ?wd_sp wdt:P225 ?species_name .\n            ?family wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q35409 ;\n                wdt:P225 ?family_name ;\n                ^wdt:P171* ?wd_sp .\n            ?genus wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q34740 ;\n                wdt:P225 ?genus_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n    #}\n    {\n        SELECT ?extract (COUNT(DISTINCT ?feature) AS ?count_of_selected_class)\n        WHERE {\n            ?extract a emi:ExtractSample ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?lcms a emi:LCMSAnalysis ;\n                emi:hasLCMSFeatureSet ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            ?feature emi:hasAnnotation ?canopus .\n            ?canopus a emi:ChemicalTaxonAnnotation ;\n                emi:hasClass ?np_class ;\n                emi:hasClassProbability ?class_prob .\n            ?np_class rdfs:label \"Aspidosperma type\" .\n            FILTER((?class_prob > 0.5)) .\n        } GROUP BY ?extract ORDER BY DESC(?count_of_selected_class)\n    }\n}",
+      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT ?extract ?organe ?species_name ?genus_name ?family_name ?count_of_selected_class\nWHERE {\n    ?material sosa:hasSample ?extract ;\n        sosa:isSampleOf ?organe .\n    ?organe emi:inTaxon ?wd_sp .\n    #OPTIONAL {\n        SERVICE <https://query.wikidata.org/sparql> {\n            ?wd_sp wdt:P225 ?species_name .\n            ?family wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q35409 ;\n                wdt:P225 ?family_name ;\n                ^wdt:P171* ?wd_sp .\n            ?genus wdt:P31 wd:Q16521 ;\n                wdt:P105 wd:Q34740 ;\n                wdt:P225 ?genus_name ;\n                ^wdt:P171* ?wd_sp .\n        }\n    #}\n    {\n        SELECT ?extract (COUNT(DISTINCT ?feature) AS ?count_of_selected_class)\n        WHERE {\n            ?extract a emi:ExtractSample ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?lcms a emi:LCMSAnalysis ;\n                emi:hasLCMSFeatureSet ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            ?feature emi:hasAnnotation ?canopus .\n            ?canopus a emi:ChemicalTaxonAnnotation ;\n                emi:hasClass ?np_class ;\n                emi:hasClassProbability ?class_prob .\n            ?np_class rdfs:label \"Aspidosperma type\" .\n            FILTER((?class_prob > 0.5)) .\n        } GROUP BY ?extract ORDER BY DESC(?count_of_selected_class)\n    }\n}",
       "description": "Which samples have features annotated as Aspidosperma_type alkaloids by CANOPUS with a probability score above 0.5, ordered by the decreasing count of features?",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://query.wikidata.org/sparql"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "target",
@@ -1567,35 +1869,55 @@
           "from": "https://biosoda.unil.ch/emi/sparql",
           "to": "https://qlever.earthmetabolome.org/api/metrin-kg",
           "reason": "BioSODA federation proxy is deprecated: the URL now 301-redirects to an HTML page (https://biosoda.unil.ch/pdn-agent). Upstream sparql-examples@45e5b53 lists the EMI endpoint as https://kg.earthmetabolome.org/metrin/api/, which 302-redirects to this URL; the direct URL is used because 302 redirects drop POST bodies in most SPARQL clients."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:27:18+00:00",
+        "date": "2026-11-19T10:13:11+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.3,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "0ce17371966e5ebd",
-        "run": 1
-      }
+        "resultCount": 1,
+        "responseBytes": 571,
+        "outcome": "ok",
+        "durationSeconds": 6.4,
+        "queryHash": "b3be5471d8771da6",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:27:18+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.3,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "0ce17371966e5ebd",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples013": {
-      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX qudt: <https://qudt.org/2.1/schema/qudt#>\nPREFIX npc: <https://purl.org/npc#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nSELECT DISTINCT ?source_wdx ?sourceNameURI ?tryDataLab ?tryDataVal ?unit ?unitComment WHERE {\n\t{\n\t\tSELECT DISTINCT ?source_wdx WHERE { #retrieve metabolite data\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?source_wdx . #filter metabolite data which is found in wikidata-ids wdx\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik ;\n\t\t\t\temi:hasClass ?npcClass .\n\t\t\t?npcClass skos:broader ?npcSuperClass .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t\tFILTER (REGEX(STR(?npcSuperClass),\"DITERPENOIDS\"))\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\t((wdt:P31 | wdt:P279)/(wdt:P279*)) wd:Q47006367 ; #check if the class/superclass of the chemical is Diterpenoids\n\t\t\t\twdt:P703 ?source_wdx .\n\t\t}\n\t}\n\t?trySpName emi:inTaxon ?wdx .\n\t?trySpObs sosa:isSampleOf ?trySpName ; #retrieve trait/non-trait data for trySpName (scientific name of plant species as listed in trydb)\n\t\tsosa:isFeatureOfInterestOf ?tryObId .\n\t?trySpName emi:inTaxon ?source_wdx . #retrieve wikidata-ids wdx for trySpName\n\t?tryObId sosa:hasResult ?tryData .\n\t?tryData rdfs:label ?tryDataLab ;\n\t\trdf:type emi:Trait ; #retrieve data which is labelled as \"Trait\"\n\t\trdf:value ?tryDataVal ; #retrieve values for Trait data\n\t\tqudt:hasUnit ?unit ; #retrieve units for trait data\n\t\trdfs:comment ?unitComment . #retrieve original units for Trait data as listed in trydb\n\tBIND (REPLACE(STR(?trySpName), \"%20\", \" \") AS ?sourceNameX) #remove percent-encoding for scientific names of trySpName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n}",
+      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX qudt: <https://qudt.org/schema/qudt/>\nPREFIX npc: <https://purl.org/npc#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nSELECT DISTINCT ?source_wdx ?sourceNameURI ?tryDataLab ?tryDataVal ?unit ?unitComment WHERE {\n\t{\n\t\tSELECT DISTINCT ?source_wdx WHERE { #retrieve metabolite data\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?source_wdx . #filter metabolite data which is found in wikidata-ids wdx\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik ;\n\t\t\t\temi:hasClass ?npcClass .\n\t\t\t?npcClass skos:broader ?npcSuperClass .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t\tFILTER (REGEX(STR(?npcSuperClass),\"DITERPENOIDS\"))\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\t((wdt:P31 | wdt:P279)/(wdt:P279*)) wd:Q47006367 ; #check if the class/superclass of the chemical is Diterpenoids\n\t\t\t\twdt:P703 ?source_wdx .\n\t\t}\n\t}\n\t?trySpName emi:inTaxon ?wdx .\n\t?trySpObs sosa:isSampleOf ?trySpName ; #retrieve trait/non-trait data for trySpName (scientific name of plant species as listed in trydb)\n\t\tsosa:isFeatureOfInterestOf ?tryObId .\n\t?trySpName emi:inTaxon ?source_wdx . #retrieve wikidata-ids wdx for trySpName\n\t?tryObId sosa:hasResult ?tryData .\n\t?tryData rdfs:label ?tryDataLab ;\n\t\trdf:type emi:Trait ; #retrieve data which is labelled as \"Trait\"\n\t\trdf:value ?tryDataVal ; #retrieve values for Trait data\n\t\tqudt:hasUnit ?unit ; #retrieve units for trait data\n\t\trdfs:comment ?unitComment . #retrieve original units for Trait data as listed in trydb\n\tBIND (REPLACE(STR(?trySpName), \"%20\", \" \") AS ?sourceNameX) #remove percent-encoding for scientific names of trySpName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n}",
       "description": "## List traits (and their values) of plants producing Diterpenoids",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1621,35 +1943,76 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "qudt",
+          "from": "https://qudt.org/2.1/schema/qudt#",
+          "to": "https://qudt.org/schema/qudt/",
+          "occurrences": 1,
+          "reason": "Namespace used for qudt:hasUnit in the corresponding upstream EMI queries (sparql-examples@45e5b53 examples/emi/012.ttl and 014.ttl)."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:28:19+00:00",
+        "date": "2026-11-19T10:25:11+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 1.4,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "cdea87df60744534",
-        "run": 1
-      }
+        "resultCount": 135388,
+        "responseBytes": 79983712,
+        "outcome": "ok",
+        "durationSeconds": 16.0,
+        "queryHash": "3e8cc50354fe1efb",
+        "run": 4
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:28:19+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 1.4,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "cdea87df60744534",
+          "run": 1
+        },
+        {
+          "date": "2026-11-19T10:14:17+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "too-large",
+          "responseBytes": 22020096,
+          "error": "Response larger than 20971520 bytes; stopped reading",
+          "durationSeconds": 14.1,
+          "queryHash": "3e8cc50354fe1efb",
+          "run": 3
+        }
+      ]
     },
     "https://purl.org/emi#examples015": {
-      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?intxnLabel ?targetWD ?targetNameURI ?ik ?wd_chem WHERE {\n\t{\n\t\tSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?intxnLabel ?targetWD ?targetName WHERE {\n\t\t\t?intxn emi:hasSource ?source ; #retrieve interaction-pairs\n\t\t\t\temi:hasTarget ?target ;\n\t\t\t\temi:isClassifiedWith ?intxnName .\n\t\t\t?target emi:inTaxon ?targetWD ; #retrieve wikidata-id for target plant \n\t\t\t\tsosa:isSampleOf ?targetName .\n\t\t\t?source emi:inTaxon ?sourceWD ; #retrieve wikidata-id for source parasite\n\t\t\t\tsosa:isSampleOf ?sourceName .\n\t\t\t?intxnName rdfs:label ?intxnLabel\n\t\t\tVALUES ?sourceWD { wd:Q7102162 } #retain results only if the source-WD matches the wikidata-id of Orgyia postica\n\t\t}\n\t}\n\t{\n\t\tSELECT DISTINCT ?targetWD ?ik ?wd_chem WHERE {\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?targetWD . #filter metabolite data which is found in wikidata-ids targetWD\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?targetWD .\n\t\t}\n\t}\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from the sourceName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX) #remove percent encodings from the targetName\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}",
+      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?intxnLabel ?targetWD ?targetNameURI ?ik ?wd_chem WHERE {\n\t{\n\t\tSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?intxnLabel ?targetWD ?targetName WHERE {\n\t\t\t?intxn emi:hasSource ?source ; #retrieve interaction-pairs\n\t\t\t\temi:hasTarget ?target ;\n\t\t\t\temi:isClassifiedWith ?intxnName .\n\t\t\t?target emi:inTaxon ?targetWD ; #retrieve wikidata-id for target plant \n\t\t\t\tsosa:isSampleOf ?targetName .\n\t\t\t?source emi:inTaxon ?sourceWD ; #retrieve wikidata-id for source parasite\n\t\t\t\tsosa:isSampleOf ?sourceName .\n\t\t\t?intxnName rdfs:label ?intxnLabel\n\t\t\tVALUES ?sourceWD { wd:Q7102162 } #retain results only if the source-WD matches the wikidata-id of Orgyia postica\n\t\t}\n\t}\n\t{\n\t\tSELECT DISTINCT ?targetWD ?ik ?wd_chem WHERE {\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?targetWD . #filter metabolite data which is found in wikidata-ids targetWD\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?targetWD .\n\t\t}\n\t}\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from the sourceName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX) #remove percent encodings from the targetName\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}",
       "description": "## List metabolites of plants that interact with plant parasite moth Orgyia postica (wd:Q7102162) .",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1675,35 +2038,68 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:29:20+00:00",
+        "date": "2026-11-19T10:26:27+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.4,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "530705ba78735449",
-        "run": 1
-      }
+        "resultCount": 44894,
+        "responseBytes": 30337988,
+        "outcome": "ok",
+        "durationSeconds": 32.2,
+        "queryHash": "7269c6d817a9f4ca",
+        "run": 4
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:29:20+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.4,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "530705ba78735449",
+          "run": 1
+        },
+        {
+          "date": "2026-11-19T10:15:31+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "too-large",
+          "responseBytes": 22020096,
+          "error": "Response larger than 20971520 bytes; stopped reading",
+          "durationSeconds": 32.3,
+          "queryHash": "7269c6d817a9f4ca",
+          "run": 3
+        }
+      ]
     },
     "https://purl.org/emi#examples018": {
-      "query": "\n\t\tPREFIX wd: <http://www.wikidata.org/entity/>PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?wd_chem WHERE { #retrieve metabolite data for sourceWD\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?sourceWD .\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidats-ids for metabolites\n\t\t\tVALUES ?wd_chem { wd:Q100138042 } #filter on wikidata-id of asimicin\n\t\t}\n\t}\n\tUNION #union with results from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?sourceWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName .\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve wikidata-id of the interaction-source\n\t\tsosa:isSampleOf ?sourceName . #retrieve its scientific name as listed in GloBI\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve wikidata-id of the interaction-target\n\t\tsosa:isSampleOf ?targetName . #retrieve its scientific names as listed in GloBI\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from source and target names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}\nLIMIT 1000",
+      "query": "\n\t\tPREFIX wd: <http://www.wikidata.org/entity/>PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?wd_chem WHERE { #retrieve metabolite data for sourceWD\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?sourceWD .\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidats-ids for metabolites\n\t\t\tVALUES ?wd_chem { wd:Q100138042 } #filter on wikidata-id of asimicin\n\t\t}\n\t}\n\tUNION #union with results from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?sourceWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName .\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve wikidata-id of the interaction-source\n\t\tsosa:isSampleOf ?sourceName . #retrieve its scientific name as listed in GloBI\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve wikidata-id of the interaction-target\n\t\tsosa:isSampleOf ?targetName . #retrieve its scientific names as listed in GloBI\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from source and target names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}\nLIMIT 1000",
       "description": "## List possible interactions of plants that can produce asimcin (wd:Q100138042), a cytotoxin.",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1729,35 +2125,57 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
+        "Failed: HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples (examples/emi/); compare with the closest upstream query."
       ],
       "verification": {
-        "date": "2026-11-18T15:30:21+00:00",
+        "date": "2026-11-19T10:17:04+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
-        "httpStatus": 200,
-        "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.4,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "1236e166aa57c397",
-        "run": 1
-      }
+        "httpStatus": 504,
+        "contentType": "text/html",
+        "outcome": "error",
+        "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+        "durationSeconds": 60.2,
+        "queryHash": "d4a0ab68b98e1baa",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:30:21+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.4,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "1236e166aa57c397",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples012": {
-      "query": "PREFIX emi: <https://purl.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT DISTINCT ?structure_inchikey ?wd_chem ?source_wdx ?sourceNameURI WHERE {\n\t?trySpObs sosa:isSampleOf ?trySpName ; #retrieve trait/non-trait data for trySpName (scientific name of plant species as listed in trydb)\n\t\t sosa:isFeatureOfInterestOf ?tryObId .\n\t?tryObId sosa:hasResult ?tryData .\n\t?trySpName emi:inTaxon ?source_wdx . #retrieve wikidata-ids wdx for trySpName\n\t?tryData rdfs:label ?tryDataLab ;\n\t\t rdf:type emi:Trait ; #retrieve data which is labelled as \"Trait\"\n\t\t rdf:value ?tryDataVal . #retrieve values for Trait data\n\tFILTER (?tryDataLab = \"Seed dry mass\") #filter on data label 'Seed dry mass'\n\tFILTER (?tryDataVal >= 626) #filter on data value >= 626\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?source_wdx wdt:P141 wd:Q719675 . #filter wikidata-ids for trySpName, which have IUCN status (wdt:P141) as near threatened (wd:Q719675)\n\t}\n\tBIND (REPLACE(STR(?trySpName), \"%20\", \" \") AS ?sourceNameX) #remove percent-encoding for scientific names of trySpName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\t{\n\t\tSELECT ?source_wdx ?structure_inchikey ?wd_chem WHERE { #retrieve metabolite data\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?source_wdx . #filter metabolite data which is found in wikidata-ids wdx \n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?structure_inchikey .\n\t\t\t?structure_inchikey emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\twdt:P703 ?source_wdx .\n\t\t}\n\t}\n} LIMIT 1000",
+      "query": "PREFIX emi: <https://w3id.org/emi#>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT DISTINCT ?structure_inchikey ?wd_chem ?source_wdx ?sourceNameURI WHERE {\n\t?trySpObs sosa:isSampleOf ?trySpName ; #retrieve trait/non-trait data for trySpName (scientific name of plant species as listed in trydb)\n\t\t sosa:isFeatureOfInterestOf ?tryObId .\n\t?tryObId sosa:hasResult ?tryData .\n\t?trySpName emi:inTaxon ?source_wdx . #retrieve wikidata-ids wdx for trySpName\n\t?tryData rdfs:label ?tryDataLab ;\n\t\t rdf:type emi:Trait ; #retrieve data which is labelled as \"Trait\"\n\t\t rdf:value ?tryDataVal . #retrieve values for Trait data\n\tFILTER (?tryDataLab = \"Seed dry mass\") #filter on data label 'Seed dry mass'\n\tFILTER (?tryDataVal >= 626) #filter on data value >= 626\n\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t?source_wdx wdt:P141 wd:Q719675 . #filter wikidata-ids for trySpName, which have IUCN status (wdt:P141) as near threatened (wd:Q719675)\n\t}\n\tBIND (REPLACE(STR(?trySpName), \"%20\", \" \") AS ?sourceNameX) #remove percent-encoding for scientific names of trySpName\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\t{\n\t\tSELECT ?source_wdx ?structure_inchikey ?wd_chem WHERE { #retrieve metabolite data\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?source_wdx . #filter metabolite data which is found in wikidata-ids wdx \n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?structure_inchikey .\n\t\t\t?structure_inchikey emi:isInChIKeyOf ?wd_chem . #retrieve wikidata-ids for metabolites\n\t\t}\n\t}\n\tUNION #union with data from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?structure_inchikey ;\n\t\t\t\twdt:P703 ?source_wdx .\n\t\t}\n\t}\n} LIMIT 1000",
       "description": "List all metabolites produced by species with near threatened (wd:Q719675) IUCN status (wdt:P141) and with values available (or greater than a specific value) for trait 'Seed dry mass'.",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1783,35 +2201,58 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
         "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples (examples/emi/); compare with the closest upstream query."
       ],
       "verification": {
-        "date": "2026-11-18T15:31:21+00:00",
+        "date": "2026-11-19T10:21:04+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.2,
         "resultCount": 0,
+        "responseBytes": 105,
         "outcome": "empty",
-        "queryHash": "da31de3aca49e5d8",
-        "run": 1
-      }
+        "durationSeconds": 28.4,
+        "queryHash": "39794cee0728e483",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:31:21+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.2,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "da31de3aca49e5d8",
+          "run": 1
+        }
+      ]
     },
     "https://purl.org/emi#examples021": {
-      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI ?loc WHERE {\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName ;\n\t\tprov:atLocation ?loc . #retrieve location of interactions\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve interaction-source and its scientific name as listed in GloBI\n\t\tsosa:isSampleOf ?sourceName .\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve interaction-target and its scientific name as listed in GloBI\n\t\tsosa:isSampleOf ?targetName .\n\t{\n\t\tSELECT DISTINCT ?targetWD ?wd_chem WHERE { #retrieve metabolites\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?targetWD . #filter by target wikidata-id\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem .\n\t\t\tVALUES ?wd_chem { wd:Q27107580 } #filter on the wikidata-id of Onpordopicrin\n\t\t}\n\t}\n\tUNION #union with the lotus metabolite data from wikidata\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?targetWD .\n\t\t\tVALUES ?wd_chem { wd:Q27107580 }\n\t\t}\n\t}\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings of source and target scientific names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}",
+      "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI ?loc WHERE {\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName ;\n\t\tprov:atLocation ?loc . #retrieve location of interactions\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve interaction-source and its scientific name as listed in GloBI\n\t\tsosa:isSampleOf ?sourceName .\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve interaction-target and its scientific name as listed in GloBI\n\t\tsosa:isSampleOf ?targetName .\n\t{\n\t\tSELECT DISTINCT ?targetWD ?wd_chem WHERE { #retrieve metabolites\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?targetWD . #filter by target wikidata-id\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem .\n\t\t\tVALUES ?wd_chem { wd:Q27107580 } #filter on the wikidata-id of Onpordopicrin\n\t\t}\n\t}\n\tUNION #union with the lotus metabolite data from wikidata\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?targetWD .\n\t\t\tVALUES ?wd_chem { wd:Q27107580 }\n\t\t}\n\t}\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings of source and target scientific names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}",
       "description": "Natural producers (and their interactions that might be useful in agriculture) of Onpordopicrin (wd:Q27107580), which might exhibit antimicrobial and cytotoxic activities, especially against human-derived macrophages and against epidermoid carcinoma cells. There is limited scientific evidence to support these claims (https://www.sciencedirect.com/science/article/abs/pii/S138614251500685X).",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "query",
@@ -1837,35 +2278,55 @@
           "from": "https://qlever.cs.uni-freiburg.de/api/wikidata",
           "to": "https://qlever.dev/api/wikidata",
           "reason": "QLever's public Wikidata endpoint moved: the old URL answers 308 Permanent Redirect to this URL. Upstream sparql-examples made the same change (2025-10-28, 'update qlever public endpoint URL')."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:32:21+00:00",
+        "date": "2026-11-19T10:22:32+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.5,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "61fa77282e225a40",
-        "run": 1
-      }
+        "resultCount": 386,
+        "responseBytes": 215895,
+        "outcome": "ok",
+        "durationSeconds": 8.6,
+        "queryHash": "1843309933b08f4d",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:32:21+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.5,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "61fa77282e225a40",
+          "run": 1
+        }
+      ]
     },
     "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/007": {
-      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT DISTINCT ?ik ?wd_id ?taxon ?taxon_name\nWHERE { \n    {SELECT  ?ik ?wd_id\n        WHERE {\n            ?sample a emi:ExtractSample ;\n                sosa:isSampleOf* ?organe ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?organe emi:inTaxon ?taxon .\n            ?taxon rdfs:label \"melochia umbellata\" .\n            ?lcms a emi:LCMSAnalysisPos ;\n                sosa:hasResult ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            {\n                ?feature emi:hasAnnotation ?annotation .\n                ?annotation a emi:StructuralAnnotation ;\n                    prov:wasGeneratedBy ?activity .\n                ?activity prov:wasAssociatedWith <https://bio.informatik.uni-jena.de/software/sirius> .\n                ?annotation emi:hasCosmicScore ?cosmic ;\n                    emi:hasZodiacScore ?zodiac .\n                FILTER((?cosmic > 0.5) && (?zodiac > 0.8))\n            } UNION {\n                ?feature emi:hasAnnotation ?annotation .\n                ?annotation emi:hasTaxoScore ?taxo .\n                FILTER(?taxo >= 6)\n            }\n            ?annotation emi:hasChemicalStructure ?ik2d .\n            ?ik2d emi:hasSMILES ?smiles ;\n                emi:isInChIKey2DOf ?ik .\n            ?ik emi:isInChIKeyOf ?wd_id .\n        } LIMIT 50\n    }\n  SERVICE <https://query.wikidata.org/sparql> {\n        ?wd_id wdt:P31 wd:Q113145171 ;\n            wdt:P703 ?taxon .\n        ?taxon wdt:P225 ?taxon_name .\n    }\n}",
+      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT DISTINCT ?ik ?wd_id ?taxon ?taxon_name\nWHERE { \n    {SELECT  ?ik ?wd_id\n        WHERE {\n            ?sample a emi:ExtractSample ;\n                sosa:isSampleOf* ?organe ;\n                sosa:isFeatureOfInterestOf ?lcms .\n            ?organe emi:inTaxon ?taxon .\n            ?taxon rdfs:label \"melochia umbellata\" .\n            ?lcms a emi:LCMSAnalysisPos ;\n                sosa:hasResult ?feature_list .\n            ?feature_list emi:hasLCMSFeature ?feature .\n            {\n                ?feature emi:hasAnnotation ?annotation .\n                ?annotation a emi:StructuralAnnotation ;\n                    prov:wasGeneratedBy ?activity .\n                ?activity prov:wasAssociatedWith <https://bio.informatik.uni-jena.de/software/sirius> .\n                ?annotation emi:hasCosmicScore ?cosmic ;\n                    emi:hasZodiacScore ?zodiac .\n                FILTER((?cosmic > 0.5) && (?zodiac > 0.8))\n            } UNION {\n                ?feature emi:hasAnnotation ?annotation .\n                ?annotation emi:hasTaxoScore ?taxo .\n                FILTER(?taxo >= 6)\n            }\n            ?annotation emi:hasChemicalStructure ?ik2d .\n            ?ik2d emi:hasSMILES ?smiles ;\n                emi:isInChIKey2DOf ?ik .\n            ?ik emi:isInChIKeyOf ?wd_id .\n        } LIMIT 50\n    }\n  SERVICE <https://query.wikidata.org/sparql> {\n        ?wd_id wdt:P31 wd:Q113145171 ;\n            wdt:P703 ?taxon .\n        ?taxon wdt:P225 ?taxon_name .\n    }\n}",
       "description": "Show chemical structures in Melochia umbellata extracts with structural annotations where the cosmic score is greater than 0.5 and the zodiac score is less than 0.8. For ISDB annotations, consider taxon scores greater than or equal to 6",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://query.wikidata.org/sparql"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "target",
@@ -1878,35 +2339,55 @@
           "from": "https://biosoda.unil.ch/emi/sparql",
           "to": "https://qlever.earthmetabolome.org/api/metrin-kg",
           "reason": "BioSODA federation proxy is deprecated: the URL now 301-redirects to an HTML page (https://biosoda.unil.ch/pdn-agent). Upstream sparql-examples@45e5b53 lists the EMI endpoint as https://kg.earthmetabolome.org/metrin/api/, which 302-redirects to this URL; the direct URL is used because 302 redirects drop POST bodies in most SPARQL clients."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:33:22+00:00",
+        "date": "2026-11-19T10:23:41+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 1.2,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "dfff1d8531a1d284",
-        "run": 1
-      }
+        "resultCount": 106,
+        "responseBytes": 31361,
+        "outcome": "ok",
+        "durationSeconds": 3.8,
+        "queryHash": "2313e0473edbf04d",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:33:22+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 1.2,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "dfff1d8531a1d284",
+          "run": 1
+        }
+      ]
     },
     "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/002": {
-      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sachem: <http://bioinfo.uochb.cas.cz/rdf/v1.0/sachem#>\nPREFIX emi: <https://purl.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT DISTINCT ?ik2d ?smiles\nWHERE {\n    ?extract a emi:ExtractSample ;\n        sosa:isSampleOf* ?organe .\n    ?organe emi:inTaxon ?taxon .\n    ?taxon rdfs:label \"tabernaemontana coffeoides\" .\n    ?extract sosa:isFeatureOfInterestOf ?lcms .\n    ?lcms sosa:hasResult ?feature_list .\n    ?feature_list emi:hasLCMSFeature ?feature .\n    ?feature emi:hasAnnotation ?annotation .\n    ?annotation emi:hasChemicalStructure ?ik2d .\n    ?ik2d a emi:InChIKey2D ;\n        emi:hasSMILES ?smiles ;\n        emi:isInChIKey2DOf ?ik .\n    ?ik emi:isInChIKeyOf ?wd_id .\n    SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/wikidata> {\n        SELECT * WHERE {\n            ?wd_id sachem:substructureSearch [\n                sachem:query \"CCC12CCCN3C1C4(CC3)C(CC2)NC5=CC=CC=C45\" # Aspidospermidine scaffold\n            ] .\n        }\n    }\n}",
+      "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX sachem: <http://bioinfo.uochb.cas.cz/rdf/v1.0/sachem#>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\n\nSELECT DISTINCT ?ik2d ?smiles\nWHERE {\n    ?extract a emi:ExtractSample ;\n        sosa:isSampleOf* ?organe .\n    ?organe emi:inTaxon ?taxon .\n    ?taxon rdfs:label \"tabernaemontana coffeoides\" .\n    ?extract sosa:isFeatureOfInterestOf ?lcms .\n    ?lcms sosa:hasResult ?feature_list .\n    ?feature_list emi:hasLCMSFeature ?feature .\n    ?feature emi:hasAnnotation ?annotation .\n    ?annotation emi:hasChemicalStructure ?ik2d .\n    ?ik2d a emi:InChIKey2D ;\n        emi:hasSMILES ?smiles ;\n        emi:isInChIKey2DOf ?ik .\n    ?ik emi:isInChIKeyOf ?wd_id .\n    SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/wikidata> {\n        SELECT * WHERE {\n            ?wd_id sachem:substructureSearch [\n                sachem:query \"CCC12CCCN3C1C4(CC3)C(CC2)NC5=CC=CC=C45\" # Aspidospermidine scaffold\n            ] .\n        }\n    }\n}",
       "description": "Among the structural annotations from Tabernaemontana coffeoides (Apocynaceae) seeds extract, which ones contain an aspidospermidine substructure?",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://idsm.elixir-czech.cz/sparql/endpoint/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "endpoint-and-prefix-updated",
       "changes": [
         {
           "field": "target",
@@ -1919,25 +2400,45 @@
           "from": "https://biosoda.unil.ch/emi/sparql",
           "to": "https://qlever.earthmetabolome.org/api/metrin-kg",
           "reason": "BioSODA federation proxy is deprecated: the URL now 301-redirects to an HTML page (https://biosoda.unil.ch/pdn-agent). Upstream sparql-examples@45e5b53 lists the EMI endpoint as https://kg.earthmetabolome.org/metrin/api/, which 302-redirects to this URL; the direct URL is used because 302 redirects drop POST bodies in most SPARQL clients."
+        },
+        {
+          "field": "queryPrefix",
+          "prefix": "emi",
+          "from": "https://purl.org/emi#",
+          "to": "https://w3id.org/emi#",
+          "occurrences": 1,
+          "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected.",
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to <https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; compare with upstream sparql-examples examples/emi/)."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T10:24:45+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.4,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "2a1b082aeffaf851",
-        "run": 1
-      }
+        "resultCount": 14,
+        "responseBytes": 2653,
+        "outcome": "ok",
+        "durationSeconds": 2.5,
+        "queryHash": "f971fe0ff49055bd",
+        "run": 3
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:34:23+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.4,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "2a1b082aeffaf851",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/116_biosodafrontend_rabit_mouse_orthologs": {
       "query": "PREFIX lscr: <http://purl.org/lscr#>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT DISTINCT ?PROTEIN_1 ?PROTEIN_2 ?UNIPROT_XREF_1 ?UNIPROT_XREF_2 WHERE {\n\t?taxon_1 up:commonName 'Mouse' .\n\t?taxon_2 up:commonName 'Rabbit' .\n\tSERVICE <https://sparql.omabrowser.org/sparql/> {\n\t\t?cluster a orth:OrthologsCluster .\n\t\t?cluster orth:hasHomologousMember ?node1 .\n\t\t?cluster orth:hasHomologousMember ?node2 .\n\t\t?node2 orth:hasHomologousMember* ?PROTEIN_2 .\n\t\t?node1 orth:hasHomologousMember* ?PROTEIN_1 .\n\t\t?PROTEIN_1 a orth:Protein .\n\t\t?PROTEIN_1 orth:organism/obo:RO_0002162 ?taxon_1 ;\n\t\t\trdfs:label 'HBB-Y' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF_1 .\n\t\t?PROTEIN_2 a orth:Protein .\n\t\t?PROTEIN_2 orth:organism/obo:RO_0002162 ?taxon_2 .\n\t\t?PROTEIN_2 lscr:xrefUniprot ?UNIPROT_XREF_2 .\n\t\tFILTER ( ?node1 != ?node2 )\n\t}\n}",
@@ -1955,17 +2456,20 @@
           "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
         }
       ],
-      "status": "unverified",
-      "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:13:08+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 32,
+        "responseBytes": 17019,
+        "outcome": "ok",
+        "durationSeconds": 0.4,
         "queryHash": "3a91adf1715335ce",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend": {
@@ -2069,17 +2573,21 @@
           "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
         }
       ],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675583\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX obo: <http://purl.obolibrary.org/obo/>\\nPREFIX orth: <http://purl.org/net/orth#>…"
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:14:09+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675583\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX obo: <http://purl.obolibrary.org/obo/>\\nPREFIX orth: <http://purl.org/net/orth#>…",
+        "durationSeconds": 1.0,
         "queryHash": "327135b389a44ef3",
-        "run": 1
+        "run": 2
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/118_biosodafrontend_rat_brain_human_cancer": {
@@ -2099,23 +2607,27 @@
           "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
         }
       ],
-      "status": "unverified",
+      "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Not checked: stopped contacting sparql.uniprot.org after 3 consecutive failures in this run. Re-run `verify` later or check by hand."
+        "Failed: HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675830\\nPREFIX up:<http://purl.uniprot.org/core/>\\nPREFIX taxon:<http://purl.uniprot.org/taxonomy/>\\nPREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#&…"
       ],
       "verification": {
-        "date": "2026-11-18T15:34:23+00:00",
+        "date": "2026-11-19T09:15:10+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
-        "outcome": "not-run",
-        "error": "stopped contacting sparql.uniprot.org after 3 consecutive failures in this run",
+        "method": "GET",
+        "httpStatus": 400,
+        "contentType": "text/html;charset=UTF-8",
+        "outcome": "error",
+        "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675830\\nPREFIX up:<http://purl.uniprot.org/core/>\\nPREFIX taxon:<http://purl.uniprot.org/taxonomy/>\\nPREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#&…",
+        "durationSeconds": 0.9,
         "queryHash": "0daaf369f5943791",
-        "run": 1
+        "run": 2
       }
     }
   },
   "metadata": {
     "catalogueVersion": "2026-11",
-    "generated": "2026-11-18T14:48:42+00:00",
+    "generated": "2026-11-19T10:27:21+00:00",
     "generatedBy": "update_query_catalogue.py build",
     "derivedFrom": {
       "file": "sib-swiss-federated-queries.json",
@@ -2132,9 +2644,9 @@
     "upstream": {
       "repository": "https://github.com/sib-swiss/sparql-examples",
       "commitConsultedForEndpointUrls": "45e5b53a2d59a121221cd66a8596ef868cc58021",
-      "note": "Only endpoint URLs were taken from upstream; query logic was not synced and no newer upstream queries were added."
+      "note": "Only endpoint URLs and changed PREFIX namespaces were taken from upstream; query logic was not synced and no newer upstream queries were added."
     },
-    "policy": "Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE clauses. Query keys are unchanged so results can be joined with earlier experiments.",
+    "policy": "Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE clauses, and PREFIX namespaces that changed together with an endpoint's data (see prefixMap). Query keys are unchanged so results can be joined with earlier experiments.",
     "endpointMap": [
       {
         "from": "https://biosoda.unil.ch/emi/sparql",
@@ -2150,6 +2662,22 @@
         "from": "https://sparql.omabrowser.org/sparql",
         "to": "https://sparql.omabrowser.org/sparql/",
         "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
+      }
+    ],
+    "prefixMap": [
+      {
+        "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+        "prefix": "emi",
+        "from": "https://purl.org/emi#",
+        "to": "https://w3id.org/emi#",
+        "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
+      },
+      {
+        "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+        "prefix": "qudt",
+        "from": "https://qudt.org/2.1/schema/qudt#",
+        "to": "https://qudt.org/schema/qudt/",
+        "reason": "Namespace used for qudt:hasUnit in the corresponding upstream EMI queries (sparql-examples@45e5b53 examples/emi/012.ttl and 014.ttl)."
       }
     ],
     "unavailableEndpoints": [
@@ -2173,7 +2701,7 @@
       },
       {
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
-        "note": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi# instead of https://purl.org/emi# (upstream sparql-examples@45e5b53 examples/emi/ uses the new one). Queries with the old PREFIX return 0 rows."
+        "note": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi# instead of https://purl.org/emi#; the PREFIX is updated in this catalogue (see the prefix changes). Upstream sparql-examples@45e5b53 also reworked and renumbered the EMI examples 011-023 (e.g. names are read with rdfs:label); that rework was not applied here. Its gateway (nginx) ends requests that run longer than 60 s with HTTP 504 (seen on 2026-11-19)."
       }
     ],
     "number_of_queries": 67,
@@ -2201,6 +2729,82 @@
           "This run stopped contacting a host after 3 consecutive failures of any kind. UniProt was stopped after 40 (timeout), 53 (timeout) and 99 (HTTP 400), and SwissLipids after 26, 27 and 34 (responses over 200 MB), so their remaining queries were not checked. The script now only counts timeouts, 5xx and connection errors towards this limit.",
           "The HTTP 400 messages for 46, 99_uniprot_identifiers_org_translation were replaced after the run: the stored text was only the start of an inline logo image from UniProt's HTML error page."
         ]
+      },
+      {
+        "id": 2,
+        "label": "higher limits",
+        "started": "2026-11-19T08:08:07+00:00",
+        "finished": "2026-11-19T09:15:11+00:00",
+        "queriesSelected": 29,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 900.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 2147483648,
+          "recheckOutcomes": [
+            "timeout",
+            "too-large"
+          ],
+          "only": null,
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": [
+          "After the run, HTML entities (&quot;, &lt;, &gt;) in the stored HTTP 400 messages of queries 50, 90_uniprot_affected_by_metabolic_diseases_using_MeSH, 49, 109_uniprot_transporter_in_liver, 117_biosodafrontend_glioblastoma_orthologs_rat, 118_biosodafrontend_rat_brain_human_cancer were decoded; the text is otherwise as received. The script now decodes them itself."
+        ]
+      },
+      {
+        "id": 3,
+        "label": "EMI prefix fix",
+        "started": "2026-11-19T10:00:05+00:00",
+        "finished": "2026-11-19T10:24:47+00:00",
+        "queriesSelected": 14,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 180,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 20971520,
+          "recheckOutcomes": [],
+          "only": null,
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": []
+      },
+      {
+        "id": 4,
+        "label": "EMI higher limits",
+        "started": "2026-11-19T10:25:11+00:00",
+        "finished": "2026-11-19T10:26:59+00:00",
+        "queriesSelected": 2,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 900.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 2147483648,
+          "recheckOutcomes": [
+            "too-large"
+          ],
+          "only": [
+            "emi#examples013",
+            "emi#examples015"
+          ],
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": []
       }
     ]
   }
