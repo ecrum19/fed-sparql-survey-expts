@@ -34,13 +34,13 @@ pip install -r requirements.txt
 | File | What it is |
 |---|---|
 | `sib-swiss-federated-queries.json` | **Original catalogue (frozen).** 67 federated queries from [sib-swiss/sparql-examples](https://github.com/sib-swiss/sparql-examples) at commit `c40a905` (2025-03-17). Used for all experiments run so far. Kept unchanged for transparency. |
-| `sib-swiss-federated-queries.updated-2026-11.json` | **Updated catalogue for future studies.** Same 67 queries with the same keys, but with minimal endpoint fixes. The BioSODA proxy is deprecated, so EMI queries now target the EarthMetabolome QLever endpoint. QLever Wikidata moved to `qlever.dev`. OMA uses its canonical `/sparql/` URL. Query logic is unchanged and no newer upstream queries were added. |
+| `sib-swiss-federated-queries.updated-2026-11.json` | **Updated catalogue for future studies.** Same 67 queries with the same keys, but with minimal endpoint fixes. The BioSODA proxy is deprecated, so EMI queries now target the EarthMetabolome QLever endpoint. QLever Wikidata moved to `qlever.dev`. OMA uses its canonical `/sparql/` URL. The EMI queries also get the `PREFIX` namespaces the new EMI knowledge graph uses (`emi:` → `https://w3id.org/emi#`, plus `qudt:` in two queries). Query logic is otherwise unchanged and no newer upstream queries were added. |
 | `sib-swiss-federated-queries.updated-2026-11.md` | Generated change log: the endpoint map with reasons, the result of checking each query against the live endpoint, and the list of queries still to fix or check by hand. |
 | `update_query_catalogue.py` | Script that builds the updated file from the original (`build`), checks each query once against its live endpoint (`verify`), and writes the change log (`report`). |
 
 Each entry in the updated file keeps the original fields (`query`, `description`, `federatesWith`, `target`) and adds:
-- `changeStatus`: `unchanged` or `endpoint-updated`
-- `changes`: list of `{field, from, to, reason}`
+- `changeStatus`: `unchanged`, `endpoint-updated`, `prefix-updated` or `endpoint-and-prefix-updated`
+- `changes`: list of `{field, from, to, reason}` (`field` is `query`, `target`, `federatesWith`, or `queryPrefix` for a `PREFIX` namespace change, which also names the `prefix`)
 - `status`: `working`, `needs-manual-fix` or `unverified`
 - `manualFixNotes`: what still needs attention
 - `verification`: date, run number, HTTP status, row count, response size, duration and any error from the latest check
@@ -50,13 +50,13 @@ Each entry in the updated file keeps the original fields (`query`, `description`
 
 `query_sort.py` ignores the extra fields, so either file can be used in step 1 below.
 
-To refresh the updated catalogue (for example after editing the endpoint map in the script):
+To refresh the updated catalogue (for example after editing the endpoint or prefix map in the script):
 ```bash
 python3 update_query_catalogue.py build --force
 python3 update_query_catalogue.py verify    # slow on purpose: one query at a time, pauses between requests, no retries
 python3 update_query_catalogue.py report
 ```
-`verify` saves progress after every query and skips queries that were already checked, unless you pass `--force`. Use `--only <id> ...` to re-check single queries after fixing them by hand. To give slow or very large queries another chance with higher limits (results are counted while they stream, so a large limit does not need much memory):
+`build --force` keeps earlier checks and the run history: a check stays current if the query did not change, otherwise it moves to `previousVerifications` and `verify` checks that query again. Add `--discard-checks` to start from scratch. `verify` saves progress after every query and skips queries that were already checked, unless you pass `--force`. Use `--only <id> ...` to re-check single queries after fixing them by hand. To give slow or very large queries another chance with higher limits (results are counted while they stream, so a large limit does not need much memory):
 ```bash
 python3 update_query_catalogue.py verify --recheck timeout too-large --timeout 900 --max-response-mb 2048 --label "higher limits"
 ```

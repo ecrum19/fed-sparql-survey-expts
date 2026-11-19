@@ -11,9 +11,13 @@ target endpoint.
 
 Subcommands
 -----------
-build   Apply ENDPOINT_MAP to the original catalogue and write the updated file.
-        Query text is only changed where it names a moved endpoint (SERVICE IRIs);
-        no query logic is changed and no new upstream queries are added.
+build   Apply ENDPOINT_MAP and PREFIX_MAP to the original catalogue and write the
+        updated file. Query text is only changed where it names a moved endpoint
+        (SERVICE IRIs) or declares a PREFIX whose namespace changed with the
+        target endpoint's data; no query logic is changed and no new upstream
+        queries are added. Rebuilding an existing file keeps its checks: a check
+        stays current if the query did not change, otherwise it moves to
+        previousVerifications and the query is checked again by `verify`.
 
 verify  Run each query (with its SERVICE clauses) once against its target
         endpoint and record the outcome in the updated file. Designed to be
@@ -46,6 +50,7 @@ import argparse
 import codecs
 import datetime as dt
 import hashlib
+import html
 import json
 import os
 import re
@@ -94,6 +99,34 @@ ENDPOINT_MAP = OrderedDict([
     }),
 ])
 
+# PREFIX namespaces that changed together with an endpoint's data, keyed by the
+# (updated) target endpoint. Only the namespace IRI in the PREFIX declaration of
+# queries sent to that endpoint is changed; the rest of the query is untouched.
+PREFIX_MAP = OrderedDict([
+    ("https://qlever.earthmetabolome.org/api/metrin-kg", [
+        OrderedDict([
+            ("prefix", "emi"),
+            ("from", "https://purl.org/emi#"),
+            ("to", "https://w3id.org/emi#"),
+            ("reason", (
+                "The EMI knowledge graph behind the new endpoint uses the namespace "
+                "https://w3id.org/emi#; with the old one every EMI query returned 0 rows "
+                "(run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made "
+                "the same change."
+            )),
+        ]),
+        OrderedDict([
+            ("prefix", "qudt"),
+            ("from", "https://qudt.org/2.1/schema/qudt#"),
+            ("to", "https://qudt.org/schema/qudt/"),
+            ("reason", (
+                "Namespace used for qudt:hasUnit in the corresponding upstream EMI queries "
+                "(sparql-examples@45e5b53 examples/emi/012.ttl and 014.ttl)."
+            )),
+        ]),
+    ]),
+])
+
 # Endpoints that did not answer as SPARQL endpoints on 2026-11-18 and have no
 # known successor. Queries using them are left unchanged and flagged.
 UNAVAILABLE_ENDPOINTS = OrderedDict([
@@ -112,17 +145,20 @@ ENDPOINT_NOTES = OrderedDict([
      "It sits behind Cloudflare, which ends requests that run longer than ~125 s with HTTP 524."),
     ("https://qlever.earthmetabolome.org/api/metrin-kg",
      "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi# "
-     "instead of https://purl.org/emi# (upstream sparql-examples@45e5b53 examples/emi/ uses "
-     "the new one). Queries with the old PREFIX return 0 rows."),
+     "instead of https://purl.org/emi#; the PREFIX is updated in this catalogue (see the prefix "
+     "changes). Upstream sparql-examples@45e5b53 also reworked and renumbered the EMI examples "
+     "011-023 (e.g. names are read with rdfs:label); that rework was not applied here. "
+     "Its gateway (nginx) ends requests that run longer than 60 s with HTTP 504 (seen on 2026-11-19)."),
 ])
 
 # Hints added to a query's manualFixNotes when its check did not succeed,
 # keyed by target endpoint.
 FAILURE_HINTS = {
     "https://qlever.earthmetabolome.org/api/metrin-kg":
-        "Hint: likely fix is changing PREFIX emi: <https://purl.org/emi#> to "
-        "<https://w3id.org/emi#> (namespace changed with the new EMI knowledge graph; "
-        "compare with upstream sparql-examples examples/emi/).",
+        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand "
+        "or ask the maintainers. For 0 rows: the PREFIX namespaces are already updated, but "
+        "upstream sparql-examples@45e5b53 reworked and renumbered the EMI examples "
+        "(examples/emi/); compare with the closest upstream query.",
     "https://www.bgee.org/sparql":
         "Hint: HTTP 524 means Cloudflare ended the request after ~125 s; the query itself may still be valid.",
     "https://www.bgee.org/sparql/":
@@ -182,9 +218,14 @@ def map_endpoint(url):
 
 
 def build(args):
-    if os.path.exists(args.output) and not args.force:
-        sys.exit(f"{args.output} already exists (it may hold verification results). "
-                 f"Use --force to overwrite it.")
+    previous = None
+    if os.path.exists(args.output):
+        if not args.force:
+            sys.exit(f"{args.output} already exists (it may hold verification results). "
+                     f"Use --force to rebuild it; earlier checks are kept unless you also "
+                     f"pass --discard-checks.")
+        if not args.discard_checks:
+            previous = load_json(args.output)
 
     original = load_json(args.input)
     data = original["data"]
@@ -229,6 +270,19 @@ def build(args):
                 fed.append(mapped)
                 seen.add(mapped)
 
+        # 4. PREFIX namespaces that changed with the target endpoint's data
+        prefix_changed = False
+        for spec in PREFIX_MAP.get(target, []):
+            pattern = re.compile(r"(?im)^(\s*PREFIX\s+%s:\s*)<%s>" % (re.escape(spec["prefix"]),
+                                                                     re.escape(spec["from"])))
+            query, n = pattern.subn(lambda m: f"{m.group(1)}<{spec['to']}>", query)
+            if n:
+                prefix_changed = True
+                changes.append(OrderedDict([
+                    ("field", "queryPrefix"), ("prefix", spec["prefix"]), ("from", spec["from"]),
+                    ("to", spec["to"]), ("occurrences", n), ("reason", spec["reason"]),
+                ]))
+
         notes = []
         for ep in sorted(set(all_endpoints(OrderedDict(query=query, target=target, federatesWith=fed)))):
             if ep in UNAVAILABLE_ENDPOINTS:
@@ -238,7 +292,11 @@ def build(args):
         new["description"] = entry["description"]
         new["federatesWith"] = fed
         new["target"] = target
-        new["changeStatus"] = "endpoint-updated" if changes else "unchanged"
+        endpoint_changed = any(c["field"] != "queryPrefix" for c in changes)
+        new["changeStatus"] = {(False, False): "unchanged", (True, False): "endpoint-updated",
+                               (False, True): "prefix-updated",
+                               (True, True): "endpoint-and-prefix-updated"}[
+                                   (endpoint_changed, prefix_changed)]
         new["changes"] = changes
         new["status"] = "unverified"
         new["manualFixNotes"] = notes
@@ -258,14 +316,17 @@ def build(args):
     meta["upstream"] = OrderedDict([
         ("repository", UPSTREAM_REPO),
         ("commitConsultedForEndpointUrls", UPSTREAM_COMMIT_CHECKED),
-        ("note", "Only endpoint URLs were taken from upstream; query logic was not synced "
-                 "and no newer upstream queries were added."),
+        ("note", "Only endpoint URLs and changed PREFIX namespaces were taken from upstream; "
+                 "query logic was not synced and no newer upstream queries were added."),
     ])
     meta["policy"] = ("Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE "
-                      "clauses. Query keys are unchanged so results can be joined with "
-                      "earlier experiments.")
+                      "clauses, and PREFIX namespaces that changed together with an endpoint's "
+                      "data (see prefixMap). Query keys are unchanged so results can be joined "
+                      "with earlier experiments.")
     meta["endpointMap"] = [OrderedDict([("from", k), ("to", v["to"]), ("reason", v["reason"])])
                            for k, v in ENDPOINT_MAP.items()]
+    meta["prefixMap"] = [OrderedDict([("endpoint", ep)] + list(spec.items()))
+                         for ep, specs in PREFIX_MAP.items() for spec in specs]
     meta["unavailableEndpoints"] = [OrderedDict([("endpoint", k), ("note", v)])
                                     for k, v in UNAVAILABLE_ENDPOINTS.items()]
     meta["endpointNotes"] = [OrderedDict([("endpoint", k), ("note", v)])
@@ -274,9 +335,41 @@ def build(args):
     meta["ignored_endpoints"] = (original.get("metadata") or {}).get("ignored_endpoints", [])
     meta["verificationRuns"] = []
 
+    kept = carry_over_checks(previous, out_data, meta) if previous else None
     save_json_atomic(OrderedDict([("data", out_data), ("metadata", meta)]), args.output)
-    print(f"Wrote {args.output}: {len(out_data)} queries "
-          f"({counts['endpoint-updated']} endpoint-updated, {counts['unchanged']} unchanged)")
+    print(f"Wrote {args.output}: {len(out_data)} queries ("
+          + ", ".join(f"{n} {k}" for k, n in sorted(counts.items())) + ")")
+    if kept:
+        print(f"Kept earlier checks: {kept['current']} still current."
+              + (f" {kept['stale']} queries changed, so their check moved to previousVerifications "
+                 f"and they are unverified." if kept["stale"] else ""))
+
+
+def carry_over_checks(previous, out_data, meta):
+    """Keep check results and run history from an earlier build of the same file.
+
+    A check stays current only if the query text and target are unchanged (same
+    queryHash); otherwise it is kept in previousVerifications and the query is
+    marked unverified, so `verify` checks it again.
+    """
+    meta["verificationRuns"] = migrate_runs(previous["metadata"])
+    kept = {"current": 0, "stale": 0}
+    for key, entry in out_data.items():
+        old = previous["data"].get(key)
+        if not old:
+            continue
+        history = list(old.get("previousVerifications") or [])
+        v = old.get("verification")
+        if v and v.get("queryHash") == query_hash(entry):
+            entry["verification"] = v
+            kept["current"] += 1
+        elif v and v.get("outcome") != "not-run":
+            history.append(v)
+            kept["stale"] += 1
+        if history:
+            entry["previousVerifications"] = history
+        classify(entry)
+    return kept
 
 
 # ---------------------------------------------------------------------------
@@ -439,6 +532,7 @@ def squash(text, limit=600):
     text = re.sub(r"(?is)<(script|style|svg|head)\b.*?</\1>", " ", text)
     text = re.sub(r"data:[^\s\"'>)]+", "", text)  # inline images
     text = re.sub(r"<[^>]+>", " ", text)       # strip HTML tags from error pages
+    text = html.unescape(text)                 # &quot; -> " etc. (after stripping tags)
     text = re.sub(r"\s+", " ", text).strip()
     return text[:limit] + ("…" if len(text) > limit else "")
 
@@ -681,7 +775,7 @@ def report(args):
              f"{len(data)} queries). The original file is unchanged.")
     L.append("")
     L.append(f"- **Policy:** {meta['policy']}")
-    L.append(f"- **Upstream consulted for endpoint URLs:** {meta['upstream']['repository']} "
+    L.append(f"- **Upstream consulted:** {meta['upstream']['repository']} "
              f"@ `{meta['upstream']['commitConsultedForEndpointUrls'][:7]}`. "
              f"{meta['upstream']['note']}")
     L.append("- **Live checks:** in each verification run, every selected query is sent once, "
@@ -724,6 +818,19 @@ def report(args):
             L.append(f"- `{u['endpoint']}`: {u['note']}")
     L.append("")
 
+    if meta.get("prefixMap"):
+        L.append("## Prefix changes")
+        L.append("")
+        L.append("Only applied to queries whose target is the given endpoint.")
+        L.append("")
+        L.append("| Endpoint | Prefix | From | To | Queries affected | Reason |")
+        L.append("|---|---|---|---|---:|---|")
+        for m in meta["prefixMap"]:
+            n = sum(1 for e in data.values()
+                    if any(c["field"] == "queryPrefix" and c["from"] == m["from"] for c in e["changes"]))
+            L.append(f"| `{m['endpoint']}` | `{m['prefix']}:` | `{m['from']}` | `{m['to']}` | {n} | "
+                     f"{md_escape(m['reason'])} |")
+        L.append("")
     manual = [(k, e) for k, e in data.items() if e["status"] == "needs-manual-fix"]
     L.append(f"## Queries to fix or check by hand ({len(manual)})")
     L.append("")
@@ -734,7 +841,8 @@ def report(args):
         L.append(f"### `{short_id(k)}`")
         L.append("")
         L.append(f"- Key: <{k}>")
-        L.append(f"- Target: `{e['target']}`" + (" (endpoint updated)" if e["changes"] else ""))
+        L.append(f"- Target: `{e['target']}`"
+                 + (f" ({e['changeStatus']})" if e["changeStatus"] != "unchanged" else ""))
         if v:
             L.append(f"- Check: {fmt_check(v)}")
         for pv in e.get("previousVerifications", []):
@@ -806,7 +914,11 @@ def main():
     b.add_argument("-i", "--input", default="sib-swiss-federated-queries.json")
     b.add_argument("-o", "--output", default="sib-swiss-federated-queries.updated-2026-11.json")
     b.add_argument("--version", default="2026-11")
-    b.add_argument("--force", action="store_true", help="overwrite an existing output file")
+    b.add_argument("--force", action="store_true",
+                   help="rebuild an existing output file (its earlier checks are kept: a check stays "
+                        "current if the query did not change, otherwise it moves to previousVerifications)")
+    b.add_argument("--discard-checks", action="store_true",
+                   help="with --force: start without any earlier checks or run history")
     b.set_defaults(func=build)
 
     v = sub.add_parser("verify", help="check each query once against its live target endpoint")
