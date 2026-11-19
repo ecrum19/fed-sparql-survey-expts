@@ -34,19 +34,20 @@ pip install -r requirements.txt
 | File | What it is |
 |---|---|
 | `sib-swiss-federated-queries.json` | **Original catalogue (frozen).** 67 federated queries from [sib-swiss/sparql-examples](https://github.com/sib-swiss/sparql-examples) at commit `c40a905` (2025-03-17). Used for all experiments run so far. Kept unchanged for transparency. |
-| `sib-swiss-federated-queries.updated-2026-11.json` | **Updated catalogue for future studies.** Same 67 queries with the same keys, but with minimal endpoint fixes. The BioSODA proxy is deprecated, so EMI queries now target the EarthMetabolome QLever endpoint. QLever Wikidata moved to `qlever.dev`. OMA uses its canonical `/sparql/` URL. The EMI queries also get the `PREFIX` namespaces the new EMI knowledge graph uses (`emi:` → `https://w3id.org/emi#`, plus `qudt:` in two queries). Query logic is otherwise unchanged and no newer upstream queries were added. |
-| `sib-swiss-federated-queries.updated-2026-11.md` | Generated change log: the endpoint map with reasons, the result of checking each query against the live endpoint, and the list of queries still to fix or check by hand. |
+| `sib-swiss-federated-queries.updated-2026-11.json` | **Updated catalogue for future studies.** 63 of the 67 queries, with the same keys and minimal endpoint fixes. The BioSODA proxy is deprecated, so EMI queries now target the EarthMetabolome QLever endpoint. QLever Wikidata moved to `qlever.dev`. OMA uses its canonical `/sparql/` URL. The EMI queries also get the `PREFIX` namespaces the new EMI knowledge graph uses (`emi:` → `https://w3id.org/emi#`, plus `qudt:` in two queries). Two EMI queries that changed in the upstream SIB catalogue (`emi#examples012`, `emi#examples019a`) are replaced with their upstream version, so their results are not comparable with earlier experiments. Four queries are left out: UniProt 46, OrthoDB 18 and OMA 14 because they use dead endpoints (EEA, neXtProt, NIBB), and `emi#examples019b` because upstream dropped it. Query logic is otherwise unchanged and no newer upstream queries were added. |
+| `sib-swiss-federated-queries.updated-2026-11.md` | Generated change log: the endpoint and prefix changes with reasons, the replaced and removed queries, the result of checking each query against the live endpoint, and the list of queries still to fix or check by hand. |
+| `sib-swiss-federated-queries.updated-2026-11.checklist.md` | Checklist of the queries still to run or fix by hand, with what failed, what changed upstream and what to try. Edited by hand (not regenerated). |
 | `update_query_catalogue.py` | Script that builds the updated file from the original (`build`), checks each query once against its live endpoint (`verify`), and writes the change log (`report`). |
 
 Each entry in the updated file keeps the original fields (`query`, `description`, `federatesWith`, `target`) and adds:
-- `changeStatus`: `unchanged`, `endpoint-updated`, `prefix-updated` or `endpoint-and-prefix-updated`
-- `changes`: list of `{field, from, to, reason}` (`field` is `query`, `target`, `federatesWith`, or `queryPrefix` for a `PREFIX` namespace change, which also names the `prefix`)
+- `changeStatus`: `unchanged`, `endpoint-updated`, `prefix-updated`, `endpoint-and-prefix-updated` or `replaced-with-upstream`
+- `changes`: list of `{field, from, to, reason}` (`field` is `query`, `target`, `federatesWith`, `queryPrefix` for a `PREFIX` namespace change, which also names the `prefix`, or `queryAndDescription` for a query replaced with its upstream version)
 - `status`: `working`, `needs-manual-fix` or `unverified`
 - `manualFixNotes`: what still needs attention
 - `verification`: date, run number, HTTP status, row count, response size, duration and any error from the latest check
 - `previousVerifications`: earlier checks of the same query, kept when a query is re-checked
 
-`metadata.verificationRuns` lists every verification run with its settings and notes.
+`metadata.verificationRuns` lists every verification run with its settings and notes. `metadata.upstreamReplacements` lists the queries replaced with their upstream version, and `metadata.removedQueries` lists the queries left out, with the reason and their last checks.
 
 `query_sort.py` ignores the extra fields, so either file can be used in step 1 below.
 
