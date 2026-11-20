@@ -154,7 +154,7 @@
       ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/53": {
-      "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?chebi\n    ?reaction\n    ?humanProtein\n    ?mouseProtein\n    ?cluster \nWHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?reaction rdfs:subClassOf rh:Reaction .\n    ?reaction rh:side/rh:contains/rh:compound ?compound .\n    ?compound rh:chebi ?chebi .\n    ?chebi rdfs:subClassOf* CHEBI:15889\n  }\n\n  ?humanProtein up:organism taxon:9606 .\n  ?humanProtein up:annotation ?a .\n  ?a a up:Catalytic_Activity_Annotation .\n  ?a up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?reaction .\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {\n    ?cluster a orth:ParalogsCluster .\n    ?cluster orth:hasHomologousMember ?node1 , ?node2 .\n    ?node1 orth:hasHomologousMember* ?orthoProtein1 .\n    ?node2 orth:hasHomologousMember* ?orthoProtein2 .\n    ?orthoProtein1 lscr:xrefUniprot ?mouseProtein .\n    ?orthoProtein2 lscr:xrefUniprot ?humanProtein .\n    # inTaxon mouse\n    ?orthoProtein1 orth:organism/<http://purl.obolibrary.org/obo/RO_0002162> taxon:10090 . \n  }\n}",
+      "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?chebi\n    ?reaction\n    ?humanProtein\n    ?mouseProtein\n    ?cluster \nWHERE {\n  { SELECT DISTINCT ?chebi ?reaction ?humanProtein WHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?reaction rdfs:subClassOf rh:Reaction .\n    ?reaction rh:side/rh:contains/rh:compound ?compound .\n    ?compound rh:chebi ?chebi .\n    ?chebi rdfs:subClassOf* CHEBI:15889\n  }\n\n  ?humanProtein up:organism taxon:9606 .\n  ?humanProtein up:annotation ?a .\n  ?a a up:Catalytic_Activity_Annotation .\n  ?a up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?reaction .\n  } }\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {\n    ?cluster a orth:ParalogsCluster .\n    ?cluster orth:hasHomologousMember ?node1 , ?node2 .\n    ?node1 orth:hasHomologousMember* ?orthoProtein1 .\n    ?node2 orth:hasHomologousMember* ?orthoProtein2 .\n    ?orthoProtein1 lscr:xrefUniprot ?mouseProtein .\n    ?orthoProtein2 lscr:xrefUniprot ?humanProtein .\n    # inTaxon mouse\n    ?orthoProtein1 orth:organism/<http://purl.obolibrary.org/obo/RO_0002162> taxon:10090 . \n  }\n}",
       "description": "Find mouse homologs in OMABrowser of human enzymes that catalyze reactions involving sterols (CHEBI:15889). Federating with Rhea and OMABrowser.",
       "federatesWith": [
         "https://sparql.uniprot.org/sparql",
@@ -162,7 +162,7 @@
         "https://sparql.omabrowser.org/sparql/"
       ],
       "target": "https://sparql.uniprot.org/sparql/",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "query-fixed",
       "changes": [
         {
           "field": "query",
@@ -176,24 +176,42 @@
           "from": "https://sparql.omabrowser.org/sparql",
           "to": "https://sparql.omabrowser.org/sparql/",
           "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
+        },
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "WHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {",
+              "to": "WHERE {\n  { SELECT DISTINCT ?chebi ?reaction ?humanProtein WHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {"
+            },
+            {
+              "from": "  ?ca up:catalyzedReaction ?reaction .\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {",
+              "to": "  ?ca up:catalyzedReaction ?reaction .\n  } }\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "The UniProt endpoint (QLever) only passes values into a SERVICE call when the SERVICE is joined directly with a result of at most 10,000 rows; otherwise OMA gets the whole block unbound, which returned 0 rows after 760 s in run 2 (most likely OMA's time limit). The Rhea and UniProt part is wrapped in a subquery (1,390 rows, 319 human proteins on 2026-11-20), so it becomes the SERVICE's direct sibling and OMA gets the human proteins as VALUES. The query asks the same question."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T08:39:38+00:00",
+        "date": "2026-11-20T08:17:54+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "resultCount": 0,
-        "responseBytes": 176,
-        "outcome": "empty",
-        "durationSeconds": 760.2,
-        "queryHash": "da4dafb60b037c2a",
-        "run": 2
+        "resultCount": 30016,
+        "responseBytes": 19459514,
+        "outcome": "ok",
+        "durationSeconds": 23.2,
+        "queryHash": "a879fdf77b7fd309",
+        "run": 7
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/53_mouse_homologs_of_sterol_enzymes_via_omabrowser.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/53_mouse_homologs_of_sterol_enzymes_via_omabrowser.ttl",
+        "note": "Unchanged."
       },
       "previousVerifications": [
         {
@@ -205,6 +223,19 @@
           "error": "No complete response within 180 s (client timeout)",
           "queryHash": "da4dafb60b037c2a",
           "run": 1
+        },
+        {
+          "date": "2026-11-19T08:39:38+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "resultCount": 0,
+          "responseBytes": 176,
+          "outcome": "empty",
+          "durationSeconds": 760.2,
+          "queryHash": "da4dafb60b037c2a",
+          "run": 2
         }
       ]
     },
@@ -233,35 +264,92 @@
         "error": "HTTP 400: UniProt returned an HTML error page; the error detail was cut off in this run (the script now captures it). Run the query by hand to see the reason.",
         "queryHash": "a8797b69e07fcf6c",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/99_uniprot_identifiers_org_translation.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/99_uniprot_identifiers_org_translation.ttl",
+        "note": "Unchanged."
+      },
+      "failureSummary": "identifiers.org's SPARQL endpoint (`https://sparql.api.identifiers.org`) answers UniProt's SERVICE call with HTTP 500.",
+      "openOptions": "Check whether identifiers.org still runs its SPARQL endpoint.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "a8797b69e07fcf6c",
+          "outcome": "error",
+          "result": "error - https://sparql.api.identifiers.org issued HTTP 500",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/36": {
-      "query": "PREFIX orthodb: <http://purl.orthodb.org/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?orthoGroup\n  ?scientificName\n  ?functionComment\n  ?prefferedGeneName\n  ((STRLEN(?value) - ?medianLength) as ?deviationFromMedianLength)\nWHERE\n{\n  uniprotkb:P05067 a up:Protein ;\n        up:organism/up:scientificName ?scientificName ;\n        rdfs:seeAlso ?orthoGroup ;\n        up:encodedBy/skos:prefLabel ?prefferedGeneName ;\n          up:sequence/rdf:value ?value .\n  OPTIONAL {\n    ?protein up:annotation ?functionAnnotation .\n    ?functionAnnotation a up:Function_Annotation ;\n      rdfs:comment ?functionComment .\n  }\n  SERVICE <https://sparql.orthodb.org/sparql>{\n    ?orthoGroup orthodb:ogMedianProteinLength ?medianLength .\n    ?orthoGroup orthodb:hasMember ?xref .\n    ?xref orthodb:xref/orthodb:xrefResource uniprotkb:P05067 .\n  }\n}",
+      "query": "PREFIX orthodb: <http://purl.orthodb.org/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?orthoGroup\n  ?scientificName\n  ?functionComment\n  ?prefferedGeneName\n  ((STRLEN(?value) - ?medianLength) as ?deviationFromMedianLength)\nWHERE\n{\n  BIND(uniprotkb:P05067 AS ?protein)\n  ?protein a up:Protein ;\n    up:organism/up:scientificName ?scientificName ;\n    up:encodedBy/skos:prefLabel ?prefferedGeneName ;\n    up:sequence/rdf:value ?value .\n  # We do not ask the UniProt endpoint for the ?orthoGroup from the\n  # cross-reference as these can be out of date. We trust the content\n  # of the orthodb endpoint\n  OPTIONAL {\n    ?protein up:annotation ?functionAnnotation .\n    ?functionAnnotation a up:Function_Annotation ;\n      rdfs:comment ?functionComment .\n  }\n  SERVICE <https://sparql.orthodb.org/sparql/>{\n    ?orthoGroup orthodb:ogMedianProteinLength ?medianLength .\n    ?orthoGroup orthodb:hasMember ?xref .\n    ?xref orthodb:xref/orthodb:xrefResource ?protein .\n  }\n}",
       "description": "Find the orthologous proteins for UniProtKB entry P05067 using the <a href=\"http://www.orthod.org\">OrthoDB database</a>",
       "federatesWith": [
         "https://sparql.uniprot.org/sparql",
         "https://sparql.orthodb.org/sparql"
       ],
       "target": "https://sparql.uniprot.org/sparql/",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
+      "changeStatus": "replaced-with-upstream",
+      "changes": [
+        {
+          "field": "queryAndDescription",
+          "from": "36 as in the original catalogue (sparql-examples@c40a905)",
+          "to": "examples/UniProt/36_orthologous_proteins_via_orthodb.ttl at sparql-examples@45e5b53",
+          "upstreamId": "https://sparql.uniprot.org/.well-known/sparql-examples/36",
+          "reason": "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query no longer reads the OrthoDB group from UniProt's rdfs:seeAlso cross-reference (upstream notes these can be out of date) but matches the protein inside the OrthoDB SERVICE, whose URL now has a trailing slash; the description is unchanged. The old version returned 0 rows (run 2, 2026-11-19); the upstream version returned 1,100 rows when run by hand (2026-11-20), so it replaced the old text."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T08:53:44+00:00",
+        "date": "2026-11-20T12:02:14+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "resultCount": 0,
-        "responseBytes": 230,
-        "outcome": "empty",
-        "durationSeconds": 0.5,
-        "queryHash": "202731827987aa25",
-        "run": 2
-      }
+        "resultCount": 1100,
+        "responseBytes": 1382023,
+        "outcome": "ok",
+        "durationSeconds": 8.2,
+        "queryHash": "454a15d6c999601a",
+        "run": 10
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/36_orthologous_proteins_via_orthodb.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/36_orthologous_proteins_via_orthodb.ttl",
+        "note": "Reworked: the OrthoDB group is no longer read from UniProt's `rdfs:seeAlso` cross-reference (upstream says these can be out of date) but matched inside the OrthoDB SERVICE. The catalogue now uses this upstream version (`UPSTREAM_REPLACEMENTS`)."
+      },
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "454a15d6c999601a",
+          "outcome": "ok",
+          "resultCount": 1100,
+          "result": "1100",
+          "note": "Run on the upstream version before it replaced the catalogue text (same query text).",
+          "currentQuery": true
+        }
+      ],
+      "previousVerifications": [
+        {
+          "date": "2026-11-19T08:53:44+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "resultCount": 0,
+          "responseBytes": 230,
+          "outcome": "empty",
+          "durationSeconds": 0.5,
+          "queryHash": "202731827987aa25",
+          "run": 2
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/50": {
       "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX genex: <http://purl.org/genex#>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?chebi\n    ?reaction\n    ?protein ?ensemblGene\n    ?anatomicEntityLabel\n    ?anatomicEntity\nWHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?reaction rdfs:subClassOf rh:Reaction .\n    ?reaction rh:equation ?reactionEquation .\n    ?reaction rh:side ?reactionSide .\n    ?reactionSide rh:contains ?participant .\n    ?participant rh:compound ?compound .\n    ?compound rh:chebi ?chebi .\n    ?chebi rdfs:subClassOf* CHEBI:52639\n}\n  ?protein up:organism taxon:9606 .\n  ?protein up:annotation ?a .\n  ?a a up:Catalytic_Activity_Annotation .\n  ?a up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?reaction .\n  ?protein rdfs:seeAlso / up:transcribedFrom ?ensemblGene .\n\n  SERVICE  <https://www.bgee.org/sparql> {\n    ?gene genex:isExpressedIn ?anatomicEntity .\n    ?gene lscr:xrefEnsemblGene ?ensemblGene .\n    ?anatomicEntity rdfs:label ?anatomicEntityLabel .\n  }\n}",
@@ -289,7 +377,25 @@
         "durationSeconds": 0.9,
         "queryHash": "abcd81b98b76a58f",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/50_tissues_where_genes_sphingosines_are_expressed.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/50_tissues_where_genes_sphingosines_are_expressed.ttl",
+        "note": "The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream."
+      },
+      "failureSummary": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash.",
+      "openOptions": "Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) is blocked too (see UniProt 117 and 118).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "abcd81b98b76a58f",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/54": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX sachem: <http://bioinfo.uochb.cas.cz/rdf/v1.0/sachem#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT \n  ?protein\n  ?mnemonic\n  ?proteinName\n  ?ligandSimilarityScore\n  ?ligand\nWHERE {\n  SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi> {\n    ?ssc sachem:compound ?ligand; \n      sachem:score ?ligandSimilarityScore ;\n      sachem:similaritySearch ?sss .\n        # Smiles of Heme\n    ?sss    sachem:query \"CC1=C(CCC([O-])=O)C2=[N+]3C1=Cc1c(C)c(C=C)c4C=C5C(C)=C(C=C)C6=[N+]5[Fe-]3(n14)n1c(=C6)c(C)c(CCC([O-])=O)c1=C2\";\n      sachem:cutoff \"8e-1\"^^xsd:double ;\n      sachem:aromaticityMode sachem:aromaticityDetect ;\n      sachem:similarityRadius 1 ;\n      sachem:tautomerMode sachem:ignoreTautomers .\n  }\n  ?protein up:mnemonic ?mnemonic ;\n    up:recommendedName/up:fullName ?proteinName ;\n    up:annotation ?annotation .\n  ?annotation a up:Binding_Site_Annotation ;\n      up:ligand/rdfs:subClassOf ?ligand .\n}\nORDER BY DESC(?ligandSimilarityScore)",
@@ -422,32 +528,70 @@
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/48": {
-      "query": "PREFIX faldo: <http://biohackathon.org/resource/faldo#>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX glycan: <http://purl.jp/bio/12/glyco/glycan#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n        DISTINCT\n            ?protein ?glycosite ?glycostructure ?glycoimage\nWHERE{\n  ?protein up:annotation ?annotation .\n  ?protein up:organism taxon:9606 .\n  ?annotation a up:Catalytic_Activity_Annotation .\n  ?protein up:sequence ?isoform .\n   \n  SERVICE <https://glyconnect.expasy.org/sparql> {\n    ?glycosite faldo:reference ?isoform .\n    ?glycosite faldo:position ?position .\n    ?specificglycosite faldo:location ?glycosite .\n    ?glycoprotein glycan:glycosylated_at ?specificglycosite .\n    ?glycostructure glycan:glycosylates_at ?specificglycosite .\n    ?glycostructure foaf:depiction ?glycoimage .\n  }\n}",
+      "query": "PREFIX faldo: <http://biohackathon.org/resource/faldo#>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX glyconj: <http://purl.jp/bio/12/glyco/conjugate#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n        DISTINCT\n            ?protein ?glycosite ?glycostructure ?glycoimage\nWHERE{\n  ?protein up:annotation ?annotation .\n  ?protein up:organism taxon:9606 .\n  ?annotation a up:Catalytic_Activity_Annotation .\n  ?protein up:sequence ?isoform .\n   \n  SERVICE <https://glyconnect.expasy.org/sparql> {\n    ?glycosite faldo:reference ?isoform .\n    ?glycosite faldo:position ?position .\n    ?specificglycosite faldo:location ?glycosite .\n    ?glycoprotein glyconj:glycosylated_at ?specificglycosite .\n    ?glycostructure glyconj:glycosylates_at ?specificglycosite .\n    ?glycostructure foaf:depiction ?glycoimage .\n  }\n}",
       "description": "Retrieve glycosylation sites and glycans on human enzymes (federated with Glyconnect)",
       "federatesWith": [
         "https://sparql.uniprot.org/sparql",
         "https://glyconnect.expasy.org/sparql"
       ],
       "target": "https://sparql.uniprot.org/sparql/",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
+      "changeStatus": "query-fixed",
+      "changes": [
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "PREFIX glycan: <http://purl.jp/bio/12/glyco/glycan#>",
+              "to": "PREFIX glyconj: <http://purl.jp/bio/12/glyco/conjugate#>"
+            },
+            {
+              "from": "glycan:glycosylated_at",
+              "to": "glyconj:glycosylated_at"
+            },
+            {
+              "from": "glycan:glycosylates_at",
+              "to": "glyconj:glycosylates_at"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "GlyConnect now publishes glycosylated_at and glycosylates_at in the namespace http://purl.jp/bio/12/glyco/conjugate# (probe 2026-11-20: 0 triples with the glycan# predicates, 5,052 matching rows for the SERVICE block with conjugate#). Only those two predicates change."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T09:03:03+00:00",
+        "date": "2026-11-20T08:19:31+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "resultCount": 0,
-        "responseBytes": 162,
-        "outcome": "empty",
-        "durationSeconds": 0.1,
-        "queryHash": "76a6feec04da896f",
-        "run": 2
-      }
+        "resultCount": 509,
+        "responseBytes": 16460589,
+        "outcome": "ok",
+        "durationSeconds": 12.3,
+        "queryHash": "3df6eb60c954c494",
+        "run": 7
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/48_glycosylation_sites_and_glycans.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/48_glycosylation_sites_and_glycans.ttl",
+        "note": "Unchanged."
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-19T09:03:03+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "resultCount": 0,
+          "responseBytes": 162,
+          "outcome": "empty",
+          "durationSeconds": 0.1,
+          "queryHash": "76a6feec04da896f",
+          "run": 2
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease": {
       "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX sachem: <http://bioinfo.uochb.cas.cz/rdf/v1.0/sachem#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?rhea\n  ?chebi\n  ?disease\nWHERE {\n  # Use the smiles of dopamine CHEBI:18243\n  SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi>{\n    ?chebi sachem:similarCompoundSearch [\n      sachem:query \"NCCc1ccc(O)c(O)c1\" ] .\n  }\n  GRAPH<https://sparql.rhea-db.org/rhea>{\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?chebi .\n  }\n  ?protein up:reviewed true ;\n    up:annotation ?caa, ?natural_variant_annotation, ?disease_annotation .\n  ?caa up:catalyticActivity/up:catalyzedReaction ?rhea .\n  ?natural_variant_annotation a up:Natural_Variant_Annotation ;\n    skos:related ?disease .\n  ?disease_annotation a up:Disease_Annotation ;\n     up:disease ?disease .\n}",
@@ -500,7 +644,25 @@
         "durationSeconds": 1.1,
         "queryHash": "8950b09ad6e7285b",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/90_uniprot_affected_by_metabolic_diseases_using_MeSH.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/90_uniprot_affected_by_metabolic_diseases_using_MeSH.ttl",
+        "note": "Unchanged."
+      },
+      "failureSummary": "The MeSH endpoint (`https://id.nlm.nih.gov/mesh/sparql`) returns its service description as text/plain instead of SPARQL results, which UniProt (QLever) cannot use.",
+      "openOptions": "Check whether MeSH still offers SPARQL results at that URL.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "8950b09ad6e7285b",
+          "outcome": "error",
+          "result": "error - MeSH error; endpoint sent 'text/plain;charset=utf-8' not 'application/sparql-results+json'",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/29": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?englishLabelStr\nWHERE {\n    SERVICE <https://data.allie.dbcls.jp/sparql>{\n        ?x rdfs:label \"アミロイド前駆体タンパク質\"@ja ;\n            rdfs:label ?englishLabel .\n        FILTER(lang(?englishLabel) = \"en\")\n    }\n    BIND (STR(?englishLabel) AS ?englishLabelStr)\n    ?protein a up:Protein .\n    {\n        ?protein (up:recommendedName|up:alternativeName) ?structuredName .\n    }\n    UNION\n    {\n        VALUES(?partType){(up:domain) (up:component)}\n            ?protein ?partType ?part .\n        ?part (up:recommendedName|up:alternativeName) ?structuredName .\n    }\n    ?structuredName ?anyKindOfName  ?englishLabelStr .\n    ?anyKindOfName rdfs:subPropertyOf up:structuredNameType .\n}",
@@ -529,32 +691,71 @@
       }
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome": {
-      "query": "PREFIX chebislash: <http://purl.obolibrary.org/obo/chebi/>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n?uniprot ?mnemonic ?rhea ?chebi ?smiles ?inchiKey\nWHERE\n{\n  ?uniprot up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea ;\n        up:organism taxon:9606 ;\n        up:mnemonic ?mnemonic .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n\t?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?chebi .\n   }\n   ?chebi chebislash:smiles ?smiles ;\n          chebislash:inchikey ?inchiKey .\n}",
+      "query": "PREFIX chemrof: <https://w3id.org/chemrof/>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n?uniprot ?mnemonic ?rhea ?chebi ?smiles ?inchiKey\nWHERE\n{\n  ?uniprot up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea ;\n        up:organism taxon:9606 ;\n        up:mnemonic ?mnemonic .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n\t?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|rh:underlyingChebi) ?chebi .\n   }\n   ?chebi chemrof:smiles_string ?smiles ;\n          chemrof:inchi_key_string ?inchiKey .\n}",
       "description": "Generate a draft human metabolome",
       "federatesWith": [
         "https://sparql.uniprot.org/sparql",
         "https://sparql.rhea-db.org/sparql"
       ],
       "target": "https://sparql.uniprot.org/sparql/",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
+      "changeStatus": "replaced-with-upstream",
+      "changes": [
+        {
+          "field": "queryAndDescription",
+          "from": "67_draft_human_metabolome as in the original catalogue (sparql-examples@c40a905)",
+          "to": "examples/UniProt/67_draft_human_metabolome.ttl at sparql-examples@45e5b53",
+          "upstreamId": "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome",
+          "reason": "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query reads ChEBI's chemrof:smiles_string and chemrof:inchi_key_string (instead of chebislash:smiles and chebislash:inchikey) and follows rh:underlyingChebi straight to the ChEBI IRI (instead of rh:underlyingChebi/rh:chebi); the description is unchanged. The old version returned 0 rows (run 2, 2026-11-19); the upstream version returned 317,738 rows when run by hand (2026-11-20), so it replaced the old text."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T09:08:49+00:00",
+        "date": "2026-11-20T12:08:58+00:00",
         "endpoint": "https://sparql.uniprot.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "resultCount": 0,
-        "responseBytes": 180,
-        "outcome": "empty",
-        "durationSeconds": 0.6,
-        "queryHash": "0b63602caa38af21",
-        "run": 2
-      }
+        "resultCount": 317738,
+        "responseBytes": 229463428,
+        "outcome": "ok",
+        "durationSeconds": 44.7,
+        "queryHash": "d978080128b6a20d",
+        "run": 10
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/67_draft_human_metabolome.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/67_draft_human_metabolome.ttl",
+        "note": "ChEBI predicates changed (`chebislash:smiles`/`inchikey` → `chemrof:smiles_string`/`chemrof:inchi_key_string`) and `rh:underlyingChebi/rh:chebi` → `rh:underlyingChebi`. The catalogue now uses this upstream version (`UPSTREAM_REPLACEMENTS`)."
+      },
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "d978080128b6a20d",
+          "outcome": "ok",
+          "resultCount": 317738,
+          "result": "317,738",
+          "note": "Run on the upstream version before it replaced the catalogue text (same query text); counted with count_results.py from the downloaded .srj file.",
+          "currentQuery": true
+        }
+      ],
+      "previousVerifications": [
+        {
+          "date": "2026-11-19T09:08:49+00:00",
+          "endpoint": "https://sparql.uniprot.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "resultCount": 0,
+          "responseBytes": 180,
+          "outcome": "empty",
+          "durationSeconds": 0.6,
+          "queryHash": "0b63602caa38af21",
+          "run": 2
+        }
+      ]
     },
     "https://sparql.rhea-db.org/.well-known/sparql-examples/19_draft_human_metabolome": {
       "query": "PREFIX chebislash: <http://purl.obolibrary.org/obo/chebi/>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?uniprot ?mnemonic ?rhea ?chebi ?smiles ?inchiKey\nWHERE\n{\n  ?rhea rh:side/rh:contains/rh:compound ?compound .\n  ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?chebi .\n  ?chebi chebislash:smiles ?smiles ;\n          chebislash:inchikey ?inchiKey .\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n     ?uniprot up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea ;\n                                             up:organism taxon:9606 ;\n                                             up:mnemonic ?mnemonic .\n\n   }\n}",
@@ -581,7 +782,25 @@
         "outcome": "empty",
         "queryHash": "576895f51a01ed77",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/Rhea/19_draft_human_metabolome.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Rhea/19_draft_human_metabolome.ttl",
+        "note": "Same ChEBI changes as UniProt 67 (upstream uses `chemrof:inchikey_string` here but `chemrof:inchi_key_string` in UniProt 67, so one may be a typo); SERVICE URL without trailing slash."
+      },
+      "openOptions": "If not tried yet: the upstream version with `chemrof:inchi_key_string`, the spelling UniProt 67 uses.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/Rhea/19_draft_human_metabolome.ttl",
+          "outcome": "empty",
+          "resultCount": 0,
+          "result": "empty result set",
+          "currentQuery": false
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/49": {
       "query": "PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\nPREFIX genex: <http://purl.org/genex#>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?protein ?ensemblGene ?reaction ?anatomicEntityLabel ?anatomicEntity\nWHERE {\n  # federated query to Rhea enadpoint\n  {\n    SELECT DISTINCT ?reaction WHERE {\n      SERVICE <https://sparql.rhea-db.org/sparql> {\n        ?reaction rdfs:subClassOf rh:Reaction ;\n          rh:equation ?reactionEquation ;\n          rh:side ?reactionSide .\n        ?reactionSide rh:contains ?participant .\n        ?participant rh:compound ?compound .\n        # compound constraint (CHEBI:16113 == cholesterol)\n        ?compound rh:chebi CHEBI:16113 .\n      }\n    }\n  }\n  # taxonomy constraint (taxon:9606 == Homo sapiens)\n  ?protein up:organism taxon:9606 ;\n    up:annotation ?a ;\n    rdfs:seeAlso / up:transcribedFrom ?ensemblGene .\n  ?a a up:Catalytic_Activity_Annotation ;\n    up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?reaction .\n  # federated query to Bgee (expression data)\n  BIND(IRI(REPLACE(STR(?ensemblGene), \"\\\\.[0-9]+$\", \"\")) AS ?ensemblGeneNoVersion)\n  SERVICE <https://www.bgee.org/sparql> {\n    ?gene lscr:xrefEnsemblGene ?ensemblGeneNoVersion ;\n      genex:isExpressedIn ?anatomicEntity .\n    ?anatomicEntity rdfs:label ?anatomicEntityLabel .\n  }\n}",
@@ -609,7 +828,25 @@
         "durationSeconds": 11.0,
         "queryHash": "2ab5e40b819fe1ea",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/49_tissues_where_genes_metabolizing_cholestrol_are_expressed.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/49_tissues_where_genes_metabolizing_cholestrol_are_expressed.ttl",
+        "note": "The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream."
+      },
+      "failureSummary": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash.",
+      "openOptions": "Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) is blocked too (see UniProt 117 and 118).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "2ab5e40b819fe1ea",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/109_uniprot_transporter_in_liver": {
       "query": "PREFIX genex: <http://purl.org/genex#>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX uberon: <http://purl.obolibrary.org/obo/uo#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?rhea\n  ?protein\n  ?anat\nWHERE\n{\n  GRAPH <https://sparql.rhea-db.org/rhea> {\n    ?rhea rh:isTransport true .\n  }\n  ?protein up:annotation ?ann .\n  ?protein up:organism taxon:9606 .\n  ?ann up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?rhea .\n  BIND(uberon:0002107 AS ?anat)\n  SERVICE <https://www.bgee.org/sparql> {\n    ?seq genex:isExpressedIn ?anat .\n    ?seq lscr:xrefUniprot ?protein .\n    ?seq orth:organism ?organism .\n    ?organism obo:RO_0002162 taxon:9606 .\n  }\n}",
@@ -636,7 +873,25 @@
         "durationSeconds": 4.5,
         "queryHash": "f93c95011b493047",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/109_uniprot_transporter_in_liver.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/109_uniprot_transporter_in_liver.ttl",
+        "note": "The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream."
+      },
+      "failureSummary": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash.",
+      "openOptions": "Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) is blocked too (see UniProt 117 and 118).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "f93c95011b493047",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/60": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX sachem: <http://bioinfo.uochb.cas.cz/rdf/v1.0/sachem#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?protein\n    ?disease\n    ?rhea\n    ?chebi\n    ?omim\nWHERE {\n    # Find complete ChEBIs with a Cholestane skeleton, via the Czech Elixir node IDSM Sachem chemical substructure search.\n    SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi> {\n      ?chebi sachem:substructureSearch [\n        sachem:query\n\"[C@]12(CCC3CCCC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@@]([H])([C@@](C)([H])CCCC(C)C)CC[C@@]21[H])[H]\"\n].\n   }\n   # Use the fact that UniProt catalytic activities are annotated using Rhea \n   # Mapping the found ChEBIs to Rhea reactions\n   SERVICE <https://sparql.rhea-db.org/sparql>{\n     ?rhea rh:side/rh:contains/rh:compound/rdfs:subClassOf ?chebi .\n   }\n   # Match the found Rhea reactions with human UniProtKB proteins\n   ?protein up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea .\n   ?protein up:organism taxon:9606 .\n   # Find only those human entries that have an annotated related disease, and optionaly map these to OMIM\n   ?protein up:annotation/up:disease ?disease .\n   OPTIONAL {\n     ?disease rdfs:seeAlso ?omim .\n     ?omim up:database <http://purl.uniprot.org/database/MIM>\n   }\n}",
@@ -666,7 +921,7 @@
       }
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/26": {
-      "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  ?organism {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite .\n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism ?organism .\n  }\n}",
+      "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?swisslipid  ?organism {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|rh:underlyingChebi) ?chebi .\n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism ?organism ;\n             up:reviewed true .\n  }\n}",
       "description": "Lipids produced in different organisms",
       "federatesWith": [
         "https://beta.sparql.swisslipids.org/sparql",
@@ -674,25 +929,74 @@
         "https://sparql.uniprot.org/sparql"
       ],
       "target": "https://beta.sparql.swisslipids.org/sparql",
-      "changeStatus": "unchanged",
-      "changes": [],
+      "changeStatus": "query-fixed",
+      "changes": [
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "(rh:underlyingChebi/rh:chebi)) ?metabolite",
+              "to": "rh:underlyingChebi) ?chebi"
+            },
+            {
+              "from": "SELECT ?swisslipid  ?organism {",
+              "to": "SELECT DISTINCT ?swisslipid  ?organism {"
+            },
+            {
+              "from": "             up:organism ?organism .\n",
+              "to": "             up:organism ?organism ;\n             up:reviewed true .\n"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/26.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (632,026,411,011 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). With the join fix alone the result would still be 89,319,800 rows, so the query also returns DISTINCT (lipid, organism) pairs and counts only reviewed (Swiss-Prot) enzymes (up:reviewed true): 136,755 rows expected (computed from aggregate queries on 2026-11-20)."
+        }
+      ],
       "status": "needs-manual-fix",
       "manualFixNotes": [
-        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
+        "Failed: Not valid SPARQL JSON results: invalid JSON inside the bindings array after 10720 rows; the response ends with: { \"organism\" : { \"type\" : \"uri\", \"value\" : \"http:/"
       ],
       "verification": {
-        "date": "2026-11-19T08:15:18+00:00",
+        "date": "2026-11-20T12:02:42+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "outcome": "too-large",
-        "responseBytes": 2148532224,
-        "error": "Response larger than 2147483648 bytes; stopped reading",
-        "durationSeconds": 45.2,
-        "queryHash": "a6915450f1dc9fe3",
-        "run": 2
+        "outcome": "error",
+        "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array after 10720 rows; the response ends with: { \"organism\" : { \"type\" : \"uri\", \"value\" : \"http:/",
+        "durationSeconds": 356.0,
+        "queryHash": "89e373cae51ffd2e",
+        "run": 10
       },
+      "upstreamComparison": {
+        "file": "examples/SwissLipids/26.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/26.ttl",
+        "note": "The Rhea part binds `?chebi` instead of `?metabolite`, so it joins the SwissLipids part (the original is a cross product); also `rh:underlyingChebi/rh:chebi` → `rh:underlyingChebi` and the SERVICE URL without trailing slash. The catalogue now has this join fix plus DISTINCT and reviewed enzymes only."
+      },
+      "failureSummary": "SwissLipids' RDF4J engine breaks the result stream part way: the response ends inside the bindings with invalid JSON (run 8 after 673.9 s; run 10 after 10,720 rows and 356 s), the same failure as 'Premature end of chunk' for SwissLipids 7 by hand.",
+      "openOptions": "Run it again later, or where the stream does not break. The computed count is its expected result: the same computation gave exactly the observed counts of 27 and 34 (run 10).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "catalogue",
+          "queryHash": "89e373cae51ffd2e",
+          "outcome": "ok",
+          "resultCount": 136755,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead.",
+          "currentQuery": true
+        },
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "upstream",
+          "versionNote": "the join fix only, as upstream (no DISTINCT, all enzymes)",
+          "upstreamFile": "examples/SwissLipids/26.ttl",
+          "outcome": "ok",
+          "resultCount": 89319800,
+          "note": "Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed enzymes only.",
+          "currentQuery": false
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T14:52:58+00:00",
@@ -705,11 +1009,52 @@
           "error": "Response larger than 209715200 bytes; not parsed",
           "queryHash": "a6915450f1dc9fe3",
           "run": 1
+        },
+        {
+          "date": "2026-11-19T08:15:18+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "too-large",
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "durationSeconds": 45.2,
+          "queryHash": "a6915450f1dc9fe3",
+          "run": 2
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "count-by-parts",
+          "outcome": "ok",
+          "resultCount": 632026411011,
+          "durationSeconds": 16.0,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "countQueriesUsed": [
+            "sl26_34",
+            "rhea_by_reaction",
+            "uniprot_by_reaction"
+          ],
+          "queryHash": "a6915450f1dc9fe3",
+          "run": 6
+        },
+        {
+          "date": "2026-11-20T08:37:46+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "error",
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array",
+          "durationSeconds": 673.9,
+          "queryHash": "89e373cae51ffd2e",
+          "run": 8
         }
       ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/27": {
-      "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  ?organism {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite .\n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism ?organism .\n  }\n  ?swisslipidIsomericSubpecies rdfs:subClassOf ?swisslipid ;\n        SWISSLIPID:rank SWISSLIPID:Isomeric_Subspecies .\n}",
+      "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?swisslipid  ?organism {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|rh:underlyingChebi) ?chebi .\n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism ?organism ;\n             up:reviewed true .\n  }\n  ?swisslipidIsomericSubpecies rdfs:subClassOf ?swisslipid ;\n        SWISSLIPID:rank SWISSLIPID:Isomeric_Subspecies .\n}",
       "description": "Find the list of SwissLipids for all organisms and their Isomeric subspecies",
       "federatesWith": [
         "https://beta.sparql.swisslipids.org/sparql",
@@ -717,25 +1062,71 @@
         "https://sparql.uniprot.org/sparql"
       ],
       "target": "https://beta.sparql.swisslipids.org/sparql",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
+      "changeStatus": "query-fixed",
+      "changes": [
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "(rh:underlyingChebi/rh:chebi)) ?metabolite",
+              "to": "rh:underlyingChebi) ?chebi"
+            },
+            {
+              "from": "SELECT ?swisslipid  ?organism {",
+              "to": "SELECT DISTINCT ?swisslipid  ?organism {"
+            },
+            {
+              "from": "             up:organism ?organism .\n",
+              "to": "             up:organism ?organism ;\n             up:reviewed true .\n"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/27.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (80,644,283,152,110 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). With the join fix alone the result would still be 10,548,746,085 rows, so the query also returns DISTINCT (lipid, organism) pairs and counts only reviewed (Swiss-Prot) enzymes (up:reviewed true): 6,400 rows expected (computed from aggregate queries on 2026-11-20)."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T08:38:35+00:00",
+        "date": "2026-11-20T12:10:03+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "outcome": "too-large",
-        "responseBytes": 2148532224,
-        "error": "Response larger than 2147483648 bytes; stopped reading",
-        "durationSeconds": 42.9,
-        "queryHash": "e7c4effc28bab734",
-        "run": 2
+        "resultCount": 6400,
+        "responseBytes": 1686160,
+        "outcome": "ok",
+        "durationSeconds": 870.7,
+        "queryHash": "40bc373c6139da1d",
+        "run": 10
       },
+      "upstreamComparison": {
+        "file": "examples/SwissLipids/27.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/27.ttl",
+        "note": "Same join fix as 26 (`?metabolite` → `?chebi`, `rh:underlyingChebi`), SERVICE URL without trailing slash. The catalogue now has this join fix plus DISTINCT and reviewed enzymes only."
+      },
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "catalogue",
+          "queryHash": "40bc373c6139da1d",
+          "outcome": "ok",
+          "resultCount": 6400,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only, plus isomeric subspecies per lipid. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead. Run 10 then returned exactly this count.",
+          "currentQuery": true
+        },
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "upstream",
+          "versionNote": "the join fix only, as upstream (no DISTINCT, all enzymes)",
+          "upstreamFile": "examples/SwissLipids/27.ttl",
+          "outcome": "ok",
+          "resultCount": 10548746085,
+          "note": "Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed enzymes only.",
+          "currentQuery": false
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T14:57:00+00:00",
@@ -748,11 +1139,52 @@
           "error": "Response larger than 209715200 bytes; not parsed",
           "queryHash": "e7c4effc28bab734",
           "run": 1
+        },
+        {
+          "date": "2026-11-19T08:38:35+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "too-large",
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "durationSeconds": 42.9,
+          "queryHash": "e7c4effc28bab734",
+          "run": 2
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "count-by-parts",
+          "outcome": "ok",
+          "resultCount": 80644283152110,
+          "durationSeconds": 19.6,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "countQueriesUsed": [
+            "sl27",
+            "rhea_by_reaction",
+            "uniprot_by_reaction"
+          ],
+          "queryHash": "e7c4effc28bab734",
+          "run": 6
+        },
+        {
+          "date": "2026-11-20T08:50:00+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "error",
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array",
+          "durationSeconds": 129.6,
+          "queryHash": "40bc373c6139da1d",
+          "run": 8
         }
       ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/34": {
-      "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n\t?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite . \n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism taxon:9606 .\n  }\n}",
+      "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?swisslipid  {\n  ?swisslipid owl:equivalentClass ?chebi .\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n    ?rhea rh:side/rh:contains/rh:compound ?compound .\n\t?compound (rh:chebi|(rh:reactivePart/rh:chebi)|rh:underlyingChebi) ?chebi . \n  }\n  SERVICE <https://sparql.uniprot.org/sparql/> {\n    ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n    ?protein up:annotation ?catalyticActivityAnnotation ;\n             up:organism taxon:9606 .\n  }\n}",
       "description": "Lipids affected by human enzymes",
       "federatesWith": [
         "https://beta.sparql.swisslipids.org/sparql",
@@ -760,25 +1192,52 @@
         "https://sparql.uniprot.org/sparql"
       ],
       "target": "https://beta.sparql.swisslipids.org/sparql",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Response larger than 2147483648 bytes; stopped reading. The query probably works but returns a very large result; confirm by hand."
+      "changeStatus": "query-fixed",
+      "changes": [
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "(rh:underlyingChebi/rh:chebi)) ?metabolite",
+              "to": "rh:underlyingChebi) ?chebi"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/34.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (1,780,126,200 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). Expected size with this fix: 280,679 rows (computed from aggregate queries on 2026-11-20)."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T08:52:38+00:00",
+        "date": "2026-11-20T12:25:34+00:00",
         "endpoint": "https://beta.sparql.swisslipids.org/sparql",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "outcome": "too-large",
-        "responseBytes": 2148532224,
-        "error": "Response larger than 2147483648 bytes; stopped reading",
-        "durationSeconds": 45.7,
-        "queryHash": "eb0fd6e1c9d17f05",
-        "run": 2
+        "resultCount": 280679,
+        "responseBytes": 39856523,
+        "outcome": "ok",
+        "durationSeconds": 351.3,
+        "queryHash": "a68360bcb58003ca",
+        "run": 10
       },
+      "upstreamComparison": {
+        "file": "examples/SwissLipids/34.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/34.ttl",
+        "note": "Same join fix as 26 (`?metabolite` → `?chebi`, `rh:underlyingChebi`), SERVICE URL without trailing slash. The catalogue now has this join fix only (same as upstream)."
+      },
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "catalogue",
+          "queryHash": "a68360bcb58003ca",
+          "outcome": "ok",
+          "resultCount": 280679,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction for human enzymes. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead. Run 10 then returned exactly this count.",
+          "currentQuery": true
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T15:03:07+00:00",
@@ -791,6 +1250,47 @@
           "error": "Response larger than 209715200 bytes; not parsed",
           "queryHash": "eb0fd6e1c9d17f05",
           "run": 1
+        },
+        {
+          "date": "2026-11-19T08:52:38+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "too-large",
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "durationSeconds": 45.7,
+          "queryHash": "eb0fd6e1c9d17f05",
+          "run": 2
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "count-by-parts",
+          "outcome": "ok",
+          "resultCount": 1780126200,
+          "durationSeconds": 12.5,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "countQueriesUsed": [
+            "sl26_34",
+            "rhea_by_reaction",
+            "uniprot_human_by_reaction"
+          ],
+          "queryHash": "eb0fd6e1c9d17f05",
+          "run": 6
+        },
+        {
+          "date": "2026-11-20T08:53:09+00:00",
+          "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "outcome": "error",
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array",
+          "durationSeconds": 51.3,
+          "queryHash": "a68360bcb58003ca",
+          "run": 8
         }
       ]
     },
@@ -875,7 +1375,41 @@
         "durationSeconds": 0.5,
         "queryHash": "11408872a689be69",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/SwissLipids/7.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/7.ttl",
+        "note": "Upstream fixed a typo: `SWISSLIPID:Isomeric_Subspecie` → `SWISSLIPID:Isomeric_Subspecies`; its SERVICE URL has no trailing slash."
+      },
+      "failureSummary": "The catalogue text returns 0 rows because of the class-name typo. The corrected text fails on SwissLipids' own engine: by hand its stream broke ('Premature end of chunk'), and in run 11 SwissLipids answered HTTP 400 with an empty message after 682 s.",
+      "openOptions": "Fix the typo (`QUERY_FIXES`, as upstream) once SwissLipids answers the corrected query, or check it with an engine that does the federation itself.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "variant",
+          "versionNote": "the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as upstream (the UniProt SERVICE URL keeps its trailing slash)",
+          "upstreamFile": "examples/SwissLipids/7.ttl",
+          "outcome": "error",
+          "result": "error -- org.eclipse.rdf4j.query.QueryEvaluationException: org.apache.http.ConnectionClosedException: Premature end of chunk coded message body: closing chunk expected",
+          "currentQuery": false
+        },
+        {
+          "date": "2026-11-20T12:44:54+00:00",
+          "method": "http-check",
+          "run": 11,
+          "version": "variant",
+          "versionNote": "the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as upstream (the UniProt SERVICE URL keeps its trailing slash)",
+          "upstreamFile": "examples/SwissLipids/7.ttl",
+          "queryHash": "6b23f8ee5cf1cbaf",
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 682.4,
+          "error": "HTTP 400 with an empty message",
+          "note": "The typo fix was in QUERY_FIXES for this run only; it was taken out again because the query failed.",
+          "currentQuery": false
+        }
+      ]
     },
     "https://sparql.swisslipids.org/.well-known/sparql-examples/5": {
       "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rh: <http://rdf.rhea-db.org/>\n\n# Example 5\nSELECT ?startId ?startName ?id ?name ?chebi ?rhea ?rheaEquation \nWHERE\n{\n  # SwissLipids query (list of) identifier(s)\n  VALUES ?startId { SWISSLIPID:000399814 }\n  # name\n  ?startId rdfs:label ?startName .\n  # Retrieve children lipids \n  ?id rdfs:subClassOf* ?startId .\n  ?id rdfs:label ?name .\n  # ChEBI x-ref\n  ?id owl:equivalentClass ?chebi .\n  # federated query to Rhea\n  SERVICE <https://sparql.rhea-db.org/sparql> {\n  \t?rhea rh:equation ?rheaEquation .\n  \t?rhea rh:side/rh:contains/rh:compound/rh:chebi ?chebi .\n  }    \n} \nORDER BY  ?startId ?id",
@@ -928,6 +1462,37 @@
         "queryHash": "25f02f2ca4a16ec4",
         "run": 2
       },
+      "upstreamComparison": {
+        "file": "examples/OrthoDB/19.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/OrthoDB/19.ttl",
+        "note": "Only the SERVICE URL's trailing slash differs."
+      },
+      "failureSummary": "OrthoDB's Virtuoso sends one SERVICE request per binding, in parallel; Rhea answers 503 Too many concurrent queries. The automated check got no answer within 900 s.",
+      "openOptions": "Not tried: drop the Rhea equation lookup (return the Rhea reaction IRI), or run the query from UniProt (QLever) with OrthoDB as a SERVICE, which needs about 2 remote calls but changes the target.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "25f02f2ca4a16ec4",
+          "outcome": "error",
+          "result": "error - HTTP 503 (bad virtuoso SERVICE handling by sending burst of requests that results in HTTP 403)",
+          "currentQuery": true
+        },
+        {
+          "date": "2026-11-20T08:57:48+00:00",
+          "method": "probe",
+          "version": "variant",
+          "versionNote": "this query with the OrthoDB part (with the clade filter) in a subquery",
+          "endpoint": "https://sparql.orthodb.org/sparql/",
+          "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX : <http://purl.orthodb.org/>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX interpro: <http://www.ebi.ac.uk/interpro/entry/>\n\nSELECT ?og ?equation\n    (group_concat (distinct ?clade_name; SEPARATOR=\"; \") as ?clades)\n    (count(distinct ?taxon) as ?cnt_taxons)\n    (count(distinct ?gene) as ?cnt_genes)\n    (group_concat (distinct ?org_name; SEPARATOR=\"; \") as ?taxons)\nWHERE {\n  { SELECT ?og ?gene ?xref ?taxon ?org_name ?clade_name WHERE {\n    ?taxon a :Species; up:scientificName ?org_name ;\n        rdfs:subClassOf+/up:scientificName ?clade_name.\n    ?gene a :Gene ;\n        up:organism/a ?taxon.\n    ?gene rdfs:seeAlso ?xref.\n    ?xref a :Uniprot.\n    ?gene :memberOf ?og.\n    ?og :xref/:xrefResource interpro:IPR002328 ;\n        :ogBuiltAt/up:scientificName \"Eukaryota\".\n    # restrict taxons to several clades\n    VALUES ?clade_name { \"Stramenopiles\" \"Alveolata\" \"Liliopsida\" \"Coleoptera\" }\n  } }\n\n    # join via uniprot ?xref\n    SERVICE <https://sparql.uniprot.org/sparql/> {\n        ?xref a up:Protein ;\n            up:annotation/up:catalyticActivity/up:catalyzedReaction ?rh .\n    }\n\n    # join via reaction ?rh\n    SERVICE <https://sparql.rhea-db.org/sparql> {\n        ?rh rdfs:subClassOf rh:Reaction ;\n            rh:equation ?equation.\n    }\n\n} GROUP BY ?equation ?og ORDER BY ?og ?equation",
+          "outcome": "error",
+          "durationSeconds": 64.5,
+          "error": "HTTP 500: Virtuoso RDFZZ Error DB.DBA.SPARQL_REXEC('https://sparql.rhea-db.org/sparql', ...) returned Content-Type 'text/html' status 'HTTP/1.1 503' Rhea: Too many concurrent queries. Please try again later.",
+          "note": "Only the ~1,844 UniProt cross-references in the 4 clades are federated, instead of the 76,771 genes of the 119 groups. It got through the UniProt SERVICE in about a minute; Rhea then refused the parallel calls. Not retried.",
+          "currentQuery": false
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T14:57:41+00:00",
@@ -942,31 +1507,66 @@
       ]
     },
     "https://sparql.orthodb.org/.well-known/sparql-examples/17": {
-      "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX odbgroup: <http://purl.orthodb.org/odbgroup/>\nPREFIX : <http://purl.orthodb.org/>\n\nSELECT *\nWHERE {\n    ?gene a :Gene;\n        :memberOf odbgroup:6400at314295 .\n    ?gene :xref [a :Xref; :xrefResource ?xref] .\n    ?xref a :Uniprot .\n    SERVICE <https://sparql.uniprot.org/sparql/> {\n        ?xref a up:Protein ;\n            up:recommendedName [up:fullName ?name] .\n    }\n}\n",
-      "description": "Find genes having Uniprot xrefs in the group 6400at314295, along with their names fetched from Uniprot SPARQL endpoint",
+      "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX odbgroup: <http://purl.orthodb.org/odbgroup/>\nPREFIX : <http://purl.orthodb.org/>\n\nSELECT *\nWHERE {\n    ?gene a :Gene;\n        :memberOf odbgroup:17060at314295 .\n    ?gene :xref [a :Xref; :xrefResource ?xref] .\n    ?xref a :Uniprot .\n    SERVICE <https://sparql.uniprot.org/sparql/> {\n        ?xref a up:Protein ;\n            up:recommendedName [up:fullName ?name] .\n    }\n}\n",
+      "description": "Find genes having Uniprot xrefs in the group 17060at314295, along with their names fetched from Uniprot SPARQL endpoint",
       "federatesWith": [
         "https://sparql.orthodb.org/sparql/",
         "https://sparql.uniprot.org/sparql"
       ],
       "target": "https://sparql.orthodb.org/sparql/",
-      "changeStatus": "unchanged",
-      "changes": [],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
+      "changeStatus": "query-fixed",
+      "changes": [
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "odbgroup:6400at314295",
+              "to": "odbgroup:17060at314295"
+            }
+          ],
+          "descriptionReplacements": [
+            {
+              "from": "6400at314295",
+              "to": "17060at314295"
+            }
+          ],
+          "reason": "OrthoDB group 6400at314295 no longer exists (0 genes on 2026-11-20). OrthoDB's v11 API names it 'Coiled-coil domain-containing protein 179' (Hominoidea, 7 genes in 7 species); the current group for the same family is 17060at314295 (same name, 7 genes, contains human CCDC179, UniProt H3BU77). The group ID is replaced in the query and the description."
+        }
       ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:03:41+00:00",
+        "date": "2026-11-20T08:18:37+00:00",
         "endpoint": "https://sparql.orthodb.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.2,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "b831b496fab09a42",
-        "run": 1
-      }
+        "resultCount": 2,
+        "responseBytes": 644,
+        "outcome": "ok",
+        "durationSeconds": 11.6,
+        "queryHash": "e1afa459b0eb70fa",
+        "run": 7
+      },
+      "upstreamComparison": {
+        "file": "examples/OrthoDB/17.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/OrthoDB/17.ttl",
+        "note": "Only the SERVICE URL's trailing slash differs."
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:03:41+00:00",
+          "endpoint": "https://sparql.orthodb.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.2,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "b831b496fab09a42",
+          "run": 1
+        }
+      ]
     },
     "https://sparql.orthodb.org/.well-known/sparql-examples/20": {
       "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX GO: <http://purl.obolibrary.org/obo/GO_>\nPREFIX : <http://purl.orthodb.org/>\nPREFIX ip_highest: <http://string-db.org/rdf/interaction/physical-highest-confidence-cutoff>\n\nSELECT ?gene_m ?gene_m_name ?partner_m ?string_partner_genename ?level ?percent_single_copy\nWHERE {\n    ?gene_m a :Gene .\n    ?gene_m up:organism/a [up:scientificName \"Mus musculus\"] .\n    ?gene_m :name ?gene_m_name .\n    ?gene_m :memberOf ?og .\n    ?og a :OrthoGroup ;\n        :name ?og_description ;\n        :ogBuiltAt [up:scientificName \"Mammalia\"] .\n    ?og :xref [a :Xref; :xrefResource GO:0005164], [a :Xref; :xrefResource GO:0045739] .\n    ?gene_m :xref [a :Xref; :xrefResource ?xref_m] .\n    ?xref_m a :Entrezgene.\n\n    SERVICE <https://sparql.string-db.org/sparql> {\n        ?string_gene_m rdfs:seeAlso ?xref_m ;\n            ip_highest: ?partner_m .\n        ?partner_m rdfs:label ?string_partner_genename ;\n            rdfs:comment ?string_partner_description .\n    }\n\n    ?gene_m2 a :Gene ;\n        up:organism/a [up:scientificName \"Mus musculus\"] ;\n        :name ?string_partner_genename ;\n        :memberOf ?og2 .\n    ?og2 a :OrthoGroup ;\n        :ogBuiltAt/up:scientificName ?level ;\n        :ogPercentSingleCopy ?percent_single_copy .\n}\n",
@@ -993,7 +1593,25 @@
         "error": "HTTP 500: Virtuoso RDFZZ Error DB.DBA.SPARQL_REXEC('https://sparql.string-db.org/sparql', ...) returned Content-Type 'text/html' status 'HTTP/1.1 403 Forbidden ' 403 Forbidden Forbidden You don't have permission to access /sparql on this server. SPARQL query: PREFIX up: PREFIX rdfs: PREFIX GO: PREFIX : PREFIX ip_highest: SELECT ?gene_m ?gene_m_name ?partner_m ?string_partner_genename ?level ?percent_single_copy WHERE { ?gene_m a :Gene . ?gene_m up:organism/a [up:scientificName \"Mus musculus\"] . ?gene_m :name ?gene_m_name . ?gene_m :memberOf ?og . ?og a :OrthoGroup ; :name ?og_description ; :ogBuiltAt [u…",
         "queryHash": "324b0fba6393b421",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/OrthoDB/20.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/OrthoDB/20.ttl",
+        "note": "Unchanged."
+      },
+      "failureSummary": "STRING (`https://sparql.string-db.org/sparql`) answers OrthoDB's SERVICE call with 403 Forbidden (an HTML page).",
+      "openOptions": "Check whether STRING's endpoint still accepts SPARQL requests.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "324b0fba6393b421",
+          "outcome": "error",
+          "result": "error - HTTP 403 from STRING db",
+          "currentQuery": true
+        }
+      ]
     },
     "https://www.bgee.org/sparql/.well-known/sparql-examples/020": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX genex: <http://purl.org/genex#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX sio: <http://semanticscience.org/resource/>\n\nSELECT DISTINCT ?flyEnsemblGene ?orthologTaxon ?orthologEnsemblGene ?orthologOmaLink WHERE {\n\t{\n        SELECT DISTINCT ?gene ?flyEnsemblGene {\n        ?gene a orth:Gene ;\n            genex:isExpressedIn/rdfs:label 'eye' ;\n            orth:organism/obo:RO_0002162 ?taxon ;\n            dcterms:identifier ?flyEnsemblGene .\n        ?taxon up:commonName 'fruit fly' .\n        } LIMIT 100\n    }\n    SERVICE <https://sparql.omabrowser.org/sparql/> {\n        ?protein2 a orth:Protein .\n        ?protein1 a orth:Protein .\n        ?clusterPrimates a orth:OrthologsCluster .\n        ?cluster a orth:OrthologsCluster ;\n            orth:hasHomologousMember ?node1 ;\n            orth:hasHomologousMember ?node2 .\n        ?node1 orth:hasHomologousMember* ?protein1 .\n        ?node2 orth:hasHomologousMember* ?clusterPrimates .\n        ?clusterPrimates orth:hasHomologousMember* ?protein2 .\n        ?protein1 sio:SIO_010079 ?gene . # is encoded by\n        ?protein2 rdfs:seeAlso ?orthologOmaLink ;\n            orth:organism/obo:RO_0002162 ?orthologTaxonUri ;\n            sio:SIO_010079 ?orthologGene . # is encoded by\n        ?clusterPrimates orth:hasTaxonomicRange ?taxRange .\n        ?taxRange orth:taxRange 'Primates' .\n        FILTER ( ?node1 != ?node2 )\n    }\n    ?orthologTaxonUri up:commonName ?orthologTaxon .\n    ?orthologGene dcterms:identifier ?orthologEnsemblGene .\n}",
@@ -1111,7 +1729,25 @@
         "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7e541cd1a74fa\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7e541cd1a74fa\",\"timestamp\":\"2026-11-18T15:11:24Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…",
         "queryHash": "efd2b4024cd402ef",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/Bgee/019.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Bgee/019.ttl",
+        "note": "Unchanged."
+      },
+      "failureSummary": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s.",
+      "openOptions": "Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "efd2b4024cd402ef",
+          "outcome": "error",
+          "result": "error - HTTP 524",
+          "currentQuery": true
+        }
+      ]
     },
     "https://www.bgee.org/sparql/.well-known/sparql-examples/018": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX genex: <http://purl.org/genex#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX sio: <http://semanticscience.org/resource/>\nPREFIX lscr: <http://purl.org/lscr#>\n\nSELECT ?humanProtein ?mouseProtein ?mouseOmaLink {\n    {\n        ?humanTaxon up:commonName 'human' .\n        ?mouseTaxon up:commonName 'mouse' .\n    }\n    SERVICE <https://sparql.omabrowser.org/sparql/> {\n        ?cluster a orth:OrthologsCluster ;\n            orth:hasHomologousMember ?node1 ;\n            orth:hasHomologousMember ?node2 .\n        ?node2 orth:hasHomologousMember* ?mouseProtein .\n        ?node1 orth:hasHomologousMember* ?humanProtein .\n        ?humanProtein a orth:Protein ;\n            rdfs:label 'INS' ;\n            orth:organism/obo:RO_0002162 ?humanTaxon .\n        ?mouseProtein a orth:Protein ;\n            sio:SIO_010079 ?mouseGene ; # is encoded by\n            orth:organism/obo:RO_0002162 ?mouseTaxon ;\n            rdfs:seeAlso ?mouseOmaLink .\n        ?mouseGene lscr:xrefEnsemblGene ?mouseGeneEnsembl .\n        FILTER ( ?node1 != ?node2 )\n    }\n    {\n        ?mouseGeneBgee a orth:Gene ;\n            lscr:xrefEnsemblGene ?mouseGeneEnsembl ;\n            genex:isExpressedIn ?cond ;\n            orth:organism/obo:RO_0002162 ?mouseTaxon .\n        ?cond genex:hasAnatomicalEntity/rdfs:label 'liver' .\n    }\n}",
@@ -1153,7 +1789,25 @@
         "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7eeb6bc35b73b\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7eeb6bc35b73b\",\"timestamp\":\"2026-11-18T15:17:51Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…",
         "queryHash": "a02e4ecc2a57054d",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/Bgee/018.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Bgee/018.ttl",
+        "note": "Only the SERVICE URL's trailing slash differs."
+      },
+      "failureSummary": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s.",
+      "openOptions": "Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "a02e4ecc2a57054d",
+          "outcome": "error",
+          "result": "error - HTTP 524",
+          "currentQuery": true
+        }
+      ]
     },
     "https://sparql.rhea-db.org/.well-known/sparql-examples/20_search_chemical_names_in_japanese": {
       "query": "PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT\n*\nWHERE {\nSERVICE <https://data.allie.dbcls.jp/sparql>{\n        ?x rdfs:label \"1,2,4-トリクロロベンゼン\"@ja ;\n            rdfs:label ?englishLabel .\n        FILTER(lang(?englishLabel) = \"en\")\n    }\n  BIND(STR(?englishLabel) AS ?englishLabelStr)\n  ?chebi rdfs:label|oboInOwl:hasSynonym ?englishLabelStr .\n}",
@@ -1366,6 +2020,24 @@
         "queryHash": "8fc2ba5e9f1a1c8b",
         "run": 3
       },
+      "upstreamComparison": {
+        "file": "examples/emi/006.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/006.ttl",
+        "note": "Identical apart from the `emi:` PREFIX (already updated)."
+      },
+      "failureSummary": "HTTP 504: the EMI gateway (nginx) ends requests after 60 s.",
+      "openOptions": "Run it where the 60 s limit does not apply, or ask the EarthMetabolome maintainers.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "8fc2ba5e9f1a1c8b",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout",
+          "currentQuery": true
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T14:55:40+00:00",
@@ -1920,14 +2592,14 @@
       ]
     },
     "https://purl.org/emi#examples018": {
-      "query": "\n\t\tPREFIX wd: <http://www.wikidata.org/entity/>PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?wd_chem WHERE { #retrieve metabolite data for sourceWD\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?sourceWD .\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidats-ids for metabolites\n\t\t\tVALUES ?wd_chem { wd:Q100138042 } #filter on wikidata-id of asimicin\n\t\t}\n\t}\n\tUNION #union with results from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?sourceWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName .\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve wikidata-id of the interaction-source\n\t\tsosa:isSampleOf ?sourceName . #retrieve its scientific name as listed in GloBI\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve wikidata-id of the interaction-target\n\t\tsosa:isSampleOf ?targetName . #retrieve its scientific names as listed in GloBI\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from source and target names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}\nLIMIT 1000",
+      "query": "\n\t\tPREFIX wd: <http://www.wikidata.org/entity/>PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX enpkg: <https://enpkg.commons-lab.org/kg/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceNameURI ?intxnName ?targetWD ?targetNameURI WHERE {\n\t{\n\t\tSELECT DISTINCT ?sourceWD ?wd_chem WHERE { #retrieve metabolite data for sourceWD\n\t\t\t?material sosa:hasSample ?extract ;\n\t\t\t\tsosa:isSampleOf ?organe .\n\t\t\t?organe emi:inTaxon ?sourceWD .\n\t\t\t?extract sosa:isFeatureOfInterestOf ?lcms .\n\t\t\t?lcms sosa:hasResult ?feature_list .\n\t\t\t?feature_list emi:hasLCMSFeature ?feature .\n\t\t\t?feature emi:hasAnnotation ?sirius_annotation .\n\t\t\t?sirius_annotation a emi:StructuralAnnotation ;\n\t\t\t\temi:hasChemicalStructure ?ik2d .\n\t\t\t?ik2d emi:hasSMILES ?smiles ;\n\t\t\t\temi:isInChIKey2DOf ?ik .\n\t\t\t?ik emi:isInChIKeyOf ?wd_chem . #retrieve wikidats-ids for metabolites\n\t\t\tVALUES ?wd_chem { wd:Q100138042 } #filter on wikidata-id of asimicin\n\t\t}\n\t}\n\tUNION #union with results from lotus (integrated in wikidata)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n\t\t\t\twdt:P703 ?sourceWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n\t?intxn emi:hasSource ?xOrg ; #retrieve interaction-pairs\n\t\temi:hasTarget ?yOrg ;\n\t\temi:isClassifiedWith ?intxnName .\n\t?xOrg emi:inTaxon ?sourceWD ; #retrieve wikidata-id of the interaction-source\n\t\tsosa:isSampleOf ?sourceName . #retrieve its scientific name as listed in GloBI\n\t?yOrg emi:inTaxon ?targetWD ; #retrieve wikidata-id of the interaction-target\n\t\tsosa:isSampleOf ?targetName . #retrieve its scientific names as listed in GloBI\n\tBIND (REPLACE(STR(?sourceName), \"%20\", \" \") AS ?sourceNameX) #remove percent encodings from source and target names\n\tBIND (IRI(?sourceNameX) AS ?sourceNameURI)\n\tBIND (REPLACE(STR(?targetName), \"%20\", \" \") AS ?targetNameX)\n\tBIND (IRI(?targetNameX) AS ?targetNameURI)\n}\nLIMIT 1000",
       "description": "## List possible interactions of plants that can produce asimcin (wd:Q100138042), a cytotoxin.",
       "federatesWith": [
         "https://qlever.earthmetabolome.org/api/metrin-kg",
         "https://qlever.dev/api/wikidata"
       ],
       "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
-      "changeStatus": "endpoint-and-prefix-updated",
+      "changeStatus": "query-fixed",
       "changes": [
         {
           "field": "query",
@@ -1961,25 +2633,78 @@
           "to": "https://w3id.org/emi#",
           "occurrences": 1,
           "reason": "The EMI knowledge graph behind the new endpoint uses the namespace https://w3id.org/emi#; with the old one every EMI query returned 0 rows (run 1, 2026-11-18). Upstream sparql-examples@45e5b53 examples/emi/ made the same change."
+        },
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "\t\tSELECT DISTINCT ?wd_chem WHERE { #retrieve metabolite data for sourceWD",
+              "to": "\t\tSELECT DISTINCT ?sourceWD ?wd_chem WHERE { #retrieve metabolite data for sourceWD"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "The metabolite subquery returned only ?wd_chem, not ?sourceWD, so in the EMI branch of the UNION the producing organism was not tied to the interactions: every interaction in the graph (12.9 million) matched, and the query hit the endpoint's 60 s gateway limit (HTTP 504, run 3). The subquery now also returns ?sourceWD, as its comment intends (probe 2026-11-20: 32 rows in 0.5 s)."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Failed: HTTP 504: 504 Gateway Time-out nginx/1.20.1",
-        "Hint: HTTP 504 after 60 s comes from the endpoint's gateway, so run the query by hand or ask the maintainers."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-19T10:17:04+00:00",
+        "date": "2026-11-20T08:59:58+00:00",
         "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
         "method": "GET",
-        "httpStatus": 504,
-        "contentType": "text/html",
-        "outcome": "error",
-        "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
-        "durationSeconds": 60.2,
-        "queryHash": "d4a0ab68b98e1baa",
-        "run": 3
+        "httpStatus": 200,
+        "contentType": "application/sparql-results+json",
+        "resultCount": 32,
+        "responseBytes": 13256,
+        "outcome": "ok",
+        "durationSeconds": 0.6,
+        "queryHash": "40a6c43511f4f977",
+        "run": 9
       },
+      "upstreamComparison": {
+        "file": "examples/emi/021.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/021.ttl",
+        "note": "Reworked and renumbered upstream. The closest upstream queries are examples/emi/021.ttl (the same question, for norhyoscyamine, `wd:Q27107545`) and examples/emi/020.ttl (producers of onopordopicrin, `wd:Q27107580`, and where their interactions were seen)."
+      },
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "variant",
+          "versionNote": "upstream examples/emi/021.ttl with asimicin (`wd:Q100138042`, as in the catalogue) instead of norhyoscyamine",
+          "upstreamFile": "examples/emi/021.ttl",
+          "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?intxnId ?targetWD ?targetName WHERE {\n\t# interaction data\n\t{\n        \t?intxn emi:hasSource ?xOrg ; # retrieve interaction-pairs\n                \temi:hasTarget ?yOrg ;\n                        emi:isClassifiedWith ?intxnId .\n                ?intxnId rdfs:label ?intxnName .\n                ?xOrg emi:inTaxon ?sourceWD ;\n\t\t\trdfs:label ?sourceName .\n\t\t?yOrg emi:inTaxon ?targetWD ;\n\t\t\trdfs:label ?targetName .\n        }\n\n\t# metabolite data\n\tFILTER (?xWD = ?sourceWD || ?xWD = ?targetWD)\t# ensure that xWD can be both source/target from the interaction-pairs retrieved before\n        {\n\t\tSELECT DISTINCT ?xWD ?wd_chem WHERE {\n                \t?material sosa:hasSample ?extract ;\n                        \tsosa:isSampleOf ?organe .\n                        ?organe emi:inTaxon ?xWD .\n                        ?extract sosa:isFeatureOfInterestOf ?lcms .\n                        ?lcms sosa:hasResult ?feature_list .\n                        ?feature_list emi:hasLCMSFeature ?feature .\n                        ?feature emi:hasAnnotation ?sirius_annotation .\n                        ?sirius_annotation a emi:StructuralAnnotation ;\n                        \temi:hasChemicalStructure ?ik2d .\n                        ?ik2d emi:hasSMILES ?smiles ;\n                        \temi:isInChIKey2DOf ?ik .\n                        ?ik emi:isInChIKeyOf ?wd_chem .\n                        VALUES ?wd_chem { wd:Q100138042 }\n                }\n\t}  UNION # union with data from wikidata (lotus)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n   \t\t\t\twdt:P703 ?xWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n}",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout",
+          "note": "One result was written for this version and upstream 020 (next check); both timed out.",
+          "currentQuery": false
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "versionNote": "as is (a related question)",
+          "upstreamFile": "examples/emi/020.ttl",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout",
+          "note": "One result was written for this version and the 021 version above; both timed out.",
+          "currentQuery": false
+        },
+        {
+          "date": "2026-11-20T08:57:26+00:00",
+          "method": "probe",
+          "version": "variant",
+          "versionNote": "upstream examples/emi/020.ttl, restructured",
+          "upstreamFile": "examples/emi/020.ttl",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?targetWD ?targetName ?loc WHERE {\n\t# interactions whose target produces the compound (computed first, small)\n\t{ SELECT ?intxn ?xOrg ?yOrg ?targetWD WHERE {\n\t# metabolite data\n        {\n\t\tSELECT DISTINCT ?targetWD ?wd_chem WHERE {\n\t\t\t?material sosa:hasSample ?extract ;\n                        \tsosa:isSampleOf ?organe .\n                \t?organe emi:inTaxon ?targetWD .\t# filter by target wikidata-id\n                \t?extract sosa:isFeatureOfInterestOf ?lcms .\n                \t?lcms sosa:hasResult ?feature_list .\n                \t?feature_list emi:hasLCMSFeature ?feature .\n                \t?feature emi:hasAnnotation ?sirius_annotation .\n                \t?sirius_annotation a emi:StructuralAnnotation ;\n\t                \temi:hasChemicalStructure ?ik2d .\n                \t?ik2d emi:hasSMILES ?smiles ;\n                      \t\temi:isInChIKey2DOf ?ik .\n                \t?ik emi:isInChIKeyOf ?wd_chem .\n                \tVALUES ?wd_chem { wd:Q27107580 } # filter on the wikidata-id of Onpordopicrin\n\t\t}\n\t} UNION\t# union with the lotus metabolite data from wikidata\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n   \t\t\t\twdt:P703 ?targetWD .\n\t\t \tVALUES ?wd_chem { wd:Q27107580 }\n\t\t}\n\t}\n\t\t?yOrg emi:inTaxon ?targetWD .\n\t\t?intxn emi:hasTarget ?yOrg ;\n\t\t\temi:hasSource ?xOrg .\n\t} }\n\t# then their details\n\t?intxn emi:isClassifiedWith ?intxnName ;\n\t\tprov:atLocation ?loc ;\n\t\twgs:lat ?lats ;\n\t\twgs:long ?longs .\n\t?xOrg emi:inTaxon ?sourceWD ;\n\t\trdfs:label ?sourceName ;\n\t\tsosa:isSampleOf ?sourceSample .\n\t?yOrg rdfs:label ?targetName ;\n\t\tsosa:isSampleOf ?targetSample .\n}",
+          "outcome": "ok",
+          "resultCount": 126,
+          "durationSeconds": 2.0,
+          "note": "The interactions whose target produces the compound are found first, in a subquery, and their location and names are added after. As is, 020 joins its 24 producer taxa with all 8.4 million located interactions and hits the 60 s gateway limit.",
+          "currentQuery": false
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T15:30:21+00:00",
@@ -1992,6 +2717,18 @@
           "outcome": "empty",
           "queryHash": "1236e166aa57c397",
           "run": 1
+        },
+        {
+          "date": "2026-11-19T10:17:04+00:00",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "method": "GET",
+          "httpStatus": 504,
+          "contentType": "text/html",
+          "outcome": "error",
+          "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+          "durationSeconds": 60.2,
+          "queryHash": "d4a0ab68b98e1baa",
+          "run": 3
         }
       ]
     },
@@ -2048,6 +2785,24 @@
         "queryHash": "e7d88b39ff0d01b3",
         "run": 5
       },
+      "upstreamComparison": {
+        "file": "examples/emi/013.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/013.ttl",
+        "note": "Changed in the upstream SIB catalogue; already replaced with the upstream version."
+      },
+      "failureSummary": "QLever's Wikidata endpoint (qlever.dev) answers the EMI server's SERVICE call with 429 Too Many Requests.",
+      "openOptions": "Try again later: the 429 is a rate limit.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "catalogue",
+          "queryHash": "e7d88b39ff0d01b3",
+          "outcome": "error",
+          "result": "error - wikidata responds with HTTP 429",
+          "currentQuery": true
+        }
+      ],
       "previousVerifications": [
         {
           "date": "2026-11-18T15:31:21+00:00",
@@ -2305,37 +3060,74 @@
       }
     },
     "https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend": {
-      "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT DISTINCT ?PROTEIN ?IS_PARALOGOUS_TO_PROTEIN ?UNIPROT_XREF ?PARALOG_UNIPROT_XREF ?annotation_text WHERE {\n\t{\n\t\t?cluster a orth:ParalogsCluster .\n\t\t?cluster orth:hasHomologousMember ?node1 .\n\t\t?cluster orth:hasHomologousMember ?node2 .\n\t\t?node2 orth:hasHomologousMember* ?PROTEIN .\n\t\t?node1 orth:hasHomologousMember* ?IS_PARALOGOUS_TO_PROTEIN .\n\t\t?PROTEIN a orth:Protein .\n\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n\t\t?IS_PARALOGOUS_TO_PROTEIN a orth:Protein .\n\t\t?IS_PARALOGOUS_TO_PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' .\n\t\t?IS_PARALOGOUS_TO_PROTEIN lscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n\t}\n\tSERVICE <https://sparql.uniprot.org/sparql/> {\n\t\t?PARALOG_UNIPROT_XREF up:annotation ?annotation .\n\t\t?annotation a up:Function_Annotation .\n\t\t?annotation rdfs:comment ?annotation_text .\n\t}\n}",
+      "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX sio: <http://semanticscience.org/resource/>\nSELECT DISTINCT ?PROTEIN ?IS_PARALOGOUS_TO_PROTEIN ?UNIPROT_XREF ?PARALOG_UNIPROT_XREF ?annotation_text WHERE {\n\t{\n\t\t?cluster a orth:ParalogsCluster .\n\t\t?cluster orth:hasHomologousMember ?node1 .\n\t\t?cluster orth:hasHomologousMember ?node2 .\n\t\t?node2 orth:hasHomologousMember* ?PROTEIN .\n\t\t?node1 orth:hasHomologousMember* ?IS_PARALOGOUS_TO_PROTEIN .\n\t\t?PROTEIN a orth:Protein .\n\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\tsio:SIO_010079 ?gene .\n\t\t?tp53Node sio:SIO_010079 ?gene ; # label and UniProt xref are on another protein node of the same gene\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n\t\t?IS_PARALOGOUS_TO_PROTEIN a orth:Protein .\n\t\t?IS_PARALOGOUS_TO_PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' .\n\t\t?IS_PARALOGOUS_TO_PROTEIN sio:SIO_010079 ?paralogGene .\n\t\t?paralogNode sio:SIO_010079 ?paralogGene ;\n\t\t\tlscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n\t}\n\tSERVICE <https://sparql.uniprot.org/sparql/> {\n\t\t?PARALOG_UNIPROT_XREF up:annotation ?annotation .\n\t\t?annotation a up:Function_Annotation .\n\t\t?annotation rdfs:comment ?annotation_text .\n\t}\n}",
       "description": "Rattus norvegicus' proteins encoded by genes that are paralogous to its TP53 gene and their Uniprot function annotations.",
       "federatesWith": [
         "https://sparql.uniprot.org/sparql"
       ],
       "target": "https://sparql.omabrowser.org/sparql/",
-      "changeStatus": "endpoint-updated",
+      "changeStatus": "query-fixed",
       "changes": [
         {
           "field": "target",
           "from": "https://sparql.omabrowser.org/sparql",
           "to": "https://sparql.omabrowser.org/sparql/",
           "reason": "OMA answers 301 Moved Permanently from /sparql to /sparql/; most clients turn a redirected POST into a GET without the query, so the canonical URL with the trailing slash is used."
+        },
+        {
+          "field": "queryFix",
+          "replacements": [
+            {
+              "from": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT DISTINCT ?PROTEIN",
+              "to": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX sio: <http://semanticscience.org/resource/>\nSELECT DISTINCT ?PROTEIN"
+            },
+            {
+              "from": "\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n",
+              "to": "\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\tsio:SIO_010079 ?gene .\n\t\t?tp53Node sio:SIO_010079 ?gene ; # label and UniProt xref are on another protein node of the same gene\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n"
+            },
+            {
+              "from": "\t\t?IS_PARALOGOUS_TO_PROTEIN lscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n",
+              "to": "\t\t?IS_PARALOGOUS_TO_PROTEIN sio:SIO_010079 ?paralogGene .\n\t\t?paralogNode sio:SIO_010079 ?paralogGene ;\n\t\t\tlscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n"
+            }
+          ],
+          "descriptionReplacements": [],
+          "reason": "In the current OMA data the protein node that has the organism and sits in the paralog clusters (rat TP53: RATNO03077) has no rdfs:label and no lscr:xrefUniprot; those are on another protein node of the same gene (RATNO03074), which has no organism and no cluster (probes 2026-11-20). The label and the UniProt cross-references are now read from a protein node of the same gene (sio:SIO_010079), for the TP53 protein and for its paralogs."
         }
       ],
-      "status": "needs-manual-fix",
-      "manualFixNotes": [
-        "Returned 0 results: check by hand whether that is expected."
-      ],
+      "status": "working",
+      "manualFixNotes": [],
       "verification": {
-        "date": "2026-11-18T15:04:33+00:00",
+        "date": "2026-11-20T08:19:09+00:00",
         "endpoint": "https://sparql.omabrowser.org/sparql/",
         "method": "GET",
         "httpStatus": 200,
         "contentType": "application/sparql-results+json",
-        "durationSeconds": 0.3,
-        "resultCount": 0,
-        "outcome": "empty",
-        "queryHash": "5fc6e71f8f8dfa90",
-        "run": 1
-      }
+        "resultCount": 16,
+        "responseBytes": 20180,
+        "outcome": "ok",
+        "durationSeconds": 2.6,
+        "queryHash": "8c1c622536179523",
+        "run": 7
+      },
+      "upstreamComparison": {
+        "file": "examples/OMA/15-biosodafrontend-rat-TP53.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/OMA/15-biosodafrontend-rat-TP53.ttl",
+        "note": "Only the SERVICE URL's trailing slash differs."
+      },
+      "previousVerifications": [
+        {
+          "date": "2026-11-18T15:04:33+00:00",
+          "endpoint": "https://sparql.omabrowser.org/sparql/",
+          "method": "GET",
+          "httpStatus": 200,
+          "contentType": "application/sparql-results+json",
+          "durationSeconds": 0.3,
+          "resultCount": 0,
+          "outcome": "empty",
+          "queryHash": "5fc6e71f8f8dfa90",
+          "run": 1
+        }
+      ]
     },
     "https://www.bgee.org/sparql/.well-known/sparql-examples/027-biosodafrontend": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX genex: <http://purl.org/genex#>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX orth: <http://purl.org/net/orth#>\nSELECT DISTINCT ?geneEns ?uniprot ?annotation_text {\n\t{\n\t\tSELECT ?geneEns {\n\t\t\t?geneB a orth:Gene .\n\t\t\t?geneB genex:isExpressedIn ?cond .\n\t\t\t?cond genex:hasAnatomicalEntity ?anat .\n\t\t\t?geneB lscr:xrefEnsemblGene ?geneEns .\n\t\t\t?anat rdfs:label 'pancreas' .\n\t\t\t?geneB orth:organism ?o .\n\t\t\t?o obo:RO_0002162 ?taxon2 .\n\t\t\t?taxon2 up:commonName 'human' .\n\t\t} LIMIT 100\n\t}\n\tSERVICE <https://sparql.uniprot.org/sparql/> {\n\t\t?uniprot rdfs:seeAlso / up:transcribedFrom ?geneEns .\n\t\t?uniprot up:annotation ?annotation .\n\t\t?annotation rdfs:comment ?annotation_text .\n\t}\n}",
@@ -2386,7 +3178,25 @@
         "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7fc1478c08a8b\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7fc1478c08a8b\",\"timestamp\":\"2026-11-18T15:26:58Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…",
         "queryHash": "a522cf00bb7eec5b",
         "run": 1
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/Bgee/028-biosodafrontend.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Bgee/028-biosodafrontend.ttl",
+        "note": "Reworked: `LIMIT 10` on the Bgee genes, `up:transcribedFrom` without `rdfs:seeAlso`, and no `up:Disease_Annotation` filter any more (it returns all annotation IRIs, not disease annotation texts)."
+      },
+      "failureSummary": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s (also for the upstream version with `LIMIT 10`).",
+      "openOptions": "Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/Bgee/028-biosodafrontend.ttl",
+          "outcome": "error",
+          "result": "error - HTTP524",
+          "currentQuery": false
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/117_biosodafrontend_glioblastoma_orthologs_rat": {
       "query": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX obo: <http://purl.obolibrary.org/obo/>\nPREFIX orth: <http://purl.org/net/orth#>\nPREFIX sio: <http://semanticscience.org/resource/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX lscr: <http://purl.org/lscr#>\nPREFIX genex: <http://purl.org/genex#>\nSELECT DISTINCT ?protein ?orthologous_protein ?gene ?annotation_text WHERE {\n\t?protein a up:Protein ;\n\tup:organism taxon:9606 ;\n\tup:annotation ?annotation .\n\t?annotation rdfs:comment ?annotation_text .\n\t?annotation a up:Disease_Annotation .\n\tFILTER CONTAINS (?annotation_text, \"glioblastoma\")\n\tSERVICE <https://sparql.omabrowser.org/sparql/> {\n\t\t\tSELECT ?orthologous_protein ?protein ?gene WHERE {\n\t\t\t\t?protein_OMA a orth:Protein .\n\t\t\t\t?orthologous_protein a orth:Protein .\n\t\t\t\t?cluster a orth:OrthologsCluster .\n\t\t\t\t?cluster orth:hasHomologousMember ?node1 .\n\t\t\t\t?cluster\n\t\t\t\torth:hasHomologousMember ?node2 .\n\t\t\t\t?node2 orth:hasHomologousMember* ?protein_OMA .\n\t\t\t\t?node1 orth:hasHomologousMember* ?orthologous_protein .\n\t\t\t\t?orthologous_protein orth:organism/obo:RO_0002162 taxon:10116 . # rattus norvegicus\n\t\t\t\t?orthologous_protein sio:SIO_010079 ?gene .\n\t\t\t\t?protein_OMA lscr:xrefUniprot ?protein .\n\t\t\t\tFILTER(?node1 != ?node2)\n\t\t\t}\n\t\t}\n\t\tSERVICE <https://www.bgee.org/sparql/> {\n\t\t\t ?gene genex:isExpressedIn ?a .\n\t\t\t?a rdfs:label \"brain\" .\n\t\t\t?gene orth:organism ?s . \n\t\t\t?s obo:RO_0002162 taxon:10116.\n\t\t}\n}",
@@ -2420,7 +3230,25 @@
         "durationSeconds": 1.0,
         "queryHash": "327135b389a44ef3",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl",
+        "note": "Restructured: the UniProt disease filter runs in a subquery before the OMA and Bgee SERVICE calls (OMA and Bgee parts unchanged apart from layout)."
+      },
+      "failureSummary": "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's SERVICE call).",
+      "openOptions": "Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) is blocked too (see UniProt 117 and 118).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl",
+          "outcome": "error",
+          "result": "error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: SERVICE responded with HTTP status code: 403, Forbidden",
+          "currentQuery": false
+        }
+      ]
     },
     "https://sparql.uniprot.org/.well-known/sparql-examples/118_biosodafrontend_rat_brain_human_cancer": {
       "query": "PREFIX up:<http://purl.uniprot.org/core/>\nPREFIX taxon:<http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>\nPREFIX orth:<http://purl.org/net/orth#>\nPREFIX dcterms:<http://purl.org/dc/terms/>\nPREFIX obo:<http://purl.obolibrary.org/obo/>\nPREFIX lscr:<http://purl.org/lscr#>\nPREFIX genex:<http://purl.org/genex#>\nPREFIX sio: <http://semanticscience.org/resource/>\nSELECT ?gene ?orthologous_protein2 WHERE {\n\t?protein1 a up:Protein;\n\tup:organism/up:scientificName 'Homo sapiens' ;\n\tup:annotation ?annotation .\n\t?annotation rdfs:comment ?annotation_text.\n\t?annotation a up:Disease_Annotation .\n\tFILTER CONTAINS (?annotation_text, \"cancer\")\n\tSERVICE <https://sparql.omabrowser.org/sparql/> {\n\t\t\tSELECT ?orthologous_protein2 ?protein1 ?gene WHERE {\n\t\t\t\t?protein_OMA a orth:Protein .\n\t\t\t\t?orthologous_protein2 a orth:Protein .\n\t\t\t\t?cluster a orth:OrthologsCluster .\n\t\t\t\t?cluster orth:hasHomologousMember ?node1 .\n\t\t\t\t?cluster orth:hasHomologousMember ?node2 .\n\t\t\t\t?node2 orth:hasHomologousMember* ?protein_OMA .\n\t\t\t\t?node1 orth:hasHomologousMember* ?orthologous_protein2 \n\t\t\t\t.?orthologous_protein2 orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' .\n\t\t\t\t?orthologous_protein2 sio:SIO_010079 ?gene .\n\t\t\t\t?protein_OMA lscr:xrefUniprot ?protein1 .\n\t\t\t\tFILTER(?node1 != ?node2)\n\t\t\t}\n\t\t}\n\n\t\tSERVICE <https://www.bgee.org/sparql/> {\n\t\t\t?gene genex:isExpressedIn ?anatEntity .\n\t\t\t?anatEntity rdfs:label 'brain' .\n\t\t\t?gene orth:organism ?org . \n\t\t\t?org obo:RO_0002162 taxon:10116 .\n\t\t}\n}",
@@ -2454,12 +3282,30 @@
         "durationSeconds": 0.9,
         "queryHash": "0daaf369f5943791",
         "run": 2
-      }
+      },
+      "upstreamComparison": {
+        "file": "examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl",
+        "url": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl",
+        "note": "Restructured like UniProt 117 (UniProt part in a subquery) and selects only `?gene ?orthologous_protein2`."
+      },
+      "failureSummary": "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's SERVICE call).",
+      "openOptions": "Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) is blocked too (see UniProt 117 and 118).",
+      "otherChecks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl",
+          "outcome": "error",
+          "result": "error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: SERVICE responded with HTTP status code: 403, Forbidden",
+          "currentQuery": false
+        }
+      ]
     }
   },
   "metadata": {
     "catalogueVersion": "2026-11",
-    "generated": "2026-11-19T12:18:49+00:00",
+    "generated": "2026-11-20T12:57:20+00:00",
     "generatedBy": "update_query_catalogue.py build",
     "derivedFrom": {
       "file": "sib-swiss-federated-queries.json",
@@ -2478,7 +3324,7 @@
       "commitConsultedForEndpointUrls": "45e5b53a2d59a121221cd66a8596ef868cc58021",
       "note": "Endpoint URLs and changed PREFIX namespaces were taken from upstream. Query logic was not synced, except for the queries in upstreamReplacements, which changed in the upstream SIB catalogue and are replaced with their upstream version. No newer upstream queries were added."
     },
-    "policy": "Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE clauses, and PREFIX namespaces that changed together with an endpoint's data (see prefixMap). Queries that no longer work and were reworked upstream are replaced with the upstream version (see upstreamReplacements); queries that use an unavailable endpoint or were dropped upstream are left out (see removedQueries). Query keys are unchanged so results can be joined with earlier experiments, except for replaced queries.",
+    "policy": "Minimal fixes only: endpoint URLs in target, federatesWith and SERVICE clauses, and PREFIX namespaces that changed together with an endpoint's data (see prefixMap). Queries that no longer work and were reworked upstream are replaced with the upstream version (see upstreamReplacements); a few queries that returned no results get a small documented fix (see queryFixes); queries that use an unavailable endpoint or were dropped upstream are left out (see removedQueries). Query keys are unchanged so results can be joined with earlier experiments, except for replaced queries.",
     "endpointMap": [
       {
         "from": "https://biosoda.unil.ch/emi/sparql",
@@ -2524,8 +3370,55 @@
         "upstreamFile": "examples/emi/019.ttl",
         "upstreamId": "https://kg.earthmetabolome.org/metrin/api/.well-known/examples/019",
         "reason": "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query is examples/emi/019.ttl (same description), which selects the interaction type with VALUES instead of a REGEX filter and reads names with rdfs:label. The old version hit the endpoint's 60 s gateway limit (HTTP 504) even with the PREFIX fix (run 3, 2026-11-19), so it was replaced with the upstream text and description."
+      },
+      {
+        "key": "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome",
+        "upstreamFile": "examples/UniProt/67_draft_human_metabolome.ttl",
+        "upstreamId": "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome",
+        "reason": "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query reads ChEBI's chemrof:smiles_string and chemrof:inchi_key_string (instead of chebislash:smiles and chebislash:inchikey) and follows rh:underlyingChebi straight to the ChEBI IRI (instead of rh:underlyingChebi/rh:chebi); the description is unchanged. The old version returned 0 rows (run 2, 2026-11-19); the upstream version returned 317,738 rows when run by hand (2026-11-20), so it replaced the old text."
+      },
+      {
+        "key": "https://sparql.uniprot.org/.well-known/sparql-examples/36",
+        "upstreamFile": "examples/UniProt/36_orthologous_proteins_via_orthodb.ttl",
+        "upstreamId": "https://sparql.uniprot.org/.well-known/sparql-examples/36",
+        "reason": "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query no longer reads the OrthoDB group from UniProt's rdfs:seeAlso cross-reference (upstream notes these can be out of date) but matches the protein inside the OrthoDB SERVICE, whose URL now has a trailing slash; the description is unchanged. The old version returned 0 rows (run 2, 2026-11-19); the upstream version returned 1,100 rows when run by hand (2026-11-20), so it replaced the old text."
       }
     ],
+    "queryFixes": [
+      {
+        "key": "https://sparql.uniprot.org/.well-known/sparql-examples/48",
+        "reason": "GlyConnect now publishes glycosylated_at and glycosylates_at in the namespace http://purl.jp/bio/12/glyco/conjugate# (probe 2026-11-20: 0 triples with the glycan# predicates, 5,052 matching rows for the SERVICE block with conjugate#). Only those two predicates change."
+      },
+      {
+        "key": "https://sparql.orthodb.org/.well-known/sparql-examples/17",
+        "reason": "OrthoDB group 6400at314295 no longer exists (0 genes on 2026-11-20). OrthoDB's v11 API names it 'Coiled-coil domain-containing protein 179' (Hominoidea, 7 genes in 7 species); the current group for the same family is 17060at314295 (same name, 7 genes, contains human CCDC179, UniProt H3BU77). The group ID is replaced in the query and the description."
+      },
+      {
+        "key": "https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend",
+        "reason": "In the current OMA data the protein node that has the organism and sits in the paralog clusters (rat TP53: RATNO03077) has no rdfs:label and no lscr:xrefUniprot; those are on another protein node of the same gene (RATNO03074), which has no organism and no cluster (probes 2026-11-20). The label and the UniProt cross-references are now read from a protein node of the same gene (sio:SIO_010079), for the TP53 protein and for its paralogs."
+      },
+      {
+        "key": "https://sparql.uniprot.org/.well-known/sparql-examples/53",
+        "reason": "The UniProt endpoint (QLever) only passes values into a SERVICE call when the SERVICE is joined directly with a result of at most 10,000 rows; otherwise OMA gets the whole block unbound, which returned 0 rows after 760 s in run 2 (most likely OMA's time limit). The Rhea and UniProt part is wrapped in a subquery (1,390 rows, 319 human proteins on 2026-11-20), so it becomes the SERVICE's direct sibling and OMA gets the human proteins as VALUES. The query asks the same question."
+      },
+      {
+        "key": "https://sparql.swisslipids.org/.well-known/sparql-examples/26",
+        "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/26.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (632,026,411,011 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). With the join fix alone the result would still be 89,319,800 rows, so the query also returns DISTINCT (lipid, organism) pairs and counts only reviewed (Swiss-Prot) enzymes (up:reviewed true): 136,755 rows expected (computed from aggregate queries on 2026-11-20)."
+      },
+      {
+        "key": "https://sparql.swisslipids.org/.well-known/sparql-examples/27",
+        "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/27.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (80,644,283,152,110 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). With the join fix alone the result would still be 10,548,746,085 rows, so the query also returns DISTINCT (lipid, organism) pairs and counts only reviewed (Swiss-Prot) enzymes (up:reviewed true): 6,400 rows expected (computed from aggregate queries on 2026-11-20)."
+      },
+      {
+        "key": "https://sparql.swisslipids.org/.well-known/sparql-examples/34",
+        "reason": "Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 examples/SwissLipids/34.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins the SwissLipids part instead of forming a cross product (1,780,126,200 rows, run 6), and rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). Expected size with this fix: 280,679 rows (computed from aggregate queries on 2026-11-20)."
+      },
+      {
+        "key": "https://purl.org/emi#examples018",
+        "reason": "The metabolite subquery returned only ?wd_chem, not ?sourceWD, so in the EMI branch of the UNION the producing organism was not tied to the interactions: every interaction in the graph (12.9 million) matched, and the query hit the endpoint's 60 s gateway limit (HTTP 504, run 3). The subquery now also returns ?sourceWD, as its comment intends (probe 2026-11-20: 32 rows in 0.5 s)."
+      }
+    ],
+    "otherChecks": "Entries can have otherChecks: results outside the verify runs. method by-hand: run by the catalogue maintainer from a hand-check list (2026-11-19/20; recorded on 2026-11-20); probe: a single HTTP request sent while updating the catalogue; computed: a result count computed from small aggregate queries (not observed). version catalogue means the entry's query text (currentQuery is true while queryHash matches it); upstream means the file named in upstreamFile at sparql-examples@45e5b53; variant means the text in query or described in versionNote. upstreamComparison, failureSummary and openOptions hold what is known about the query. All of it comes from QUERY_NOTES in the script.",
     "removedQueries": [
       {
         "key": "https://sparql.uniprot.org/.well-known/sparql-examples/46",
@@ -2768,6 +3661,195 @@
         },
         "notes": [
           "The stored HTTP 500 message of emi#examples012 was shortened after the run: the HTML clean-up had removed the <IRI>s from this JSON error (fixed in the script). The SERVICE URL was restored; it is the query's only SERVICE endpoint. The echoed query text was cut."
+        ]
+      },
+      {
+        "id": 6,
+        "label": "result counts by parts (SwissLipids 26, 27, 34)",
+        "started": "2026-11-19T14:11:49+00:00",
+        "finished": "2026-11-19T14:13:51+00:00",
+        "queriesSelected": 3,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 900,
+          "retries": 0,
+          "maxResponseBytes": 104857600,
+          "recheckOutcomes": [
+            "too-large"
+          ],
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": [
+          "SwissLipids 26, 27 and 34 returned more than 2 GB in run 2. Their result is a cross product: the SwissLipids pattern binds ?chebi but the Rhea SERVICE binds ?metabolite, so the SwissLipids part and the Rhea x UniProt part share no variable (upstream sparql-examples@45e5b53 fixed this by using ?chebi in the Rhea part). A COUNT(*) around the original query would make SwissLipids enumerate the whole product, so the counts were computed instead from 5 aggregate queries (see countQueries): |result| = |SwissLipids part| x sum over Rhea reactions r of |Rhea rows for r| x |UniProt rows for r|.",
+          "Parts: SwissLipids owl:equivalentClass pairs = 4,643 (26, 34); with the isomeric-subspecies pattern = 592,430 (27); Rhea x UniProt rows = 136,124,577 (26, 27), human only = 383,400 (34).",
+          "Each count assumes the remote endpoints return complete results to SwissLipids' SERVICE calls. A check of the formula against the federated engine for one reaction (rhea:18789, expected 27,858) was answered with HTTP 400 and an empty message by SwissLipids; it was not retried. Run by hand it failed as well, and it was dropped once 26, 27 and 34 got upstream's join fix (their expected counts are computed the same way; see otherChecks)."
+        ],
+        "countQueries": [
+          {
+            "name": "sl26_34",
+            "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+            "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nSELECT (COUNT(*) AS ?n) WHERE {\n  ?swisslipid owl:equivalentClass ?chebi .\n}",
+            "httpStatus": 200,
+            "durationSeconds": 0.3,
+            "rows": 1
+          },
+          {
+            "name": "rhea_by_reaction",
+            "endpoint": "https://sparql.rhea-db.org/sparql",
+            "query": "PREFIX rh: <http://rdf.rhea-db.org/>\nSELECT ?rhea (COUNT(*) AS ?n) WHERE {\n  ?rhea rh:side/rh:contains/rh:compound ?compound .\n  ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|(rh:underlyingChebi/rh:chebi)) ?metabolite .\n} GROUP BY ?rhea",
+            "httpStatus": 200,
+            "durationSeconds": 6.9,
+            "rows": 18995
+          },
+          {
+            "name": "uniprot_by_reaction",
+            "endpoint": "https://sparql.uniprot.org/sparql/",
+            "query": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?rhea (COUNT(*) AS ?n) WHERE {\n  ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n  ?protein up:annotation ?catalyticActivityAnnotation ;\n           up:organism ?organism .\n} GROUP BY ?rhea",
+            "httpStatus": 200,
+            "durationSeconds": 8.8,
+            "rows": 14340
+          },
+          {
+            "name": "sl27",
+            "endpoint": "https://beta.sparql.swisslipids.org/sparql",
+            "query": "PREFIX SWISSLIPID: <https://swisslipids.org/rdf/SLM_>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT (COUNT(*) AS ?n) WHERE {\n  ?swisslipid owl:equivalentClass ?chebi .\n  ?swisslipidIsomericSubpecies rdfs:subClassOf ?swisslipid ;\n        SWISSLIPID:rank SWISSLIPID:Isomeric_Subspecies .\n}",
+            "httpStatus": 200,
+            "durationSeconds": 3.9,
+            "rows": 1
+          },
+          {
+            "name": "uniprot_human_by_reaction",
+            "endpoint": "https://sparql.uniprot.org/sparql/",
+            "query": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?rhea (COUNT(*) AS ?n) WHERE {\n  ?catalyticActivityAnnotation up:catalyticActivity/up:catalyzedReaction ?rhea .\n  ?protein up:annotation ?catalyticActivityAnnotation ;\n           up:organism taxon:9606 .\n} GROUP BY ?rhea",
+            "httpStatus": 200,
+            "durationSeconds": 5.3,
+            "rows": 6261
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "label": "small fixes for 0-row queries",
+        "started": "2026-11-20T08:17:54+00:00",
+        "finished": "2026-11-20T08:19:44+00:00",
+        "queriesSelected": 4,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 300.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 209715200,
+          "recheckOutcomes": [],
+          "only": null,
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": []
+      },
+      {
+        "id": 8,
+        "label": "SwissLipids join fix (+ reviewed, DISTINCT)",
+        "started": "2026-11-20T08:37:46+00:00",
+        "finished": "2026-11-20T08:54:01+00:00",
+        "queriesSelected": 3,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 600.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 209715200,
+          "recheckOutcomes": [],
+          "only": null,
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": []
+      },
+      {
+        "id": 9,
+        "label": "EMI 018 subquery fix",
+        "started": "2026-11-20T08:59:58+00:00",
+        "finished": "2026-11-20T08:59:58+00:00",
+        "queriesSelected": 1,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 180,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 20971520,
+          "recheckOutcomes": [],
+          "only": null,
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": []
+      },
+      {
+        "id": 10,
+        "label": "UniProt 36/67 upstream versions; SwissLipids retry",
+        "started": "2026-11-20T12:02:14+00:00",
+        "finished": "2026-11-20T12:31:25+00:00",
+        "queriesSelected": 5,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 900.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 1073741824,
+          "recheckOutcomes": [],
+          "only": [
+            "36",
+            "67_draft_human_metabolome",
+            "26",
+            "27",
+            "34"
+          ],
+          "force": true,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": [
+          "UniProt 36 and 67_draft_human_metabolome were replaced with their upstream versions just before this run (their hand runs on 2026-11-20 had worked). Both returned the same row counts as by hand: 1,100 and 317,738 (229.5 MB).",
+          "SwissLipids 27 and 34 completed this time (870.7 s and 351.3 s) and returned exactly the row counts computed from aggregate queries on 2026-11-20 (6,400 and 280,679). SwissLipids 26 broke off again (after 10,720 rows, 356 s; run 8 after 673.9 s). It was not retried; its expected result is the computed count, 136,755 rows."
+        ]
+      },
+      {
+        "id": 11,
+        "label": "SwissLipids 7 typo fix",
+        "started": "2026-11-20T12:44:54+00:00",
+        "finished": "2026-11-20T12:56:17+00:00",
+        "queriesSelected": 1,
+        "settings": {
+          "delaySeconds": 20,
+          "perHostGapSeconds": 60,
+          "timeoutSeconds": 900.0,
+          "retries": 0,
+          "failureCooldownSeconds": 180,
+          "maxConsecutiveFailuresPerHost": 3,
+          "maxResponseBytes": 20971520,
+          "recheckOutcomes": [],
+          "only": [
+            "7"
+          ],
+          "force": false,
+          "userAgent": "FederatedSparqlSurveyExperiments-catalogue-check/1.0 (python-urllib)",
+          "accept": "application/sparql-results+json"
+        },
+        "notes": [
+          "This run checked SwissLipids 7 with the class-name typo fixed (SWISSLIPID:Isomeric_Subspecie → SWISSLIPID:Isomeric_Subspecies, as upstream sparql-examples@45e5b53 examples/SwissLipids/7.ttl), added to QUERY_FIXES for this run. SwissLipids answered HTTP 400 with an empty message after 682.4 s. Not retried. The fix was taken out again, so the catalogue keeps the original text (0 rows, run 2); this check is kept in the query's otherChecks."
         ]
       }
     ]
