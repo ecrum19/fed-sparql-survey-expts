@@ -1,0 +1,2248 @@
+{
+  "metadata": {
+    "catalogue": "sib-swiss-federated-queries.updated-2026-11.json",
+    "catalogueVersion": "2026-11",
+    "generated": "2026-11-20T12:57:20+00:00",
+    "generatedBy": "update_query_catalogue.py expected",
+    "description": "The result each query of the updated catalogue is expected to give on its live target endpoint, with every check behind it: the automated HTTP checks (verify runs), the runs by hand and single requests made while updating the catalogue, and counts computed from aggregate queries. Counts are snapshots from November 2026: the endpoints' data change, so later counts can differ.",
+    "expectedRule": "expected.outcome is ok (with resultCount) when a check of the current query text returned results; the latest such check is used. Otherwise, a count computed from aggregate queries is used (observed: false); if the query errored when it was run, runError says why and runErrorBasis names those checks. Otherwise, the latest check decides: empty (0 rows) or fails, with the reason in failure. basis names the check(s) used.",
+    "fields": {
+      "queryHash": "sha256(target + NUL + query)[:16] of the catalogue entry; a check applies to the query text with this hash",
+      "checks": "checks of the current query text, oldest first",
+      "otherVersions": "checks of other versions: earlier texts in the updated catalogue, upstream versions (upstreamFile at sparql-examples@45e5b53) and variants (text in query, or described in versionNote)",
+      "method": "http-check (run = verify run, see the catalogue's metadata.verificationRuns), by-hand (result = what the person wrote down), probe (one HTTP request), computed",
+      "outcome": "ok, empty, error, timeout or too-large for checks; ok, empty, fails, too-large or unknown for expected"
+    },
+    "summary": {
+      "empty": 2,
+      "fails": 14,
+      "ok": 46,
+      "ok (computed)": 1
+    },
+    "removedQueries": [
+      {
+        "key": "https://sparql.uniprot.org/.well-known/sparql-examples/46",
+        "reason": "Removed because it uses a dead endpoint: https://semantic.eea.europa.eu/sparql (No response (connection failed) on 2026-11-18. Was already failing with HTTP 404 in the 2025 control runs.)"
+      },
+      {
+        "key": "https://sparql.orthodb.org/.well-known/sparql-examples/18",
+        "reason": "Removed because it uses a dead endpoint: https://sparql.nextprot.org/ (neXtProt is retired: the endpoint 301-redirects to https://www.expasy.org/archives/nextprot (HTML). No replacement endpoint known.)"
+      },
+      {
+        "key": "https://sparql.omabrowser.org/.well-known/sparql-examples/14",
+        "reason": "Removed because it uses a dead endpoint: http://sparql.nibb.ac.jp/sparql (No response (connection failed) on 2026-11-18. Was already failing with HTTP 500 in the 2025 control runs.)"
+      },
+      {
+        "key": "https://purl.org/emi#examples019b",
+        "reason": "Removed because it was dropped from the upstream SIB catalogue: at sparql-examples@45e5b53 examples/emi/ has a single 019 example, the new version of 019a. This version also has a typo (emi:hasTarget ?parasitoidX where ?parasiteX is meant) and returned 0 rows on the new EMI endpoint (run 3, 2026-11-19)."
+      }
+    ]
+  },
+  "data": {
+    "https://sparql.uniprot.org/.well-known/sparql-examples/92_uniprot_bioregistry_iri_translation": {
+      "id": "92_uniprot_bioregistry_iri_translation",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "fdb9ffcc30ecebf2",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 194,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 1.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:52:16+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 194,
+          "httpStatus": 200,
+          "durationSeconds": 1.4
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/51": {
+      "id": "51",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "d10cab5b92d9a000",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 34418,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 411.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:49:05+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "timeout",
+          "durationSeconds": 180.2,
+          "error": "No complete response within 180 s (client timeout)"
+        },
+        {
+          "date": "2026-11-19T08:08:07+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 34418,
+          "httpStatus": 200,
+          "durationSeconds": 411.3,
+          "responseBytes": 22397984
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/45": {
+      "id": "45",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "9e4c3d752851180b",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 31,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 7.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:56:11+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 31,
+          "httpStatus": 200,
+          "durationSeconds": 7.6
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/52": {
+      "id": "52",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "0fc868b77e262bea",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 4091,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 173.8
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:05:18+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 4091,
+          "httpStatus": 200,
+          "durationSeconds": 173.8
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/40": {
+      "id": "40",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "96726199ea358e0c",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 57,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 391.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:12:04+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "timeout",
+          "durationSeconds": 180.2,
+          "error": "No complete response within 180 s (client timeout)"
+        },
+        {
+          "date": "2026-11-19T08:31:44+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 57,
+          "httpStatus": 200,
+          "durationSeconds": 391.4,
+          "responseBytes": 15942
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/53": {
+      "id": "53",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "query-fixed",
+      "queryHash": "a879fdf77b7fd309",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 30016,
+        "basis": "HTTP check, run 7 (2026-11-20)",
+        "durationSeconds": 23.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-20T08:17:54+00:00",
+          "method": "http-check",
+          "run": 7,
+          "outcome": "ok",
+          "resultCount": 30016,
+          "httpStatus": 200,
+          "durationSeconds": 23.2,
+          "responseBytes": 19459514
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:18:31+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "timeout",
+          "durationSeconds": 181.2,
+          "error": "No complete response within 180 s (client timeout)",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T08:39:38+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 760.2,
+          "responseBytes": 176,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/99_uniprot_identifiers_org_translation": {
+      "id": "99_uniprot_identifiers_org_translation",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "a8797b69e07fcf6c",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18); run by hand (2026-11-20)",
+        "failure": "identifiers.org's SPARQL endpoint (`https://sparql.api.identifiers.org`) answers UniProt's SERVICE call with HTTP 500."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:24:33+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 0.6,
+          "error": "HTTP 400: UniProt returned an HTML error page; the error detail was cut off in this run (the script now captures it). Run the query by hand to see the reason."
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - https://sparql.api.identifiers.org issued HTTP 500"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/36": {
+      "id": "36",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "replaced-with-upstream",
+      "queryHash": "454a15d6c999601a",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 1100,
+        "basis": "HTTP check, run 10 (2026-11-20)",
+        "durationSeconds": 8.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "ok",
+          "resultCount": 1100,
+          "result": "1100",
+          "note": "Run on the upstream version before it replaced the catalogue text (same query text)."
+        },
+        {
+          "date": "2026-11-20T12:02:14+00:00",
+          "method": "http-check",
+          "run": 10,
+          "outcome": "ok",
+          "resultCount": 1100,
+          "httpStatus": 200,
+          "durationSeconds": 8.2,
+          "responseBytes": 1382023
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-19T08:53:44+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.5,
+          "responseBytes": 230,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/50": {
+      "id": "50",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "abcd81b98b76a58f",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:54:48+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 0.9,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936669964\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/54": {
+      "id": "54",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "a64998dfae84ddc3",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 650302,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 25.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:55:53+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 650302,
+          "httpStatus": 200,
+          "durationSeconds": 25.2,
+          "responseBytes": 423478098
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/42": {
+      "id": "42",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "c93a92f308b60d5f",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 66,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 69.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:57:18+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 66,
+          "httpStatus": 200,
+          "durationSeconds": 69.4,
+          "responseBytes": 34675
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/43": {
+      "id": "43",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "fa56caf4accd53ca",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 71,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 31.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:59:27+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 71,
+          "httpStatus": 200,
+          "durationSeconds": 31.6,
+          "responseBytes": 38717
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/70_enzymes_interacting_with_molecules_similar_to_dopamine": {
+      "id": "70_enzymes_interacting_with_molecules_similar_to_dopamine",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "d33d42cefb56ed2a",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 479,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 2.0
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:00:59+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 479,
+          "httpStatus": 200,
+          "durationSeconds": 2.0,
+          "responseBytes": 175260
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/38": {
+      "id": "38",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "0b248951aba50cac",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 2,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 1.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:02:01+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 2,
+          "httpStatus": 200,
+          "durationSeconds": 1.4,
+          "responseBytes": 1264
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/48": {
+      "id": "48",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "query-fixed",
+      "queryHash": "3df6eb60c954c494",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 509,
+        "basis": "HTTP check, run 7 (2026-11-20)",
+        "durationSeconds": 12.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-20T08:19:31+00:00",
+          "method": "http-check",
+          "run": 7,
+          "outcome": "ok",
+          "resultCount": 509,
+          "httpStatus": 200,
+          "durationSeconds": 12.3,
+          "responseBytes": 16460589
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-19T09:03:03+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.1,
+          "responseBytes": 162,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease": {
+      "id": "71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "bb6c42819818172b",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 83,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 2.7
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:04:03+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 83,
+          "httpStatus": 200,
+          "durationSeconds": 2.7,
+          "responseBytes": 40327
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/90_uniprot_affected_by_metabolic_diseases_using_MeSH": {
+      "id": "90_uniprot_affected_by_metabolic_diseases_using_MeSH",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "8950b09ad6e7285b",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "The MeSH endpoint (`https://id.nlm.nih.gov/mesh/sparql`) returns its service description as text/plain instead of SPARQL results, which UniProt (QLever) cannot use."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:05:05+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 1.1,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://id.nlm.nih.gov:443/mesh/sparql>: QLever requires the endpoint of a SERVICE to send the result as 'application/sparql-results+json' but the endpoint sent 'text/plain;charset=utf-8'. First 100 bytes of the response: '<http://id.nlm.nih.gov/mesh/sparql>\\n a <http://www.w3.org/ns/sparql-service-description'\", \"query\": \"#1936673213\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX up: <h…"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - MeSH error; endpoint sent 'text/plain;charset=utf-8' not 'application/sparql-results+json'"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/29": {
+      "id": "29",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "93fdb1d8b4a3969f",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 83,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 102.0
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:06:07+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 83,
+          "httpStatus": 200,
+          "durationSeconds": 102.0,
+          "responseBytes": 21532
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome": {
+      "id": "67_draft_human_metabolome",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "replaced-with-upstream",
+      "queryHash": "d978080128b6a20d",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 317738,
+        "basis": "HTTP check, run 10 (2026-11-20)",
+        "durationSeconds": 44.7
+      },
+      "checks": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "ok",
+          "resultCount": 317738,
+          "result": "317,738",
+          "note": "Run on the upstream version before it replaced the catalogue text (same query text); counted with count_results.py from the downloaded .srj file."
+        },
+        {
+          "date": "2026-11-20T12:08:58+00:00",
+          "method": "http-check",
+          "run": 10,
+          "outcome": "ok",
+          "resultCount": 317738,
+          "httpStatus": 200,
+          "durationSeconds": 44.7,
+          "responseBytes": 229463428
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-19T09:08:49+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.6,
+          "responseBytes": 180,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/19_draft_human_metabolome": {
+      "id": "19_draft_human_metabolome",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "576895f51a01ed77",
+      "expected": {
+        "outcome": "empty",
+        "resultCount": 0,
+        "basis": "HTTP check, run 1 (2026-11-18)"
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:52:37+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 1.2
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/Rhea/19_draft_human_metabolome.ttl",
+          "outcome": "empty",
+          "resultCount": 0,
+          "result": "empty result set",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Rhea/19_draft_human_metabolome.ttl"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/49": {
+      "id": "49",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "2ab5e40b819fe1ea",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:09:49+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 11.0,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1960055620\\nPREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: …"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/109_uniprot_transporter_in_liver": {
+      "id": "109_uniprot_transporter_in_liver",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "f93c95011b493047",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a moment...' page), with or without the trailing slash."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:11:00+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 4.5,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://www.bgee.org:443/sparql>: SERVICE responded with HTTP status code: 403, Forbidden. First 100 bytes of the response: '<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Typ'\", \"query\": \"#1936674975\\nPREFIX genex: <http://purl.org/genex#>\\nPREFIX lscr: <http://purl.org/lscr#>\\nPREFIX obo: <http://purl.ob…"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - Bgee issued a HTTP 403 error"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/60": {
+      "id": "60",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "2b98fddc33c40f6f",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 33,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 3.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:12:05+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 33,
+          "httpStatus": 200,
+          "durationSeconds": 3.3,
+          "responseBytes": 19849
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/26": {
+      "id": "26",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "query-fixed",
+      "queryHash": "89e373cae51ffd2e",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 136755,
+        "basis": "computed from aggregate queries (2026-11-20)",
+        "observed": false,
+        "runError": "SwissLipids' RDF4J engine breaks the result stream part way: the response ends inside the bindings with invalid JSON (run 8 after 673.9 s; run 10 after 10,720 rows and 356 s), the same failure as 'Premature end of chunk' for SwissLipids 7 by hand.",
+        "runErrorBasis": "HTTP check, run 8 (2026-11-20); HTTP check, run 10 (2026-11-20)",
+        "note": "Not observed: the latest attempt, HTTP check, run 10 (2026-11-20), ended with error: Not valid SPARQL JSON results: invalid JSON inside the bindings array after 10720 rows; the response ends with: { \"organism\" : { \"type\" : \"uri\", \"value\" : \"http:/"
+      },
+      "checks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "outcome": "ok",
+          "resultCount": 136755,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead."
+        },
+        {
+          "date": "2026-11-20T08:37:46+00:00",
+          "method": "http-check",
+          "run": 8,
+          "outcome": "error",
+          "httpStatus": 200,
+          "durationSeconds": 673.9,
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array"
+        },
+        {
+          "date": "2026-11-20T12:02:42+00:00",
+          "method": "http-check",
+          "run": 10,
+          "outcome": "error",
+          "httpStatus": 200,
+          "durationSeconds": 356.0,
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array after 10720 rows; the response ends with: { \"organism\" : { \"type\" : \"uri\", \"value\" : \"http:/"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T14:52:58+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 22.6,
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T08:15:18+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 45.2,
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "method": "computed",
+          "run": 6,
+          "outcome": "ok",
+          "resultCount": 632026411011,
+          "durationSeconds": 16.0,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "upstream",
+          "versionNote": "the join fix only, as upstream (no DISTINCT, all enzymes)",
+          "upstreamFile": "examples/SwissLipids/26.ttl",
+          "outcome": "ok",
+          "resultCount": 89319800,
+          "note": "Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed enzymes only.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/26.ttl"
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/27": {
+      "id": "27",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "query-fixed",
+      "queryHash": "40bc373c6139da1d",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 6400,
+        "basis": "HTTP check, run 10 (2026-11-20)",
+        "durationSeconds": 870.7
+      },
+      "checks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "outcome": "ok",
+          "resultCount": 6400,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only, plus isomeric subspecies per lipid. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead. Run 10 then returned exactly this count."
+        },
+        {
+          "date": "2026-11-20T08:50:00+00:00",
+          "method": "http-check",
+          "run": 8,
+          "outcome": "error",
+          "httpStatus": 200,
+          "durationSeconds": 129.6,
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array"
+        },
+        {
+          "date": "2026-11-20T12:10:03+00:00",
+          "method": "http-check",
+          "run": 10,
+          "outcome": "ok",
+          "resultCount": 6400,
+          "httpStatus": 200,
+          "durationSeconds": 870.7,
+          "responseBytes": 1686160
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T14:57:00+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 20.4,
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T08:38:35+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 42.9,
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "method": "computed",
+          "run": 6,
+          "outcome": "ok",
+          "resultCount": 80644283152110,
+          "durationSeconds": 19.6,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "version": "upstream",
+          "versionNote": "the join fix only, as upstream (no DISTINCT, all enzymes)",
+          "upstreamFile": "examples/SwissLipids/27.ttl",
+          "outcome": "ok",
+          "resultCount": 10548746085,
+          "note": "Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed enzymes only.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/27.ttl"
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/34": {
+      "id": "34",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "query-fixed",
+      "queryHash": "a68360bcb58003ca",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 280679,
+        "basis": "HTTP check, run 10 (2026-11-20)",
+        "durationSeconds": 351.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-20",
+          "method": "computed",
+          "outcome": "ok",
+          "resultCount": 280679,
+          "note": "Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI path, and UniProt rows per reaction for human enzymes. The parts were joined locally. Run 8 broke off before the end, so the count was computed instead. Run 10 then returned exactly this count."
+        },
+        {
+          "date": "2026-11-20T08:53:09+00:00",
+          "method": "http-check",
+          "run": 8,
+          "outcome": "error",
+          "httpStatus": 200,
+          "durationSeconds": 51.3,
+          "error": "Not valid SPARQL JSON results: invalid JSON inside the bindings array"
+        },
+        {
+          "date": "2026-11-20T12:25:34+00:00",
+          "method": "http-check",
+          "run": 10,
+          "outcome": "ok",
+          "resultCount": 280679,
+          "httpStatus": 200,
+          "durationSeconds": 351.3,
+          "responseBytes": 39856523
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:03:07+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 13.8,
+          "error": "Response larger than 209715200 bytes; not parsed",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T08:52:38+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 45.7,
+          "responseBytes": 2148532224,
+          "error": "Response larger than 2147483648 bytes; stopped reading",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T14:13:51+00:00",
+          "method": "computed",
+          "run": 6,
+          "outcome": "ok",
+          "resultCount": 1780126200,
+          "durationSeconds": 12.5,
+          "countedBy": "aggregate queries (cross product; see run 6 notes)",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/16": {
+      "id": "16",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "dc39e03227772e65",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 52,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 4.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:54:24+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 52,
+          "httpStatus": 200,
+          "durationSeconds": 4.3,
+          "responseBytes": 18618
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/6": {
+      "id": "6",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "f7e60343e0b4b084",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 52,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 4.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:55:28+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 52,
+          "httpStatus": 200,
+          "durationSeconds": 4.2,
+          "responseBytes": 46492
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/7": {
+      "id": "7",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "11408872a689be69",
+      "expected": {
+        "outcome": "empty",
+        "resultCount": 0,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "note": "The catalogue text returns 0 rows because of the class-name typo. The corrected text fails on SwissLipids' own engine: by hand its stream broke ('Premature end of chunk'), and in run 11 SwissLipids answered HTTP 400 with an empty message after 682 s."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:56:38+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.5,
+          "responseBytes": 145
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "variant",
+          "versionNote": "the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as upstream (the UniProt SERVICE URL keeps its trailing slash)",
+          "upstreamFile": "examples/SwissLipids/7.ttl",
+          "outcome": "error",
+          "result": "error -- org.eclipse.rdf4j.query.QueryEvaluationException: org.apache.http.ConnectionClosedException: Premature end of chunk coded message body: closing chunk expected",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/7.ttl"
+        },
+        {
+          "date": "2026-11-20T12:44:54+00:00",
+          "method": "http-check",
+          "run": 11,
+          "version": "variant",
+          "versionNote": "the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as upstream (the UniProt SERVICE URL keeps its trailing slash)",
+          "upstreamFile": "examples/SwissLipids/7.ttl",
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 682.4,
+          "error": "HTTP 400 with an empty message",
+          "note": "The typo fix was in QUERY_FIXES for this run only; it was taken out again because the query failed.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/SwissLipids/7.ttl"
+        }
+      ]
+    },
+    "https://sparql.swisslipids.org/.well-known/sparql-examples/5": {
+      "id": "5",
+      "target": "https://beta.sparql.swisslipids.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "89aee29ae6a8bee8",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 290,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 7.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T08:58:47+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 290,
+          "httpStatus": 200,
+          "durationSeconds": 7.3,
+          "responseBytes": 263062
+        }
+      ]
+    },
+    "https://sparql.orthodb.org/.well-known/sparql-examples/19": {
+      "id": "19",
+      "target": "https://sparql.orthodb.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "25f02f2ca4a16ec4",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18); HTTP check, run 2 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "OrthoDB's Virtuoso sends one SERVICE request per binding, in parallel; Rhea answers 503 Too many concurrent queries. The automated check got no answer within 900 s."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:57:41+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "timeout",
+          "durationSeconds": 180.1,
+          "error": "No complete response within 180 s (client timeout)"
+        },
+        {
+          "date": "2026-11-19T08:16:24+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "timeout",
+          "durationSeconds": 900.2,
+          "error": "No complete response within 900.0 s (client timeout)"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - HTTP 503 (bad virtuoso SERVICE handling by sending burst of requests that results in HTTP 403)"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20T08:57:48+00:00",
+          "method": "probe",
+          "version": "variant",
+          "versionNote": "this query with the OrthoDB part (with the clade filter) in a subquery",
+          "endpoint": "https://sparql.orthodb.org/sparql/",
+          "query": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX : <http://purl.orthodb.org/>\nPREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX interpro: <http://www.ebi.ac.uk/interpro/entry/>\n\nSELECT ?og ?equation\n    (group_concat (distinct ?clade_name; SEPARATOR=\"; \") as ?clades)\n    (count(distinct ?taxon) as ?cnt_taxons)\n    (count(distinct ?gene) as ?cnt_genes)\n    (group_concat (distinct ?org_name; SEPARATOR=\"; \") as ?taxons)\nWHERE {\n  { SELECT ?og ?gene ?xref ?taxon ?org_name ?clade_name WHERE {\n    ?taxon a :Species; up:scientificName ?org_name ;\n        rdfs:subClassOf+/up:scientificName ?clade_name.\n    ?gene a :Gene ;\n        up:organism/a ?taxon.\n    ?gene rdfs:seeAlso ?xref.\n    ?xref a :Uniprot.\n    ?gene :memberOf ?og.\n    ?og :xref/:xrefResource interpro:IPR002328 ;\n        :ogBuiltAt/up:scientificName \"Eukaryota\".\n    # restrict taxons to several clades\n    VALUES ?clade_name { \"Stramenopiles\" \"Alveolata\" \"Liliopsida\" \"Coleoptera\" }\n  } }\n\n    # join via uniprot ?xref\n    SERVICE <https://sparql.uniprot.org/sparql/> {\n        ?xref a up:Protein ;\n            up:annotation/up:catalyticActivity/up:catalyzedReaction ?rh .\n    }\n\n    # join via reaction ?rh\n    SERVICE <https://sparql.rhea-db.org/sparql> {\n        ?rh rdfs:subClassOf rh:Reaction ;\n            rh:equation ?equation.\n    }\n\n} GROUP BY ?equation ?og ORDER BY ?og ?equation",
+          "outcome": "error",
+          "durationSeconds": 64.5,
+          "error": "HTTP 500: Virtuoso RDFZZ Error DB.DBA.SPARQL_REXEC('https://sparql.rhea-db.org/sparql', ...) returned Content-Type 'text/html' status 'HTTP/1.1 503' Rhea: Too many concurrent queries. Please try again later.",
+          "note": "Only the ~1,844 UniProt cross-references in the 4 clades are federated, instead of the 76,771 genes of the 119 groups. It got through the UniProt SERVICE in about a minute; Rhea then refused the parallel calls. Not retried."
+        }
+      ]
+    },
+    "https://sparql.orthodb.org/.well-known/sparql-examples/17": {
+      "id": "17",
+      "target": "https://sparql.orthodb.org/sparql/",
+      "changeStatus": "query-fixed",
+      "queryHash": "e1afa459b0eb70fa",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 2,
+        "basis": "HTTP check, run 7 (2026-11-20)",
+        "durationSeconds": 11.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-20T08:18:37+00:00",
+          "method": "http-check",
+          "run": 7,
+          "outcome": "ok",
+          "resultCount": 2,
+          "httpStatus": 200,
+          "durationSeconds": 11.6,
+          "responseBytes": 644
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:03:41+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.2,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.orthodb.org/.well-known/sparql-examples/20": {
+      "id": "20",
+      "target": "https://sparql.orthodb.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "324b0fba6393b421",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18); run by hand (2026-11-20)",
+        "failure": "STRING (`https://sparql.string-db.org/sparql`) answers OrthoDB's SERVICE call with 403 Forbidden (an HTML page)."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:08:52+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "error",
+          "httpStatus": 500,
+          "durationSeconds": 5.9,
+          "error": "HTTP 500: Virtuoso RDFZZ Error DB.DBA.SPARQL_REXEC('https://sparql.string-db.org/sparql', ...) returned Content-Type 'text/html' status 'HTTP/1.1 403 Forbidden ' 403 Forbidden Forbidden You don't have permission to access /sparql on this server. SPARQL query: PREFIX up: PREFIX rdfs: PREFIX GO: PREFIX : PREFIX ip_highest: SELECT ?gene_m ?gene_m_name ?partner_m ?string_partner_genename ?level ?percent_single_copy WHERE { ?gene_m a :Gene . ?gene_m up:organism/a [up:scientificName \"Mus musculus\"] . ?gene_m :name ?gene_m_name . ?gene_m :memberOf ?og . ?og a :OrthoGroup ; :name ?og_description ; :ogBuiltAt [u…"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - HTTP 403 from STRING db"
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/020": {
+      "id": "020",
+      "target": "https://www.bgee.org/sparql",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "6e8b955b27e1742b",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 308,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 42.5
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:54:11+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 308,
+          "httpStatus": 200,
+          "durationSeconds": 42.5
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/016": {
+      "id": "016",
+      "target": "https://www.bgee.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "09410637c7c30305",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 13,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 7.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:01:01+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 13,
+          "httpStatus": 200,
+          "durationSeconds": 7.3
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/017": {
+      "id": "017",
+      "target": "https://www.bgee.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "d36c8985b12109f2",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 20,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 1.5
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:04:01+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 20,
+          "httpStatus": 200,
+          "durationSeconds": 1.5
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/019": {
+      "id": "019",
+      "target": "https://www.bgee.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "efd2b4024cd402ef",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18); run by hand (2026-11-20)",
+        "failure": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:09:18+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "error",
+          "httpStatus": 524,
+          "durationSeconds": 125.3,
+          "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7e541cd1a74fa\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7e541cd1a74fa\",\"timestamp\":\"2026-11-18T15:11:24Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - HTTP 524"
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/018": {
+      "id": "018",
+      "target": "https://www.bgee.org/sparql",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "a02e4ecc2a57054d",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18); run by hand (2026-11-20)",
+        "failure": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:15:46+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "error",
+          "httpStatus": 524,
+          "durationSeconds": 125.4,
+          "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7eeb6bc35b73b\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7eeb6bc35b73b\",\"timestamp\":\"2026-11-18T15:17:51Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - HTTP 524"
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/20_search_chemical_names_in_japanese": {
+      "id": "20_search_chemical_names_in_japanese",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "71363181006de0f1",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 2,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 2.1
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:56:38+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 2,
+          "httpStatus": 200,
+          "durationSeconds": 2.1
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/12": {
+      "id": "12",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "be7cb75bf552fe1c",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 14340,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 11.8
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:02:35+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 14340,
+          "httpStatus": 200,
+          "durationSeconds": 11.8
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/18": {
+      "id": "18",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "1051486e049aff82",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 143,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 0.5
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:08:32+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 143,
+          "httpStatus": 200,
+          "durationSeconds": 0.5
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/11": {
+      "id": "11",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "08d79e0fe24f79ef",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 7,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 1.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:15:24+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 7,
+          "httpStatus": 200,
+          "durationSeconds": 1.6
+        }
+      ]
+    },
+    "https://sparql.rhea-db.org/.well-known/sparql-examples/13": {
+      "id": "13",
+      "target": "https://sparql.rhea-db.org/sparql",
+      "changeStatus": "unchanged",
+      "queryHash": "48263d18fd4d2fa3",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 2224,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 4.8
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:21:53+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 2224,
+          "httpStatus": 200,
+          "durationSeconds": 4.8
+        }
+      ]
+    },
+    "https://sparql.omabrowser.org/.well-known/sparql-examples/3": {
+      "id": "3",
+      "target": "https://sparql.omabrowser.org/sparql/",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "cb237e573edaaf24",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 28,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 5.9
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T14:55:14+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 28,
+          "httpStatus": 200,
+          "durationSeconds": 5.9
+        }
+      ]
+    },
+    "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/006": {
+      "id": "006",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "8fc2ba5e9f1a1c8b",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 3 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "HTTP 504: the EMI gateway (nginx) ends requests after 60 s."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:00:05+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "error",
+          "httpStatus": 504,
+          "durationSeconds": 60.3,
+          "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T14:55:40+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 11.0,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/001": {
+      "id": "001",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "0a77bbde58357689",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 8,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 3.7
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:04:05+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 8,
+          "httpStatus": 200,
+          "durationSeconds": 3.7,
+          "responseBytes": 1235
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:01:52+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 1.1,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples011a": {
+      "id": "emi#examples011a",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "f5337aa90ac0efc6",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 12396,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 23.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:05:09+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 12396,
+          "httpStatus": 200,
+          "durationSeconds": 23.4,
+          "responseBytes": 5297280
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:04:53+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 5.2,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples011b": {
+      "id": "emi#examples011b",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "4f95f90d306185fb",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 19280,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 4.8
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:06:32+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 19280,
+          "httpStatus": 200,
+          "durationSeconds": 4.8,
+          "responseBytes": 11531370
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:11:44+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.2,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples019a": {
+      "id": "emi#examples019a",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "replaced-with-upstream",
+      "queryHash": "dc475b0bcbfea911",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 1000,
+        "basis": "HTTP check, run 5 (2026-11-19)",
+        "durationSeconds": 30.3
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T12:11:14+00:00",
+          "method": "http-check",
+          "run": 5,
+          "outcome": "ok",
+          "resultCount": 1000,
+          "httpStatus": 200,
+          "durationSeconds": 30.3,
+          "responseBytes": 996275
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:18:11+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.3,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T10:07:37+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "error",
+          "httpStatus": 504,
+          "durationSeconds": 60.2,
+          "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/009": {
+      "id": "009",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "b3be5471d8771da6",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 1,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 6.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:13:11+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 1,
+          "httpStatus": 200,
+          "durationSeconds": 6.4,
+          "responseBytes": 571
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:27:18+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.3,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples013": {
+      "id": "emi#examples013",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "3e8cc50354fe1efb",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 135388,
+        "basis": "HTTP check, run 4 (2026-11-19)",
+        "durationSeconds": 16.0
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:14:17+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 14.1,
+          "responseBytes": 22020096,
+          "error": "Response larger than 20971520 bytes; stopped reading"
+        },
+        {
+          "date": "2026-11-19T10:25:11+00:00",
+          "method": "http-check",
+          "run": 4,
+          "outcome": "ok",
+          "resultCount": 135388,
+          "httpStatus": 200,
+          "durationSeconds": 16.0,
+          "responseBytes": 79983712
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:28:19+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 1.4,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples015": {
+      "id": "emi#examples015",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "7269c6d817a9f4ca",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 44894,
+        "basis": "HTTP check, run 4 (2026-11-19)",
+        "durationSeconds": 32.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:15:31+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "too-large",
+          "httpStatus": 200,
+          "durationSeconds": 32.3,
+          "responseBytes": 22020096,
+          "error": "Response larger than 20971520 bytes; stopped reading"
+        },
+        {
+          "date": "2026-11-19T10:26:27+00:00",
+          "method": "http-check",
+          "run": 4,
+          "outcome": "ok",
+          "resultCount": 44894,
+          "httpStatus": 200,
+          "durationSeconds": 32.2,
+          "responseBytes": 30337988
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:29:20+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.4,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples018": {
+      "id": "emi#examples018",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "query-fixed",
+      "queryHash": "40a6c43511f4f977",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 32,
+        "basis": "HTTP check, run 9 (2026-11-20)",
+        "durationSeconds": 0.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-20T08:59:58+00:00",
+          "method": "http-check",
+          "run": 9,
+          "outcome": "ok",
+          "resultCount": 32,
+          "httpStatus": 200,
+          "durationSeconds": 0.6,
+          "responseBytes": 13256
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:30:21+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.4,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T10:17:04+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "error",
+          "httpStatus": 504,
+          "durationSeconds": 60.2,
+          "error": "HTTP 504: 504 Gateway Time-out nginx/1.20.1",
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "variant",
+          "versionNote": "upstream examples/emi/021.ttl with asimicin (`wd:Q100138042`, as in the catalogue) instead of norhyoscyamine",
+          "upstreamFile": "examples/emi/021.ttl",
+          "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?intxnId ?targetWD ?targetName WHERE {\n\t# interaction data\n\t{\n        \t?intxn emi:hasSource ?xOrg ; # retrieve interaction-pairs\n                \temi:hasTarget ?yOrg ;\n                        emi:isClassifiedWith ?intxnId .\n                ?intxnId rdfs:label ?intxnName .\n                ?xOrg emi:inTaxon ?sourceWD ;\n\t\t\trdfs:label ?sourceName .\n\t\t?yOrg emi:inTaxon ?targetWD ;\n\t\t\trdfs:label ?targetName .\n        }\n\n\t# metabolite data\n\tFILTER (?xWD = ?sourceWD || ?xWD = ?targetWD)\t# ensure that xWD can be both source/target from the interaction-pairs retrieved before\n        {\n\t\tSELECT DISTINCT ?xWD ?wd_chem WHERE {\n                \t?material sosa:hasSample ?extract ;\n                        \tsosa:isSampleOf ?organe .\n                        ?organe emi:inTaxon ?xWD .\n                        ?extract sosa:isFeatureOfInterestOf ?lcms .\n                        ?lcms sosa:hasResult ?feature_list .\n                        ?feature_list emi:hasLCMSFeature ?feature .\n                        ?feature emi:hasAnnotation ?sirius_annotation .\n                        ?sirius_annotation a emi:StructuralAnnotation ;\n                        \temi:hasChemicalStructure ?ik2d .\n                        ?ik2d emi:hasSMILES ?smiles ;\n                        \temi:isInChIKey2DOf ?ik .\n                        ?ik emi:isInChIKeyOf ?wd_chem .\n                        VALUES ?wd_chem { wd:Q100138042 }\n                }\n\t}  UNION # union with data from wikidata (lotus)\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n   \t\t\t\twdt:P703 ?xWD .\n\t\t\tVALUES ?wd_chem { wd:Q100138042 }\n\t\t}\n\t}\n}",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout",
+          "note": "One result was written for this version and upstream 020 (next check); both timed out.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/021.ttl"
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "versionNote": "as is (a related question)",
+          "upstreamFile": "examples/emi/020.ttl",
+          "outcome": "error",
+          "result": "error - HTTP 504 Gateway Timeout",
+          "note": "One result was written for this version and the 021 version above; both timed out.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/020.ttl"
+        },
+        {
+          "date": "2026-11-20T08:57:26+00:00",
+          "method": "probe",
+          "version": "variant",
+          "versionNote": "upstream examples/emi/020.ttl, restructured",
+          "upstreamFile": "examples/emi/020.ttl",
+          "endpoint": "https://qlever.earthmetabolome.org/api/metrin-kg",
+          "query": "PREFIX wd: <http://www.wikidata.org/entity/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX emi: <https://w3id.org/emi#>\nPREFIX sosa: <http://www.w3.org/ns/sosa/>\nPREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nSELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?targetWD ?targetName ?loc WHERE {\n\t# interactions whose target produces the compound (computed first, small)\n\t{ SELECT ?intxn ?xOrg ?yOrg ?targetWD WHERE {\n\t# metabolite data\n        {\n\t\tSELECT DISTINCT ?targetWD ?wd_chem WHERE {\n\t\t\t?material sosa:hasSample ?extract ;\n                        \tsosa:isSampleOf ?organe .\n                \t?organe emi:inTaxon ?targetWD .\t# filter by target wikidata-id\n                \t?extract sosa:isFeatureOfInterestOf ?lcms .\n                \t?lcms sosa:hasResult ?feature_list .\n                \t?feature_list emi:hasLCMSFeature ?feature .\n                \t?feature emi:hasAnnotation ?sirius_annotation .\n                \t?sirius_annotation a emi:StructuralAnnotation ;\n\t                \temi:hasChemicalStructure ?ik2d .\n                \t?ik2d emi:hasSMILES ?smiles ;\n                      \t\temi:isInChIKey2DOf ?ik .\n                \t?ik emi:isInChIKeyOf ?wd_chem .\n                \tVALUES ?wd_chem { wd:Q27107580 } # filter on the wikidata-id of Onpordopicrin\n\t\t}\n\t} UNION\t# union with the lotus metabolite data from wikidata\n\t{\n\t\tSERVICE <https://qlever.dev/api/wikidata> {\n\t\t\t?wd_chem wdt:P235 ?ik ;\n   \t\t\t\twdt:P703 ?targetWD .\n\t\t \tVALUES ?wd_chem { wd:Q27107580 }\n\t\t}\n\t}\n\t\t?yOrg emi:inTaxon ?targetWD .\n\t\t?intxn emi:hasTarget ?yOrg ;\n\t\t\temi:hasSource ?xOrg .\n\t} }\n\t# then their details\n\t?intxn emi:isClassifiedWith ?intxnName ;\n\t\tprov:atLocation ?loc ;\n\t\twgs:lat ?lats ;\n\t\twgs:long ?longs .\n\t?xOrg emi:inTaxon ?sourceWD ;\n\t\trdfs:label ?sourceName ;\n\t\tsosa:isSampleOf ?sourceSample .\n\t?yOrg rdfs:label ?targetName ;\n\t\tsosa:isSampleOf ?targetSample .\n}",
+          "outcome": "ok",
+          "resultCount": 126,
+          "durationSeconds": 2.0,
+          "note": "The interactions whose target produces the compound are found first, in a subquery, and their location and names are added after. As is, 020 joins its 24 producer taxa with all 8.4 million located interactions and hits the 60 s gateway limit.",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/emi/020.ttl"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples012": {
+      "id": "emi#examples012",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "replaced-with-upstream",
+      "queryHash": "e7d88b39ff0d01b3",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 5 (2026-11-19); run by hand (2026-11-20)",
+        "failure": "QLever's Wikidata endpoint (qlever.dev) answers the EMI server's SERVICE call with 429 Too Many Requests."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T12:12:44+00:00",
+          "method": "http-check",
+          "run": 5,
+          "outcome": "error",
+          "httpStatus": 500,
+          "durationSeconds": 2.3,
+          "error": "HTTP 500: Error while executing a SERVICE request to <https://qlever.dev/api/wikidata>: SERVICE responded with HTTP status code: 429, Too Many Requests."
+        },
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "outcome": "error",
+          "result": "error - wikidata responds with HTTP 429"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:31:21+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.2,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        },
+        {
+          "date": "2026-11-19T10:21:04+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 28.4,
+          "responseBytes": 105,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://purl.org/emi#examples021": {
+      "id": "emi#examples021",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "1843309933b08f4d",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 386,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 8.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:22:32+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 386,
+          "httpStatus": 200,
+          "durationSeconds": 8.6,
+          "responseBytes": 215895
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:32:21+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.5,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/007": {
+      "id": "007",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "2313e0473edbf04d",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 106,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 3.8
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:23:41+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 106,
+          "httpStatus": 200,
+          "durationSeconds": 3.8,
+          "responseBytes": 31361
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:33:22+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 1.2,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/002": {
+      "id": "002",
+      "target": "https://qlever.earthmetabolome.org/api/metrin-kg",
+      "changeStatus": "endpoint-and-prefix-updated",
+      "queryHash": "f971fe0ff49055bd",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 14,
+        "basis": "HTTP check, run 3 (2026-11-19)",
+        "durationSeconds": 2.5
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T10:24:45+00:00",
+          "method": "http-check",
+          "run": 3,
+          "outcome": "ok",
+          "resultCount": 14,
+          "httpStatus": 200,
+          "durationSeconds": 2.5,
+          "responseBytes": 2653
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:34:23+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.4,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/116_biosodafrontend_rabit_mouse_orthologs": {
+      "id": "116_biosodafrontend_rabit_mouse_orthologs",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "3a91adf1715335ce",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 32,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "durationSeconds": 0.4
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:13:08+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "ok",
+          "resultCount": 32,
+          "httpStatus": 200,
+          "durationSeconds": 0.4,
+          "responseBytes": 17019
+        }
+      ]
+    },
+    "https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend": {
+      "id": "15-rat-TP53-biosodafrontend",
+      "target": "https://sparql.omabrowser.org/sparql/",
+      "changeStatus": "query-fixed",
+      "queryHash": "8c1c622536179523",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 16,
+        "basis": "HTTP check, run 7 (2026-11-20)",
+        "durationSeconds": 2.6
+      },
+      "checks": [
+        {
+          "date": "2026-11-20T08:19:09+00:00",
+          "method": "http-check",
+          "run": 7,
+          "outcome": "ok",
+          "resultCount": 16,
+          "httpStatus": 200,
+          "durationSeconds": 2.6,
+          "responseBytes": 20180
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-18T15:04:33+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "empty",
+          "resultCount": 0,
+          "httpStatus": 200,
+          "durationSeconds": 0.3,
+          "version": "earlier",
+          "versionNote": "an earlier text of this query (before a change listed in `changes`)"
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/027-biosodafrontend": {
+      "id": "027-biosodafrontend",
+      "target": "https://www.bgee.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "a1571f4ed19de331",
+      "expected": {
+        "outcome": "ok",
+        "resultCount": 11,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "durationSeconds": 6.2
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:22:17+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "ok",
+          "resultCount": 11,
+          "httpStatus": 200,
+          "durationSeconds": 6.2
+        }
+      ]
+    },
+    "https://www.bgee.org/sparql/.well-known/sparql-examples/028-biosodafrontend": {
+      "id": "028-biosodafrontend",
+      "target": "https://www.bgee.org/sparql/",
+      "changeStatus": "unchanged",
+      "queryHash": "a522cf00bb7eec5b",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 1 (2026-11-18)",
+        "failure": "HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s (also for the upstream version with `LIMIT 10`)."
+      },
+      "checks": [
+        {
+          "date": "2026-11-18T15:24:53+00:00",
+          "method": "http-check",
+          "run": 1,
+          "outcome": "error",
+          "httpStatus": 524,
+          "durationSeconds": 125.3,
+          "error": "HTTP 524: {\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/\",\"title\":\"Error 524: A timeout occurred\",\"status\":524,\"detail\":\"The origin web server did not return a complete response within the 120-second Proxy Read Timeout window. The connection was established, but the origin took too long to respond.\",\"instance\":\"a5c7fc1478c08a8b\",\"error_code\":524,\"error_name\":\"origin_response_timeout\",\"error_category\":\"origin\",\"ray_id\":\"a5c7fc1478c08a8b\",\"timestamp\":\"2026-11-18T15:26:58Z\",\"zone\":\"www.bgee.org\",\"cloudflare_error\":true,\"retryable\":true,…"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/Bgee/028-biosodafrontend.ttl",
+          "outcome": "error",
+          "result": "error - HTTP524",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/Bgee/028-biosodafrontend.ttl"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/117_biosodafrontend_glioblastoma_orthologs_rat": {
+      "id": "117_biosodafrontend_glioblastoma_orthologs_rat",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "327135b389a44ef3",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "failure": "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's SERVICE call)."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:14:09+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 1.0,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675583\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\nPREFIX obo: <http://purl.obolibrary.org/obo/>\\nPREFIX orth: <http://purl.org/net/orth#>…"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl",
+          "outcome": "error",
+          "result": "error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: SERVICE responded with HTTP status code: 403, Forbidden",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl"
+        }
+      ]
+    },
+    "https://sparql.uniprot.org/.well-known/sparql-examples/118_biosodafrontend_rat_brain_human_cancer": {
+      "id": "118_biosodafrontend_rat_brain_human_cancer",
+      "target": "https://sparql.uniprot.org/sparql/",
+      "changeStatus": "endpoint-updated",
+      "queryHash": "0daaf369f5943791",
+      "expected": {
+        "outcome": "fails",
+        "resultCount": null,
+        "basis": "HTTP check, run 2 (2026-11-19)",
+        "failure": "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's SERVICE call)."
+      },
+      "checks": [
+        {
+          "date": "2026-11-19T09:15:10+00:00",
+          "method": "http-check",
+          "run": 2,
+          "outcome": "error",
+          "httpStatus": 400,
+          "durationSeconds": 0.9,
+          "error": "HTTP 400: SPARQL Downloads Documentation/Help Skip Header Query evaluation exception. { \"exception\": \"Error while executing a SERVICE request to <https://sparql.omabrowser.org:443/sparql/>: SERVICE responded with HTTP status code: 400, Bad Request. First 100 bytes of the response: 'Virtuoso 37000 Error SP030: SPARQL compiler, line 0: Too many arguments for standard built-in functi'\", \"query\": \"#1936675830\\nPREFIX up:<http://purl.uniprot.org/core/>\\nPREFIX taxon:<http://purl.uniprot.org/taxonomy/>\\nPREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#&…"
+        }
+      ],
+      "otherVersions": [
+        {
+          "date": "2026-11-20",
+          "method": "by-hand",
+          "version": "upstream",
+          "upstreamFile": "examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl",
+          "outcome": "error",
+          "result": "error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: SERVICE responded with HTTP status code: 403, Forbidden",
+          "upstreamUrl": "https://github.com/sib-swiss/sparql-examples/blob/45e5b53/examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl"
+        }
+      ]
+    }
+  }
+}

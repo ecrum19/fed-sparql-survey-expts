@@ -15,8 +15,11 @@ build   Apply ENDPOINT_MAP and PREFIX_MAP to the original catalogue and write th
         updated file. Query text is only changed where it names a moved endpoint
         (SERVICE IRIs) or declares a PREFIX whose namespace changed with the
         target endpoint's data. Exceptions: queries in UPSTREAM_REPLACEMENTS get
-        their current upstream text, and queries in REMOVED_QUERIES or using an
+        their current upstream text, queries in QUERY_FIXES get small documented
+        text replacements, and queries in REMOVED_QUERIES or using an
         endpoint in UNAVAILABLE_ENDPOINTS are left out (listed in the metadata).
+        QUERY_NOTES (runs by hand, other versions tried, upstream comparison)
+        are copied into the entries.
         No new upstream queries are added. Rebuilding an existing file keeps its checks: a check
         stays current if the query did not change, otherwise it moves to
         previousVerifications and the query is checked again by `verify`.
@@ -37,7 +40,12 @@ verify  Run each query (with its SERVICE clauses) once against its target
         (e.g. --recheck timeout too-large) with a higher --timeout and
         --max-response-mb.
 
-report  Write a Markdown change log / manual-fix list from the updated file.
+report  Write a Markdown change log from the updated file: every change, every
+        check, the queries that do not work yet and the expected results.
+
+expected
+        Write the expected result of each query (row count, 0 rows or the reason
+        it fails) with every check behind it, for testing engines later.
 
 Usage
 -----
@@ -46,6 +54,7 @@ Usage
   python3 update_query_catalogue.py verify -c sib-swiss-federated-queries.updated-2026-11.json
   python3 update_query_catalogue.py report -c sib-swiss-federated-queries.updated-2026-11.json \
                                            -o sib-swiss-federated-queries.updated-2026-11.md
+  python3 update_query_catalogue.py expected   # -> ...updated-2026-11.expected-results.json
 """
 
 import argparse
@@ -251,6 +260,1011 @@ SELECT DISTINCT ?parasitoidX_WD ?parasitoidName ?intxn2Label ?parasiteX_WD ?para
 	}
 } LIMIT 1000"""),
     ])),
+    ("https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome", OrderedDict([
+        ("upstreamFile", "examples/UniProt/67_draft_human_metabolome.ttl"),
+        ("upstreamId", "https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome"),
+        ("reason", (
+            "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query reads ChEBI's "
+            "chemrof:smiles_string and chemrof:inchi_key_string (instead of chebislash:smiles and "
+            "chebislash:inchikey) and follows rh:underlyingChebi straight to the ChEBI IRI (instead of "
+            "rh:underlyingChebi/rh:chebi); the description is unchanged. The old version returned 0 rows "
+            "(run 2, 2026-11-19); the upstream version returned 317,738 rows when run by hand "
+            "(2026-11-20), so it replaced the old text."
+        )),
+        ("description", 'Generate a draft human metabolome'),
+        ("query", """PREFIX chemrof: <https://w3id.org/chemrof/>
+PREFIX rh: <http://rdf.rhea-db.org/>
+PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
+PREFIX up: <http://purl.uniprot.org/core/>
+
+SELECT
+?uniprot ?mnemonic ?rhea ?chebi ?smiles ?inchiKey
+WHERE
+{
+  ?uniprot up:annotation/up:catalyticActivity/up:catalyzedReaction ?rhea ;
+        up:organism taxon:9606 ;
+        up:mnemonic ?mnemonic .
+  SERVICE <https://sparql.rhea-db.org/sparql> {
+	?rhea rh:side/rh:contains/rh:compound ?compound .
+    ?compound (rh:chebi|(rh:reactivePart/rh:chebi)|rh:underlyingChebi) ?chebi .
+   }
+   ?chebi chemrof:smiles_string ?smiles ;
+          chemrof:inchi_key_string ?inchiKey .
+}"""),
+    ])),
+    ("https://sparql.uniprot.org/.well-known/sparql-examples/36", OrderedDict([
+        ("upstreamFile", "examples/UniProt/36_orthologous_proteins_via_orthodb.ttl"),
+        ("upstreamId", "https://sparql.uniprot.org/.well-known/sparql-examples/36"),
+        ("reason", (
+            "Changed in the upstream SIB catalogue: at sparql-examples@45e5b53 this query no longer reads "
+            "the OrthoDB group from UniProt's rdfs:seeAlso cross-reference (upstream notes these can be out "
+            "of date) but matches the protein inside the OrthoDB SERVICE, whose URL now has a trailing "
+            "slash; the description is unchanged. The old version returned 0 rows (run 2, 2026-11-19); the "
+            "upstream version returned 1,100 rows when run by hand (2026-11-20), so it replaced the old "
+            "text."
+        )),
+        ("description", 'Find the orthologous proteins for UniProtKB entry P05067 using the <a href="http://www.orthod.org">OrthoDB database</a>'),
+        ("query", """PREFIX orthodb: <http://purl.orthodb.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>
+PREFIX up: <http://purl.uniprot.org/core/>
+
+SELECT
+  ?protein
+  ?orthoGroup
+  ?scientificName
+  ?functionComment
+  ?prefferedGeneName
+  ((STRLEN(?value) - ?medianLength) as ?deviationFromMedianLength)
+WHERE
+{
+  BIND(uniprotkb:P05067 AS ?protein)
+  ?protein a up:Protein ;
+    up:organism/up:scientificName ?scientificName ;
+    up:encodedBy/skos:prefLabel ?prefferedGeneName ;
+    up:sequence/rdf:value ?value .
+  # We do not ask the UniProt endpoint for the ?orthoGroup from the
+  # cross-reference as these can be out of date. We trust the content
+  # of the orthodb endpoint
+  OPTIONAL {
+    ?protein up:annotation ?functionAnnotation .
+    ?functionAnnotation a up:Function_Annotation ;
+      rdfs:comment ?functionComment .
+  }
+  SERVICE <https://sparql.orthodb.org/sparql/>{
+    ?orthoGroup orthodb:ogMedianProteinLength ?medianLength .
+    ?orthoGroup orthodb:hasMember ?xref .
+    ?xref orthodb:xref/orthodb:xrefResource ?protein .
+  }
+}"""),
+    ])),
+])
+
+# Small query fixes for queries that returned no results, keyed by query.
+# Each fix is a list of exact text replacements, applied after the endpoint and
+# PREFIX maps; the query keeps asking the same question. Found with small probe
+# queries on 2026-11-20 (see the reason of each fix).
+QUERY_FIXES = OrderedDict([
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/48', OrderedDict([
+        ("query", [
+            ('PREFIX glycan: <http://purl.jp/bio/12/glyco/glycan#>',
+             'PREFIX glyconj: <http://purl.jp/bio/12/glyco/conjugate#>'),
+            ('glycan:glycosylated_at',
+             'glyconj:glycosylated_at'),
+            ('glycan:glycosylates_at',
+             'glyconj:glycosylates_at'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'GlyConnect now publishes glycosylated_at and glycosylates_at in the namespace '
+            'http://purl.jp/bio/12/glyco/conjugate# (probe 2026-11-20: 0 triples with the glycan# '
+            'predicates, 5,052 matching rows for the SERVICE block with conjugate#). Only those two '
+            'predicates change.'
+        )),
+    ])),
+    ('https://sparql.orthodb.org/.well-known/sparql-examples/17', OrderedDict([
+        ("query", [
+            ('odbgroup:6400at314295',
+             'odbgroup:17060at314295'),
+        ]),
+        ("description", [('6400at314295', '17060at314295')]),
+        ("reason", (
+            "OrthoDB group 6400at314295 no longer exists (0 genes on 2026-11-20). OrthoDB's v11 API names "
+            "it 'Coiled-coil domain-containing protein 179' (Hominoidea, 7 genes in 7 species); the "
+            'current group for the same family is 17060at314295 (same name, 7 genes, contains human '
+            'CCDC179, UniProt H3BU77). The group ID is replaced in the query and the description.'
+        )),
+    ])),
+    ('https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend', OrderedDict([
+        ("query", [
+            ('PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT DISTINCT ?PROTEIN',
+             'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX sio: <http://semanticscience.org/resource/>\nSELECT DISTINCT ?PROTEIN'),
+            ("\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n",
+             "\t\t?PROTEIN orth:organism/obo:RO_0002162/up:scientificName 'Rattus norvegicus' ;\n\t\t\tsio:SIO_010079 ?gene .\n\t\t?tp53Node sio:SIO_010079 ?gene ; # label and UniProt xref are on another protein node of the same gene\n\t\t\trdfs:label 'TP53' ;\n\t\t\tlscr:xrefUniprot ?UNIPROT_XREF .\n"),
+            ('\t\t?IS_PARALOGOUS_TO_PROTEIN lscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n',
+             '\t\t?IS_PARALOGOUS_TO_PROTEIN sio:SIO_010079 ?paralogGene .\n\t\t?paralogNode sio:SIO_010079 ?paralogGene ;\n\t\t\tlscr:xrefUniprot ?PARALOG_UNIPROT_XREF .\n'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'In the current OMA data the protein node that has the organism and sits in the paralog '
+            'clusters (rat TP53: RATNO03077) has no rdfs:label and no lscr:xrefUniprot; those are on '
+            'another protein node of the same gene (RATNO03074), which has no organism and no cluster '
+            '(probes 2026-11-20). The label and the UniProt cross-references are now read from a protein '
+            'node of the same gene (sio:SIO_010079), for the TP53 protein and for its paralogs.'
+        )),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/53', OrderedDict([
+        ("query", [
+            ('WHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {',
+             'WHERE {\n  { SELECT DISTINCT ?chebi ?reaction ?humanProtein WHERE {\n  SERVICE <https://sparql.rhea-db.org/sparql> {'),
+            ('  ?ca up:catalyzedReaction ?reaction .\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {',
+             '  ?ca up:catalyzedReaction ?reaction .\n  } }\n\n  SERVICE  <https://sparql.omabrowser.org/sparql/> {'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'The UniProt endpoint (QLever) only passes values into a SERVICE call when the SERVICE is '
+            'joined directly with a result of at most 10,000 rows; otherwise OMA gets the whole block '
+            "unbound, which returned 0 rows after 760 s in run 2 (most likely OMA's time limit). The Rhea "
+            'and UniProt part is wrapped in a subquery (1,390 rows, 319 human proteins on 2026-11-20), so '
+            "it becomes the SERVICE's direct sibling and OMA gets the human proteins as VALUES. The query "
+            'asks the same question.'
+        )),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/26', OrderedDict([
+        ("query", [
+            ('(rh:underlyingChebi/rh:chebi)) ?metabolite',
+             'rh:underlyingChebi) ?chebi'),
+            ('SELECT ?swisslipid  ?organism {',
+             'SELECT DISTINCT ?swisslipid  ?organism {'),
+            ('             up:organism ?organism .\n',
+             '             up:organism ?organism ;\n             up:reviewed true .\n'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 '
+            'examples/SwissLipids/26.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins '
+            'the SwissLipids part instead of forming a cross product (632,026,411,011 rows, run 6), and '
+            'rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi '
+            'path matched nothing in Rhea on 2026-11-20). With the join fix alone the result would still '
+            'be 89,319,800 rows, so the query also returns DISTINCT (lipid, organism) pairs and counts '
+            'only reviewed (Swiss-Prot) enzymes (up:reviewed true): 136,755 rows expected (computed from '
+            'aggregate queries on 2026-11-20).'
+        )),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/27', OrderedDict([
+        ("query", [
+            ('(rh:underlyingChebi/rh:chebi)) ?metabolite',
+             'rh:underlyingChebi) ?chebi'),
+            ('SELECT ?swisslipid  ?organism {',
+             'SELECT DISTINCT ?swisslipid  ?organism {'),
+            ('             up:organism ?organism .\n',
+             '             up:organism ?organism ;\n             up:reviewed true .\n'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 '
+            'examples/SwissLipids/27.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins '
+            'the SwissLipids part instead of forming a cross product (80,644,283,152,110 rows, run 6), '
+            'and rh:underlyingChebi now points straight to the ChEBI IRI (the old '
+            'rh:underlyingChebi/rh:chebi path matched nothing in Rhea on 2026-11-20). With the join fix '
+            'alone the result would still be 10,548,746,085 rows, so the query also returns DISTINCT '
+            '(lipid, organism) pairs and counts only reviewed (Swiss-Prot) enzymes (up:reviewed true): '
+            '6,400 rows expected (computed from aggregate queries on 2026-11-20).'
+        )),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/34', OrderedDict([
+        ("query", [
+            ('(rh:underlyingChebi/rh:chebi)) ?metabolite',
+             'rh:underlyingChebi) ?chebi'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'Changed the same way in the upstream SIB catalogue (sparql-examples@45e5b53 '
+            'examples/SwissLipids/34.ttl): the Rhea part binds ?chebi instead of ?metabolite, so it joins '
+            'the SwissLipids part instead of forming a cross product (1,780,126,200 rows, run 6), and '
+            'rh:underlyingChebi now points straight to the ChEBI IRI (the old rh:underlyingChebi/rh:chebi '
+            'path matched nothing in Rhea on 2026-11-20). Expected size with this fix: 280,679 rows '
+            '(computed from aggregate queries on 2026-11-20).'
+        )),
+    ])),
+    ('https://purl.org/emi#examples018', OrderedDict([
+        ("query", [
+            ('\t\tSELECT DISTINCT ?wd_chem WHERE { #retrieve metabolite data for sourceWD',
+             '\t\tSELECT DISTINCT ?sourceWD ?wd_chem WHERE { #retrieve metabolite data for sourceWD'),
+        ]),
+        ("description", []),
+        ("reason", (
+            'The metabolite subquery returned only ?wd_chem, not ?sourceWD, so in the EMI branch of the '
+            'UNION the producing organism was not tied to the interactions: every interaction in the '
+            "graph (12.9 million) matched, and the query hit the endpoint's 60 s gateway limit (HTTP 504, "
+            'run 3). The subquery now also returns ?sourceWD, as its comment intends (probe 2026-11-20: '
+            '32 rows in 0.5 s).'
+        )),
+    ])),
+])
+
+# Tried versions of queries, kept verbatim (see QUERY_NOTES).
+EMI018_Q021_ASIMICIN = """PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX emi: <https://w3id.org/emi#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+SELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?intxnId ?targetWD ?targetName WHERE {
+	# interaction data
+	{
+        	?intxn emi:hasSource ?xOrg ; # retrieve interaction-pairs
+                	emi:hasTarget ?yOrg ;
+                        emi:isClassifiedWith ?intxnId .
+                ?intxnId rdfs:label ?intxnName .
+                ?xOrg emi:inTaxon ?sourceWD ;
+			rdfs:label ?sourceName .
+		?yOrg emi:inTaxon ?targetWD ;
+			rdfs:label ?targetName .
+        }
+
+	# metabolite data
+	FILTER (?xWD = ?sourceWD || ?xWD = ?targetWD)	# ensure that xWD can be both source/target from the interaction-pairs retrieved before
+        {
+		SELECT DISTINCT ?xWD ?wd_chem WHERE {
+                	?material sosa:hasSample ?extract ;
+                        	sosa:isSampleOf ?organe .
+                        ?organe emi:inTaxon ?xWD .
+                        ?extract sosa:isFeatureOfInterestOf ?lcms .
+                        ?lcms sosa:hasResult ?feature_list .
+                        ?feature_list emi:hasLCMSFeature ?feature .
+                        ?feature emi:hasAnnotation ?sirius_annotation .
+                        ?sirius_annotation a emi:StructuralAnnotation ;
+                        	emi:hasChemicalStructure ?ik2d .
+                        ?ik2d emi:hasSMILES ?smiles ;
+                        	emi:isInChIKey2DOf ?ik .
+                        ?ik emi:isInChIKeyOf ?wd_chem .
+                        VALUES ?wd_chem { wd:Q100138042 }
+                }
+	}  UNION # union with data from wikidata (lotus)
+	{
+		SERVICE <https://qlever.dev/api/wikidata> {
+			?wd_chem wdt:P235 ?ik ;
+   				wdt:P703 ?xWD .
+			VALUES ?wd_chem { wd:Q100138042 }
+		}
+	}
+}"""
+
+EMI020_RESTRUCTURED = """PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX emi: <https://w3id.org/emi#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX wgs: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT DISTINCT ?sourceWD ?sourceName ?intxnName ?targetWD ?targetName ?loc WHERE {
+	# interactions whose target produces the compound (computed first, small)
+	{ SELECT ?intxn ?xOrg ?yOrg ?targetWD WHERE {
+	# metabolite data
+        {
+		SELECT DISTINCT ?targetWD ?wd_chem WHERE {
+			?material sosa:hasSample ?extract ;
+                        	sosa:isSampleOf ?organe .
+                	?organe emi:inTaxon ?targetWD .	# filter by target wikidata-id
+                	?extract sosa:isFeatureOfInterestOf ?lcms .
+                	?lcms sosa:hasResult ?feature_list .
+                	?feature_list emi:hasLCMSFeature ?feature .
+                	?feature emi:hasAnnotation ?sirius_annotation .
+                	?sirius_annotation a emi:StructuralAnnotation ;
+	                	emi:hasChemicalStructure ?ik2d .
+                	?ik2d emi:hasSMILES ?smiles ;
+                      		emi:isInChIKey2DOf ?ik .
+                	?ik emi:isInChIKeyOf ?wd_chem .
+                	VALUES ?wd_chem { wd:Q27107580 } # filter on the wikidata-id of Onpordopicrin
+		}
+	} UNION	# union with the lotus metabolite data from wikidata
+	{
+		SERVICE <https://qlever.dev/api/wikidata> {
+			?wd_chem wdt:P235 ?ik ;
+   				wdt:P703 ?targetWD .
+		 	VALUES ?wd_chem { wd:Q27107580 }
+		}
+	}
+		?yOrg emi:inTaxon ?targetWD .
+		?intxn emi:hasTarget ?yOrg ;
+			emi:hasSource ?xOrg .
+	} }
+	# then their details
+	?intxn emi:isClassifiedWith ?intxnName ;
+		prov:atLocation ?loc ;
+		wgs:lat ?lats ;
+		wgs:long ?longs .
+	?xOrg emi:inTaxon ?sourceWD ;
+		rdfs:label ?sourceName ;
+		sosa:isSampleOf ?sourceSample .
+	?yOrg rdfs:label ?targetName ;
+		sosa:isSampleOf ?targetSample .
+}"""
+
+ORTHODB19_SUBQUERY = """PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://purl.orthodb.org/>
+PREFIX rh: <http://rdf.rhea-db.org/>
+PREFIX interpro: <http://www.ebi.ac.uk/interpro/entry/>
+
+SELECT ?og ?equation
+    (group_concat (distinct ?clade_name; SEPARATOR="; ") as ?clades)
+    (count(distinct ?taxon) as ?cnt_taxons)
+    (count(distinct ?gene) as ?cnt_genes)
+    (group_concat (distinct ?org_name; SEPARATOR="; ") as ?taxons)
+WHERE {
+  { SELECT ?og ?gene ?xref ?taxon ?org_name ?clade_name WHERE {
+    ?taxon a :Species; up:scientificName ?org_name ;
+        rdfs:subClassOf+/up:scientificName ?clade_name.
+    ?gene a :Gene ;
+        up:organism/a ?taxon.
+    ?gene rdfs:seeAlso ?xref.
+    ?xref a :Uniprot.
+    ?gene :memberOf ?og.
+    ?og :xref/:xrefResource interpro:IPR002328 ;
+        :ogBuiltAt/up:scientificName "Eukaryota".
+    # restrict taxons to several clades
+    VALUES ?clade_name { "Stramenopiles" "Alveolata" "Liliopsida" "Coleoptera" }
+  } }
+
+    # join via uniprot ?xref
+    SERVICE <https://sparql.uniprot.org/sparql/> {
+        ?xref a up:Protein ;
+            up:annotation/up:catalyticActivity/up:catalyzedReaction ?rh .
+    }
+
+    # join via reaction ?rh
+    SERVICE <https://sparql.rhea-db.org/sparql> {
+        ?rh rdfs:subClassOf rh:Reaction ;
+            rh:equation ?equation.
+    }
+
+} GROUP BY ?equation ?og ORDER BY ?og ?equation"""
+
+
+# What is known about single queries beyond the automated checks, keyed by query.
+# Collected from the hand-check list of 2026-11-19/20, which this replaces.
+#   upstreamFile, upstream: how the query compares with sparql-examples@45e5b53
+#   failure:  why the query fails today (short; used in the expected results)
+#   open:     what could still be tried
+#   checks:   results outside the `verify` runs. method: by-hand (run by the user and
+#             recorded on 2026-11-20), probe (one HTTP request from the update session)
+#             or computed (count from aggregate queries; not observed). version:
+#             catalogue (queryHash pins the exact text), upstream, or variant.
+# `build` copies these into each entry; a check is current only while its queryHash
+# matches the entry's query.
+QUERY_NOTES = OrderedDict([
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/7', OrderedDict([
+        ('upstreamFile', 'examples/SwissLipids/7.ttl'),
+        ('upstream', (
+            'Upstream fixed a typo: `SWISSLIPID:Isomeric_Subspecie` → `SWISSLIPID:Isomeric_Subspecies`;'
+            ' its SERVICE URL has no trailing slash.'
+        )),
+        ('failure', (
+            'The catalogue text returns 0 rows because of the class-name typo. The corrected text fails'
+            " on SwissLipids' own engine: by hand its stream broke ('Premature end of chunk'), and in "
+            'run 11 SwissLipids answered HTTP 400 with an empty message after 682 s.'
+        )),
+        ('open', (
+            'Fix the typo (`QUERY_FIXES`, as upstream) once SwissLipids answers the corrected query, or'
+            ' check it with an engine that does the federation itself.'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'variant'),
+                ('versionNote', (
+                    'the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as '
+                    'upstream (the UniProt SERVICE URL keeps its trailing slash)'
+                )),
+                ('upstreamFile', 'examples/SwissLipids/7.ttl'),
+                ('outcome', 'error'),
+                ('result', (
+                    'error -- org.eclipse.rdf4j.query.QueryEvaluationException: '
+                    'org.apache.http.ConnectionClosedException: Premature end of chunk coded message body: '
+                    'closing chunk expected'
+                )),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20T12:44:54+00:00'),
+                ('method', 'http-check'),
+                ('run', 11),
+                ('version', 'variant'),
+                ('versionNote', (
+                    'the catalogue query with the class name corrected to `SWISSLIPID:Isomeric_Subspecies`, as '
+                    'upstream (the UniProt SERVICE URL keeps its trailing slash)'
+                )),
+                ('upstreamFile', 'examples/SwissLipids/7.ttl'),
+                ('queryHash', '6b23f8ee5cf1cbaf'),
+                ('outcome', 'error'),
+                ('httpStatus', 400),
+                ('durationSeconds', 682.4),
+                ('error', 'HTTP 400 with an empty message'),
+                ('note', (
+                    'The typo fix was in QUERY_FIXES for this run only; it was taken out again because the '
+                    'query failed.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/67_draft_human_metabolome', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/67_draft_human_metabolome.ttl'),
+        ('upstream', (
+            'ChEBI predicates changed (`chebislash:smiles`/`inchikey` → '
+            '`chemrof:smiles_string`/`chemrof:inchi_key_string`) and `rh:underlyingChebi/rh:chebi` → '
+            '`rh:underlyingChebi`. The catalogue now uses this upstream version '
+            '(`UPSTREAM_REPLACEMENTS`).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'd978080128b6a20d'),
+                ('outcome', 'ok'),
+                ('resultCount', 317738),
+                ('result', '317,738'),
+                ('note', (
+                    'Run on the upstream version before it replaced the catalogue text (same query text); '
+                    'counted with count_results.py from the downloaded .srj file.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.rhea-db.org/.well-known/sparql-examples/19_draft_human_metabolome', OrderedDict([
+        ('upstreamFile', 'examples/Rhea/19_draft_human_metabolome.ttl'),
+        ('upstream', (
+            'Same ChEBI changes as UniProt 67 (upstream uses `chemrof:inchikey_string` here but '
+            '`chemrof:inchi_key_string` in UniProt 67, so one may be a typo); SERVICE URL without '
+            'trailing slash.'
+        )),
+        ('open', (
+            'If not tried yet: the upstream version with `chemrof:inchi_key_string`, the spelling '
+            'UniProt 67 uses.'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'upstream'),
+                ('upstreamFile', 'examples/Rhea/19_draft_human_metabolome.ttl'),
+                ('outcome', 'empty'),
+                ('resultCount', 0),
+                ('result', 'empty result set'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/36', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/36_orthologous_proteins_via_orthodb.ttl'),
+        ('upstream', (
+            "Reworked: the OrthoDB group is no longer read from UniProt's `rdfs:seeAlso` "
+            'cross-reference (upstream says these can be out of date) but matched inside the OrthoDB '
+            'SERVICE. The catalogue now uses this upstream version (`UPSTREAM_REPLACEMENTS`).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '454a15d6c999601a'),
+                ('outcome', 'ok'),
+                ('resultCount', 1100),
+                ('result', '1100'),
+                ('note', 'Run on the upstream version before it replaced the catalogue text (same query text).'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/117_biosodafrontend_glioblastoma_orthologs_rat', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl'),
+        ('upstream', (
+            'Restructured: the UniProt disease filter runs in a subquery before the OMA and Bgee '
+            'SERVICE calls (OMA and Bgee parts unchanged apart from layout).'
+        )),
+        ('failure', (
+            "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard "
+            "built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's "
+            'SERVICE call).'
+        )),
+        ('open', (
+            'Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the '
+            'block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) '
+            'is blocked too (see UniProt 117 and 118).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'upstream'),
+                ('upstreamFile', 'examples/UniProt/117_biosodafrontend_glioblastoma_orthologs_rat.ttl'),
+                ('outcome', 'error'),
+                ('result', (
+                    'error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: '
+                    'SERVICE responded with HTTP status code: 403, Forbidden'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/118_biosodafrontend_rat_brain_human_cancer', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl'),
+        ('upstream', (
+            'Restructured like UniProt 117 (UniProt part in a subquery) and selects only `?gene '
+            '?orthologous_protein2`.'
+        )),
+        ('failure', (
+            "OMA rejects UniProt's SERVICE call (HTTP 400, Virtuoso: 'Too many arguments for standard "
+            "built-in function'). The upstream version fails on Bgee instead (HTTP 403 to UniProt's "
+            'SERVICE call).'
+        )),
+        ('open', (
+            'Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the '
+            'block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) '
+            'is blocked too (see UniProt 117 and 118).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'upstream'),
+                ('upstreamFile', 'examples/UniProt/118_biosodafrontend_rat_brain_human_cancer.ttl'),
+                ('outcome', 'error'),
+                ('result', (
+                    'error - Error while executing a SERVICE request to <https://www.bgee.org:443/sparql/>: '
+                    'SERVICE responded with HTTP status code: 403, Forbidden'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://www.bgee.org/sparql/.well-known/sparql-examples/028-biosodafrontend', OrderedDict([
+        ('upstreamFile', 'examples/Bgee/028-biosodafrontend.ttl'),
+        ('upstream', (
+            'Reworked: `LIMIT 10` on the Bgee genes, `up:transcribedFrom` without `rdfs:seeAlso`, and '
+            'no `up:Disease_Annotation` filter any more (it returns all annotation IRIs, not disease '
+            'annotation texts).'
+        )),
+        ('failure', (
+            'HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s (also for the upstream '
+            'version with `LIMIT 10`).'
+        )),
+        ('open', 'Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'upstream'),
+                ('upstreamFile', 'examples/Bgee/028-biosodafrontend.ttl'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP524'),
+            ]),
+        ]),
+    ])),
+    ('https://www.bgee.org/sparql/.well-known/sparql-examples/018', OrderedDict([
+        ('upstreamFile', 'examples/Bgee/018.ttl'),
+        ('upstream', "Only the SERVICE URL's trailing slash differs."),
+        ('failure', 'HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s.'),
+        ('open', 'Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'a02e4ecc2a57054d'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 524'),
+            ]),
+        ]),
+    ])),
+    ('https://www.bgee.org/sparql/.well-known/sparql-examples/019', OrderedDict([
+        ('upstreamFile', 'examples/Bgee/019.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('failure', 'HTTP 524: Cloudflare in front of Bgee ends requests after ~125 s.'),
+        ('open', 'Run it where the ~125 s limit does not apply, or ask the Bgee maintainers.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'efd2b4024cd402ef'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 524'),
+            ]),
+        ]),
+    ])),
+    ('https://biosoda.unil.ch/emi/sparql/.well-known/sparql-examples/006', OrderedDict([
+        ('upstreamFile', 'examples/emi/006.ttl'),
+        ('upstream', 'Identical apart from the `emi:` PREFIX (already updated).'),
+        ('failure', 'HTTP 504: the EMI gateway (nginx) ends requests after 60 s.'),
+        ('open', 'Run it where the 60 s limit does not apply, or ask the EarthMetabolome maintainers.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '8fc2ba5e9f1a1c8b'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 504 Gateway Timeout'),
+            ]),
+        ]),
+    ])),
+    ('https://purl.org/emi#examples018', OrderedDict([
+        ('upstreamFile', 'examples/emi/021.ttl'),
+        ('upstream', (
+            'Reworked and renumbered upstream. The closest upstream queries are examples/emi/021.ttl '
+            '(the same question, for norhyoscyamine, `wd:Q27107545`) and examples/emi/020.ttl '
+            '(producers of onopordopicrin, `wd:Q27107580`, and where their interactions were seen).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'variant'),
+                ('versionNote', (
+                    'upstream examples/emi/021.ttl with asimicin (`wd:Q100138042`, as in the catalogue) instead'
+                    ' of norhyoscyamine'
+                )),
+                ('upstreamFile', 'examples/emi/021.ttl'),
+                ('query', EMI018_Q021_ASIMICIN),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 504 Gateway Timeout'),
+                ('note', 'One result was written for this version and upstream 020 (next check); both timed out.'),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'upstream'),
+                ('versionNote', 'as is (a related question)'),
+                ('upstreamFile', 'examples/emi/020.ttl'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 504 Gateway Timeout'),
+                ('note', 'One result was written for this version and the 021 version above; both timed out.'),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20T08:57:26+00:00'),
+                ('method', 'probe'),
+                ('version', 'variant'),
+                ('versionNote', 'upstream examples/emi/020.ttl, restructured'),
+                ('upstreamFile', 'examples/emi/020.ttl'),
+                ('endpoint', 'https://qlever.earthmetabolome.org/api/metrin-kg'),
+                ('query', EMI020_RESTRUCTURED),
+                ('outcome', 'ok'),
+                ('resultCount', 126),
+                ('durationSeconds', 2.0),
+                ('note', (
+                    'The interactions whose target produces the compound are found first, in a subquery, and '
+                    'their location and names are added after. As is, 020 joins its 24 producer taxa with all '
+                    '8.4 million located interactions and hits the 60 s gateway limit.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.orthodb.org/.well-known/sparql-examples/19', OrderedDict([
+        ('upstreamFile', 'examples/OrthoDB/19.ttl'),
+        ('upstream', "Only the SERVICE URL's trailing slash differs."),
+        ('failure', (
+            "OrthoDB's Virtuoso sends one SERVICE request per binding, in parallel; Rhea answers 503 "
+            'Too many concurrent queries. The automated check got no answer within 900 s.'
+        )),
+        ('open', (
+            'Not tried: drop the Rhea equation lookup (return the Rhea reaction IRI), or run the query '
+            'from UniProt (QLever) with OrthoDB as a SERVICE, which needs about 2 remote calls but '
+            'changes the target.'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '25f02f2ca4a16ec4'),
+                ('outcome', 'error'),
+                ('result', (
+                    'error - HTTP 503 (bad virtuoso SERVICE handling by sending burst of requests that results '
+                    'in HTTP 403)'
+                )),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20T08:57:48+00:00'),
+                ('method', 'probe'),
+                ('version', 'variant'),
+                ('versionNote', 'this query with the OrthoDB part (with the clade filter) in a subquery'),
+                ('endpoint', 'https://sparql.orthodb.org/sparql/'),
+                ('query', ORTHODB19_SUBQUERY),
+                ('outcome', 'error'),
+                ('durationSeconds', 64.5),
+                ('error', (
+                    "HTTP 500: Virtuoso RDFZZ Error DB.DBA.SPARQL_REXEC('https://sparql.rhea-db.org/sparql', "
+                    "...) returned Content-Type 'text/html' status 'HTTP/1.1 503' Rhea: Too many concurrent "
+                    'queries. Please try again later.'
+                )),
+                ('note', (
+                    'Only the ~1,844 UniProt cross-references in the 4 clades are federated, instead of the '
+                    '76,771 genes of the 119 groups. It got through the UniProt SERVICE in about a minute; Rhea'
+                    ' then refused the parallel calls. Not retried.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/49', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/49_tissues_where_genes_metabolizing_cholestrol_are_expressed.ttl'),
+        ('upstream', 'The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream.'),
+        ('failure', (
+            "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a "
+            "moment...' page), with or without the trailing slash."
+        )),
+        ('open', (
+            'Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the '
+            'block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) '
+            'is blocked too (see UniProt 117 and 118).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '2ab5e40b819fe1ea'),
+                ('outcome', 'error'),
+                ('result', 'error - Bgee issued a HTTP 403 error'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/50', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/50_tissues_where_genes_sphingosines_are_expressed.ttl'),
+        ('upstream', 'The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream.'),
+        ('failure', (
+            "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a "
+            "moment...' page), with or without the trailing slash."
+        )),
+        ('open', (
+            'Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the '
+            'block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) '
+            'is blocked too (see UniProt 117 and 118).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'abcd81b98b76a58f'),
+                ('outcome', 'error'),
+                ('result', 'error - Bgee issued a HTTP 403 error'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/109_uniprot_transporter_in_liver', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/109_uniprot_transporter_in_liver.ttl'),
+        ('upstream', 'The SERVICE URL is `https://www.bgee.org/sparql/` (with trailing slash) upstream.'),
+        ('failure', (
+            "Bgee's Cloudflare bot check answers UniProt's SERVICE call with HTTP 403 (a 'Just a "
+            "moment...' page), with or without the trailing slash."
+        )),
+        ('open', (
+            'Run the Bgee part directly on Bgee, or ask the Bgee or UniProt maintainers about the '
+            'block. The upstream SERVICE URL with the trailing slash (`https://www.bgee.org/sparql/`) '
+            'is blocked too (see UniProt 117 and 118).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'f93c95011b493047'),
+                ('outcome', 'error'),
+                ('result', 'error - Bgee issued a HTTP 403 error'),
+            ]),
+        ]),
+    ])),
+    ('https://purl.org/emi#examples012', OrderedDict([
+        ('upstreamFile', 'examples/emi/013.ttl'),
+        ('upstream', 'Changed in the upstream SIB catalogue; already replaced with the upstream version.'),
+        ('failure', (
+            "QLever's Wikidata endpoint (qlever.dev) answers the EMI server's SERVICE call with 429 Too"
+            ' Many Requests.'
+        )),
+        ('open', 'Try again later: the 429 is a rate limit.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'e7d88b39ff0d01b3'),
+                ('outcome', 'error'),
+                ('result', 'error - wikidata responds with HTTP 429'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/90_uniprot_affected_by_metabolic_diseases_using_MeSH', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/90_uniprot_affected_by_metabolic_diseases_using_MeSH.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('failure', (
+            'The MeSH endpoint (`https://id.nlm.nih.gov/mesh/sparql`) returns its service description '
+            'as text/plain instead of SPARQL results, which UniProt (QLever) cannot use.'
+        )),
+        ('open', 'Check whether MeSH still offers SPARQL results at that URL.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '8950b09ad6e7285b'),
+                ('outcome', 'error'),
+                ('result', (
+                    "error - MeSH error; endpoint sent 'text/plain;charset=utf-8' not "
+                    "'application/sparql-results+json'"
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.orthodb.org/.well-known/sparql-examples/20', OrderedDict([
+        ('upstreamFile', 'examples/OrthoDB/20.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('failure', (
+            "STRING (`https://sparql.string-db.org/sparql`) answers OrthoDB's SERVICE call with 403 "
+            'Forbidden (an HTML page).'
+        )),
+        ('open', "Check whether STRING's endpoint still accepts SPARQL requests."),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', '324b0fba6393b421'),
+                ('outcome', 'error'),
+                ('result', 'error - HTTP 403 from STRING db'),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/26', OrderedDict([
+        ('upstreamFile', 'examples/SwissLipids/26.ttl'),
+        ('upstream', (
+            'The Rhea part binds `?chebi` instead of `?metabolite`, so it joins the SwissLipids part '
+            '(the original is a cross product); also `rh:underlyingChebi/rh:chebi` → '
+            '`rh:underlyingChebi` and the SERVICE URL without trailing slash. The catalogue now has '
+            'this join fix plus DISTINCT and reviewed enzymes only.'
+        )),
+        ('failure', (
+            "SwissLipids' RDF4J engine breaks the result stream part way: the response ends inside the "
+            'bindings with invalid JSON (run 8 after 673.9 s; run 10 after 10,720 rows and 356 s), the '
+            "same failure as 'Premature end of chunk' for SwissLipids 7 by hand."
+        )),
+        ('open', (
+            'Run it again later, or where the stream does not break. The computed count is its expected'
+            ' result: the same computation gave exactly the observed counts of 27 and 34 (run 10).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'computed'),
+                ('version', 'catalogue'),
+                ('queryHash', '89e373cae51ffd2e'),
+                ('outcome', 'ok'),
+                ('resultCount', 136755),
+                ('note', (
+                    'Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: '
+                    'SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI '
+                    'path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only.'
+                    ' The parts were joined locally. Run 8 broke off before the end, so the count was computed '
+                    'instead.'
+                )),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'computed'),
+                ('version', 'upstream'),
+                ('versionNote', 'the join fix only, as upstream (no DISTINCT, all enzymes)'),
+                ('upstreamFile', 'examples/SwissLipids/26.ttl'),
+                ('outcome', 'ok'),
+                ('resultCount', 89319800),
+                ('note', (
+                    'Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed '
+                    'enzymes only.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/27', OrderedDict([
+        ('upstreamFile', 'examples/SwissLipids/27.ttl'),
+        ('upstream', (
+            'Same join fix as 26 (`?metabolite` → `?chebi`, `rh:underlyingChebi`), SERVICE URL without '
+            'trailing slash. The catalogue now has this join fix plus DISTINCT and reviewed enzymes '
+            'only.'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'computed'),
+                ('version', 'catalogue'),
+                ('queryHash', '40bc373c6139da1d'),
+                ('outcome', 'ok'),
+                ('resultCount', 6400),
+                ('note', (
+                    'Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: '
+                    'SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI '
+                    'path, and UniProt rows per reaction and (reaction, organism) pairs, reviewed enzymes only,'
+                    ' plus isomeric subspecies per lipid. The parts were joined locally. Run 8 broke off before'
+                    ' the end, so the count was computed instead. Run 10 then returned exactly this count.'
+                )),
+            ]),
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'computed'),
+                ('version', 'upstream'),
+                ('versionNote', 'the join fix only, as upstream (no DISTINCT, all enzymes)'),
+                ('upstreamFile', 'examples/SwissLipids/27.ttl'),
+                ('outcome', 'ok'),
+                ('resultCount', 10548746085),
+                ('note', (
+                    'Computed the same way; too large to download, so the catalogue adds DISTINCT and reviewed '
+                    'enzymes only.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.swisslipids.org/.well-known/sparql-examples/34', OrderedDict([
+        ('upstreamFile', 'examples/SwissLipids/34.ttl'),
+        ('upstream', (
+            'Same join fix as 26 (`?metabolite` → `?chebi`, `rh:underlyingChebi`), SERVICE URL without '
+            'trailing slash. The catalogue now has this join fix only (same as upstream).'
+        )),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'computed'),
+                ('version', 'catalogue'),
+                ('queryHash', 'a68360bcb58003ca'),
+                ('outcome', 'ok'),
+                ('resultCount', 280679),
+                ('note', (
+                    'Computed on 2026-11-20 from small aggregate queries, each sent to one endpoint: '
+                    'SwissLipids (lipid, ChEBI) pairs, Rhea rows per (reaction, ChEBI) with the fixed ChEBI '
+                    'path, and UniProt rows per reaction for human enzymes. The parts were joined locally. Run '
+                    '8 broke off before the end, so the count was computed instead. Run 10 then returned '
+                    'exactly this count.'
+                )),
+            ]),
+        ]),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/48', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/48_glycosylation_sites_and_glycans.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('checks', []),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/53', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/53_mouse_homologs_of_sterol_enzymes_via_omabrowser.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('checks', []),
+    ])),
+    ('https://sparql.orthodb.org/.well-known/sparql-examples/17', OrderedDict([
+        ('upstreamFile', 'examples/OrthoDB/17.ttl'),
+        ('upstream', "Only the SERVICE URL's trailing slash differs."),
+        ('checks', []),
+    ])),
+    ('https://sparql.omabrowser.org/.well-known/sparql-examples/15-rat-TP53-biosodafrontend', OrderedDict([
+        ('upstreamFile', 'examples/OMA/15-biosodafrontend-rat-TP53.ttl'),
+        ('upstream', "Only the SERVICE URL's trailing slash differs."),
+        ('checks', []),
+    ])),
+    ('https://sparql.uniprot.org/.well-known/sparql-examples/99_uniprot_identifiers_org_translation', OrderedDict([
+        ('upstreamFile', 'examples/UniProt/99_uniprot_identifiers_org_translation.ttl'),
+        ('upstream', 'Unchanged.'),
+        ('failure', (
+            "identifiers.org's SPARQL endpoint (`https://sparql.api.identifiers.org`) answers UniProt's"
+            ' SERVICE call with HTTP 500.'
+        )),
+        ('open', 'Check whether identifiers.org still runs its SPARQL endpoint.'),
+        ('checks', [
+            OrderedDict([
+                ('date', '2026-11-20'),
+                ('method', 'by-hand'),
+                ('version', 'catalogue'),
+                ('queryHash', 'a8797b69e07fcf6c'),
+                ('outcome', 'error'),
+                ('result', 'error - https://sparql.api.identifiers.org issued HTTP 500'),
+            ]),
+        ]),
+    ])),
 ])
 
 # Queries left out of the updated catalogue (they stay in the original file).
@@ -366,6 +1380,36 @@ def map_endpoint(url):
     return ENDPOINT_MAP[url]["to"] if url in ENDPOINT_MAP else url
 
 
+def upstream_url(path):
+    return f"{UPSTREAM_REPO}/blob/{UPSTREAM_COMMIT_CHECKED[:7]}/{path}"
+
+
+def add_query_notes(key, entry):
+    """Copy QUERY_NOTES into the entry. A check is marked currentQuery only while its
+    queryHash matches the entry's query, so a later change to the query retires it."""
+    spec = QUERY_NOTES.get(key)
+    if not spec:
+        return
+    if spec.get("upstream"):
+        entry["upstreamComparison"] = OrderedDict([
+            ("file", spec.get("upstreamFile")),
+            ("url", upstream_url(spec["upstreamFile"]) if spec.get("upstreamFile") else None),
+            ("note", spec["upstream"]),
+        ])
+    if spec.get("failure"):
+        entry["failureSummary"] = spec["failure"]
+    if spec.get("open"):
+        entry["openOptions"] = spec["open"]
+    h = query_hash(entry)
+    checks = []
+    for c in spec.get("checks") or []:
+        c = OrderedDict(c)
+        c["currentQuery"] = c.get("queryHash") == h
+        checks.append(c)
+    if checks:
+        entry["otherChecks"] = checks
+
+
 def build(args):
     previous = None
     if os.path.exists(args.output):
@@ -446,6 +1490,24 @@ def build(args):
                     ("to", spec["to"]), ("occurrences", n), ("reason", spec["reason"]),
                 ]))
 
+        # 4b. small fixes for queries that returned no results (QUERY_FIXES)
+        fix = QUERY_FIXES.get(key)
+        if fix:
+            for old, new_text in fix["query"]:
+                if query.count(old) != 1:
+                    sys.exit(f"QUERY_FIXES for {key}: expected the text once in the query: {old!r}")
+                query = query.replace(old, new_text)
+            for old, new_text in fix["description"]:
+                if description.count(old) != 1:
+                    sys.exit(f"QUERY_FIXES for {key}: expected the text once in the description: {old!r}")
+                description = description.replace(old, new_text)
+            changes.append(OrderedDict([
+                ("field", "queryFix"),
+                ("replacements", [OrderedDict([("from", o), ("to", n)]) for o, n in fix["query"]]),
+                ("descriptionReplacements", [OrderedDict([("from", o), ("to", n)]) for o, n in fix["description"]]),
+                ("reason", fix["reason"]),
+            ]))
+
         # 5. leave out queries listed in REMOVED_QUERIES or using an unavailable endpoint
         dead = sorted(ep for ep in set(all_endpoints(OrderedDict(query=query, target=target, federatesWith=fed)))
                       if ep in UNAVAILABLE_ENDPOINTS)
@@ -461,9 +1523,12 @@ def build(args):
         new["description"] = description
         new["federatesWith"] = fed
         new["target"] = target
-        endpoint_changed = any(c["field"] not in ("queryPrefix", "queryAndDescription") for c in changes)
+        endpoint_changed = any(c["field"] not in ("queryPrefix", "queryAndDescription", "queryFix")
+                               for c in changes)
         if rep:
             new["changeStatus"] = "replaced-with-upstream"
+        elif fix:
+            new["changeStatus"] = "query-fixed"
         else:
             new["changeStatus"] = {(False, False): "unchanged", (True, False): "endpoint-updated",
                                    (False, True): "prefix-updated",
@@ -473,6 +1538,7 @@ def build(args):
         new["status"] = "unverified"
         new["manualFixNotes"] = []
         new["verification"] = None
+        add_query_notes(key, new)
         out_data[key] = new
         counts[new["changeStatus"]] += 1
 
@@ -497,6 +1563,8 @@ def build(args):
                       "clauses, and PREFIX namespaces that changed together with an endpoint's "
                       "data (see prefixMap). Queries that no longer work and were reworked "
                       "upstream are replaced with the upstream version (see upstreamReplacements); "
+                      "a few queries that returned no results get a small documented fix (see "
+                      "queryFixes); "
                       "queries that use an unavailable endpoint or were dropped upstream are left "
                       "out (see removedQueries). Query keys are unchanged so results can be joined "
                       "with earlier experiments, except for replaced queries.")
@@ -507,6 +1575,22 @@ def build(args):
     meta["upstreamReplacements"] = [OrderedDict([("key", k), ("upstreamFile", v["upstreamFile"]),
                                                  ("upstreamId", v["upstreamId"]), ("reason", v["reason"])])
                                     for k, v in UPSTREAM_REPLACEMENTS.items() if k in out_data]
+    meta["queryFixes"] = [OrderedDict([("key", k), ("reason", v["reason"])])
+                          for k, v in QUERY_FIXES.items() if k in out_data]
+    meta["otherChecks"] = (
+        "Entries can have otherChecks: results outside the verify runs. method by-hand: run by "
+        "the catalogue maintainer from a hand-check list (2026-11-19/20; recorded on "
+        "2026-11-20); probe: a single HTTP request sent while updating the catalogue; "
+        "computed: a result count computed from small aggregate queries (not observed). "
+        "version catalogue means the entry's query text (currentQuery is true while queryHash "
+        "matches it); upstream means the file named in upstreamFile at sparql-examples@"
+        f"{UPSTREAM_COMMIT_CHECKED[:7]}; variant means the text in query or described in "
+        "versionNote. upstreamComparison, failureSummary and openOptions hold what is known "
+        "about the query. All of it comes from QUERY_NOTES in the script.")
+    missing = [k for k in QUERY_NOTES if k not in out_data]
+    if missing:
+        print("QUERY_NOTES for queries not in the updated catalogue (ignored): "
+              + ", ".join(short_id(k) for k in missing))
     meta["removedQueries"] = removed
     meta["unavailableEndpoints"] = [OrderedDict([("endpoint", k), ("note", v)])
                                     for k, v in UNAVAILABLE_ENDPOINTS.items()]
@@ -635,7 +1719,7 @@ def count_sparql_json(resp, max_bytes, chunk_size=1 << 20):
         if idx >= len(buf):
             buf, idx = "", 0
             if not more():
-                raise ValueError("response ended inside the bindings array")
+                raise ValueError(f"response ended inside the bindings array after {rows} rows")
             continue
         if buf[idx] == "]":
             buf = ""
@@ -648,7 +1732,9 @@ def count_sparql_json(resp, max_bytes, chunk_size=1 << 20):
         except json.JSONDecodeError:
             buf, idx = buf[idx:], 0  # binding split across chunks: read more
             if not more():
-                raise ValueError("invalid JSON inside the bindings array")
+                # servers that fail while streaming often append their error text here
+                raise ValueError(f"invalid JSON inside the bindings array after {rows} rows; "
+                                 f"the response ends with: {squash(buf[-600:], 600)}")
 
 
 def run_query(endpoint, query, timeout, max_bytes):
@@ -925,6 +2011,191 @@ def summarize(cat):
 
 
 # ---------------------------------------------------------------------------
+# expected results
+# ---------------------------------------------------------------------------
+
+METHOD_LABELS = {"http-check": "HTTP check", "by-hand": "Run by hand", "probe": "Single HTTP request",
+                 "computed": "Computed from aggregate queries"}
+
+
+def as_check(v):
+    """A verification record in the same shape as an otherChecks item."""
+    c = OrderedDict([("date", v.get("date")),
+                     ("method", "computed" if v.get("method") == "count-by-parts" else "http-check")])
+    for k in ("run", "outcome", "resultCount", "httpStatus", "durationSeconds", "responseBytes",
+              "countedBy", "error"):
+        if v.get(k) is not None:
+            c[k] = v[k]
+    return c
+
+
+def checks_of(entry):
+    """(current, other): the checks of the entry's current query text, oldest first, and
+    the checks of other versions of the query (earlier texts, upstream, variants)."""
+    h = query_hash(entry)
+    current, other = [], []
+    history = list(entry.get("previousVerifications") or [])
+    if entry.get("verification"):
+        history.append(entry["verification"])
+    for v in history:
+        if v.get("outcome") == "not-run":
+            continue
+        c = as_check(v)
+        if v.get("queryHash") == h:
+            current.append(c)
+        else:
+            c["version"] = "earlier"
+            c["versionNote"] = "an earlier text of this query (before a change listed in `changes`)"
+            other.append(c)
+    for oc in entry.get("otherChecks") or []:
+        c = OrderedDict((k, x) for k, x in oc.items() if k not in ("currentQuery", "queryHash"))
+        if oc.get("currentQuery"):
+            c.pop("version", None)
+            current.append(c)
+        else:
+            if c.get("version") == "catalogue":  # the query changed after this check
+                c["version"] = "earlier"
+                c.setdefault("versionNote", "an earlier text of this query")
+            if c.get("upstreamFile"):
+                c["upstreamUrl"] = upstream_url(c["upstreamFile"])
+            other.append(c)
+    by_date = lambda c: str(c.get("date") or "")
+    return sorted(current, key=by_date), sorted(other, key=by_date)
+
+
+def where(c):
+    date = str(c.get("date") or "")[:10]
+    if c["method"] == "http-check":
+        return f"HTTP check, run {c.get('run')} ({date})"
+    return f"{METHOD_LABELS[c['method']].lower()} ({date})"
+
+
+def brief(c, limit=200):
+    return c.get("result") or squash(c.get("error") or "", limit)
+
+
+def expected_result(entry):
+    """What a complete evaluation of the current query text is expected to give."""
+    current, _ = checks_of(entry)
+    seen = [c for c in current if c["method"] != "computed"]
+    ok = [c for c in seen if c.get("outcome") == "ok"]
+    computed = [c for c in current if c["method"] == "computed" and c.get("resultCount") is not None]
+    e = OrderedDict()
+    if ok:
+        c = ok[-1]
+        e["outcome"], e["resultCount"], e["basis"] = "ok", c.get("resultCount"), where(c)
+        if c.get("durationSeconds") is not None:
+            e["durationSeconds"] = c["durationSeconds"]
+    elif computed:
+        c = computed[-1]
+        e["outcome"], e["resultCount"], e["basis"] = "ok", c["resultCount"], where(c)
+        e["observed"] = False
+        failed = [c for c in seen if c.get("outcome") in ("error", "timeout", "too-large")]
+        if failed:
+            # the query errors when run, but its result size is known: record both
+            e["runError"] = entry.get("failureSummary") or brief(failed[-1])
+            e["runErrorBasis"] = "; ".join(where(c) for c in failed)
+        if seen:
+            e["note"] = (f"Not observed: the latest attempt, {where(seen[-1])}, ended with "
+                         f"{seen[-1].get('outcome')}: {brief(seen[-1])}")
+    elif seen and seen[-1].get("outcome") in ("empty", "too-large"):
+        c = seen[-1]
+        e["outcome"] = c["outcome"]
+        e["resultCount"] = 0 if c["outcome"] == "empty" else None
+        e["basis"] = where(c)
+        if entry.get("failureSummary"):
+            e["note"] = entry["failureSummary"]
+    elif seen:
+        e["outcome"], e["resultCount"] = "fails", None
+        e["basis"] = "; ".join(where(c) for c in seen)
+        e["failure"] = entry.get("failureSummary") or brief(seen[-1])
+    else:
+        e["outcome"], e["resultCount"], e["basis"] = "unknown", None, "not checked yet"
+    return e
+
+
+def rows(n):
+    return f"{n:,} row" + ("" if n == 1 else "s")
+
+
+def fmt_expected(e):
+    if e["outcome"] == "ok":
+        text = rows(e["resultCount"]) if e.get("resultCount") is not None else "results"
+        if e.get("observed") is False:
+            text += " (computed, not observed" + ("; the query errors when run" if e.get("runError") else "") + ")"
+        return text
+    if e["outcome"] == "empty":
+        return "0 rows"
+    if e["outcome"] == "fails":
+        return f"fails: {e['failure']}"
+    return e["outcome"]
+
+
+EXPECTED_KINDS = ["results (observed)", "results (computed, not observed)", "0 rows", "too large",
+                  "fails", "unknown"]
+
+
+def fmt_expected_kind(e):
+    return {"ok": "results (computed, not observed)" if e.get("observed") is False else "results (observed)",
+            "empty": "0 rows", "too-large": "too large", "fails": "fails"}.get(e["outcome"], "unknown")
+
+
+def expected_path(catalogue_path):
+    base = catalogue_path[:-5] if catalogue_path.endswith(".json") else catalogue_path
+    return base + ".expected-results.json"
+
+
+def expected(args):
+    cat = load_json(args.catalogue)
+    data, meta = cat["data"], cat["metadata"]
+    out = OrderedDict()
+    counts = defaultdict(int)
+    for key, entry in data.items():
+        current, other = checks_of(entry)
+        exp = expected_result(entry)
+        counts[exp["outcome"] + (" (computed)" if exp.get("observed") is False else "")] += 1
+        item = OrderedDict([("id", short_id(key)), ("target", entry["target"]),
+                            ("changeStatus", entry["changeStatus"]), ("queryHash", query_hash(entry)),
+                            ("expected", exp), ("checks", current)])
+        if other:
+            item["otherVersions"] = other
+        out[key] = item
+    m = OrderedDict()
+    m["catalogue"] = os.path.basename(args.catalogue)
+    m["catalogueVersion"] = meta.get("catalogueVersion")
+    m["generated"] = now_iso()
+    m["generatedBy"] = "update_query_catalogue.py expected"
+    m["description"] = (
+        "The result each query of the updated catalogue is expected to give on its live target endpoint, "
+        "with every check behind it: the automated HTTP checks (verify runs), the runs by hand and single "
+        "requests made while updating the catalogue, and counts computed from aggregate queries. Counts are "
+        "snapshots from November 2026: the endpoints' data change, so later counts can differ.")
+    m["expectedRule"] = (
+        "expected.outcome is ok (with resultCount) when a check of the current query text returned results; "
+        "the latest such check is used. Otherwise, a count computed from aggregate queries is used "
+        "(observed: false); if the query errored when it was run, runError says why and runErrorBasis "
+        "names those checks. Otherwise, the latest check decides: empty (0 rows) or fails, with the "
+        "reason in failure. basis names the check(s) used.")
+    m["fields"] = OrderedDict([
+        ("queryHash", "sha256(target + NUL + query)[:16] of the catalogue entry; a check applies to the "
+                      "query text with this hash"),
+        ("checks", "checks of the current query text, oldest first"),
+        ("otherVersions", "checks of other versions: earlier texts in the updated catalogue, upstream "
+                          "versions (upstreamFile at sparql-examples@" + UPSTREAM_COMMIT_CHECKED[:7]
+                          + ") and variants (text in query, or described in versionNote)"),
+        ("method", "http-check (run = verify run, see the catalogue's metadata.verificationRuns), "
+                   "by-hand (result = what the person wrote down), probe (one HTTP request), computed"),
+        ("outcome", "ok, empty, error, timeout or too-large for checks; ok, empty, fails, too-large or "
+                    "unknown for expected"),
+    ])
+    m["summary"] = OrderedDict(sorted(counts.items()))
+    m["removedQueries"] = [OrderedDict([("key", r["key"]), ("reason", r["reason"])])
+                           for r in meta.get("removedQueries") or []]
+    save_json_atomic(OrderedDict([("metadata", m), ("data", out)]), args.output)
+    print(f"Wrote {args.output}: " + ", ".join(f"{n} {k}" for k, n in sorted(counts.items())))
+
+
+# ---------------------------------------------------------------------------
 # report
 # ---------------------------------------------------------------------------
 
@@ -935,13 +2206,123 @@ def md_escape(text):
 def fmt_check(v):
     parts = [f"**{v.get('outcome')}**"]
     if "resultCount" in v:
-        parts.append(f"{v['resultCount']} rows")
+        parts.append(rows(v["resultCount"]))
     if v.get("httpStatus"):
         parts.append(f"HTTP {v['httpStatus']}")
     if v.get("durationSeconds") is not None:
         parts.append(f"{v['durationSeconds']} s")
+    if v.get("countedBy"):
+        parts.append(f"counted by {v['countedBy']}")
     run = f"run {v['run']}, " if v.get("run") else ""
     return ", ".join(parts) + f" ({run}{v.get('date')})"
+
+
+def diff_block(replacements):
+    """Markdown diff of exact text replacements (old lines with -, new lines with +)."""
+    out = ["```diff"]
+    for i, r in enumerate(replacements):
+        if i:
+            out.append("@@")
+        out += ["- " + line for line in r["from"].rstrip("\n").split("\n")]
+        out += ["+ " + line for line in r["to"].rstrip("\n").split("\n")]
+    out.append("```")
+    return out
+
+
+def fmt_expected_line(exp, with_note=True):
+    text = fmt_expected(exp)
+    line = f"Expected: {text}" + ("" if text.endswith(".") else ".") + f" Based on: {exp['basis']}."
+    if exp.get("runError"):
+        line += f" Error when run ({exp['runErrorBasis']}): {exp['runError']}"
+        line += "" if line.endswith(".") else "."
+    elif with_note and exp.get("note"):
+        line += f" {exp['note']}"
+    return md_escape(line)
+
+
+def fmt_other_check(c):
+    """One line for an otherChecks item or an earlier-text HTTP check (from checks_of)."""
+    date = str(c.get("date") or "")[:10]
+    if c["method"] == "http-check":
+        head = f"HTTP check, run {c.get('run')} ({date})"
+    else:
+        head = f"{METHOD_LABELS[c['method']]} ({date})"
+    version = c.get("version")
+    if version == "upstream":
+        what = f"upstream [`{c['upstreamFile']}`]({upstream_url(c['upstreamFile'])})"
+        if c.get("versionNote"):
+            what += f", {c['versionNote']}"
+    elif version in ("variant", "earlier"):
+        what = c.get("versionNote") or version
+        if c.get("query"):
+            what += " (query text below)"
+    else:
+        what = "this query"
+    res = [f"**{c.get('outcome')}**"]
+    if c.get("resultCount") is not None:
+        res.append(rows(c["resultCount"]))
+    if c.get("httpStatus"):
+        res.append(f"HTTP {c['httpStatus']}")
+    if c.get("durationSeconds") is not None:
+        res.append(f"{c['durationSeconds']} s")
+    line = f"{head}, {what}: " + ", ".join(res)
+    if c.get("result"):
+        line += f"; written down: “{c['result']}”"
+    elif c.get("error"):
+        line += f": {squash(c['error'], 300)}"
+    if c.get("note"):
+        line += ("" if line.endswith(".") else ".") + f" {c['note']}"
+    return md_escape(line)
+
+
+def query_details(L, key, e, exp, with_key=True):
+    """Bullets for one query: expected result, every check, upstream and what to try,
+    followed by the text of tried variants."""
+    if with_key:
+        L.append(f"- Key: <{key}>")
+        L.append(f"- Target: `{e['target']}`"
+                 + (f" ({e['changeStatus']})" if e["changeStatus"] != "unchanged" else ""))
+    L.append(f"- {fmt_expected_line(exp)}")
+    h = query_hash(e)
+    v = e.get("verification")
+    if v:
+        L.append(f"- Check: {fmt_check(v)}")
+    for pv in e.get("previousVerifications", []):
+        later = "" if pv.get("queryHash") == h else " (earlier query text)"
+        L.append(f"- Earlier check{later}: {fmt_check(pv)}")
+    if e["status"] != "working":
+        for n in e["manualFixNotes"]:
+            # advice the hand checks and failureSummary already answer
+            if (n.startswith("Hint:") and e.get("failureSummary")) or \
+                    (n.startswith("Returned 0 results") and e.get("otherChecks")):
+                continue
+            L.append(f"- {md_escape(n)}")
+    texts = []
+    for oc in e.get("otherChecks") or []:
+        c = OrderedDict(oc)
+        if not oc.get("currentQuery") and c.get("version") == "catalogue":
+            c["version"], c["versionNote"] = "earlier", "an earlier text of this query"
+        label = "Other check" if oc.get("currentQuery") else "Other version"
+        L.append(f"- {label}: {fmt_other_check(c)}")
+        if c.get("query"):
+            texts.append((c.get("versionNote") or "variant", c.get("endpoint") or e["target"], c["query"]))
+    up = e.get("upstreamComparison")
+    if up:
+        link = f" ([`{up['file']}`]({up['url']}))" if up.get("file") else ""
+        L.append(f"- Upstream: {md_escape(up['note'])}{link}")
+    if e.get("failureSummary") and e["status"] != "working" and exp["outcome"] != "fails" \
+            and not exp.get("runError") and exp.get("note") != e["failureSummary"]:
+        L.append(f"- Why it fails: {md_escape(e['failureSummary'])}")
+    if e.get("openOptions"):
+        L.append(f"- Still to try: {md_escape(e['openOptions'])}")
+    L.append("")
+    for note, endpoint, text in texts:
+        L.append(f"Query text of {note} (run on `{endpoint}`):")
+        L.append("")
+        L.append("```sparql")
+        L.extend(text.rstrip("\n").split("\n"))
+        L.append("```")
+        L.append("")
 
 
 def report(args):
@@ -955,9 +2336,13 @@ def report(args):
 
     status_counts = defaultdict(int)
     outcome_counts = defaultdict(int)
-    for e in data.values():
+    expected_counts = defaultdict(int)
+    exp = {}
+    for k, e in data.items():
         status_counts[e["status"]] += 1
         outcome_counts[(e.get("verification") or {}).get("outcome", "unverified")] += 1
+        exp[k] = expected_result(e)
+        expected_counts[fmt_expected_kind(exp[k])] += 1
 
     L = []
     L.append(f"# Query catalogue update ({meta['catalogueVersion']})")
@@ -976,6 +2361,12 @@ def report(args):
              "with its SERVICE clauses, to its `target` endpoint, one query at a time and "
              "without retries. Status and outcome below come from each query's latest check; "
              "earlier checks are kept. Settings per run are listed under *Verification runs*.")
+    L.append("- **Other checks:** the queries that failed were also run by hand (2026-11-19/20, recorded "
+             "on 2026-11-20), often in their upstream version, and a few counts were computed from small "
+             "aggregate queries. They are listed per query (`otherChecks` in the catalogue).")
+    L.append(f"- **Expected results:** `{os.path.basename(expected_path(args.catalogue))}` "
+             "(`update_query_catalogue.py expected`) gives the result each query is expected to give, "
+             "with every check behind it; see *Expected results* below.")
     L.append("")
     L.append("## Summary")
     L.append("")
@@ -991,12 +2382,17 @@ def report(args):
         if outcome_counts.get(k):
             L.append(f"| {k} | {outcome_counts[k]} |")
     L.append("")
+    L.append("| Expected result (all checks) | Queries |")
+    L.append("|---|---:|")
+    for k, n in sorted(expected_counts.items(), key=lambda kv: EXPECTED_KINDS.index(kv[0])):
+        L.append(f"| {k} | {n} |")
+    L.append("")
     L.append("## Endpoint changes")
     L.append("")
     L.append("| From | To | Queries affected | Reason |")
     L.append("|---|---|---:|---|")
     for m in meta["endpointMap"]:
-        n = sum(1 for e in data.values() if any(c["from"] == m["from"] for c in e["changes"]))
+        n = sum(1 for e in data.values() if any(c.get("from") == m["from"] for c in e["changes"]))
         L.append(f"| `{m['from']}` | `{m['to']}` | {n} | {md_escape(m['reason'])} |")
     L.append("")
     L.append("### Unavailable endpoints (no replacement; queries using them were removed)")
@@ -1025,7 +2421,7 @@ def report(args):
         L.append("|---|---|---|---|---:|---|")
         for m in meta["prefixMap"]:
             n = sum(1 for e in data.values()
-                    if any(c["field"] == "queryPrefix" and c["from"] == m["from"] for c in e["changes"]))
+                    if any(c["field"] == "queryPrefix" and c.get("from") == m["from"] for c in e["changes"]))
             L.append(f"| `{m['endpoint']}` | `{m['prefix']}:` | `{m['from']}` | `{m['to']}` | {n} | "
                      f"{md_escape(m['reason'])} |")
         L.append("")
@@ -1038,9 +2434,51 @@ def report(args):
                  "results are not comparable with earlier experiments.")
         L.append("")
         for r in reps:
-            L.append(f"- `{short_id(r['key'])}` → upstream `{r['upstreamFile']}` "
-                     f"(<{r['upstreamId']}>): {md_escape(r['reason'])}")
+            e = data.get(r["key"])
+            L.append(f"### `{short_id(r['key'])}`")
+            L.append("")
+            L.append(f"Upstream [`{r['upstreamFile']}`]({upstream_url(r['upstreamFile'])}) "
+                     f"(<{r['upstreamId']}>). {md_escape(r['reason'])}")
+            L.append("")
+            if e is None:
+                continue
+            if e["status"] == "needs-manual-fix":
+                L.append(f"- {fmt_expected_line(exp[r['key']], with_note=False)} It does not work yet: see "
+                         "*Queries that do not work yet*.")
+                L.append("")
+                continue
+            query_details(L, r["key"], e, exp[r["key"]], with_key=False)
+    qfixes = meta.get("queryFixes") or []
+    if qfixes:
+        L.append(f"## Queries with a small fix ({len(qfixes)})")
         L.append("")
+        L.append("These queries returned no results, or did not finish. Each got a small, documented change "
+                 "(exact text replacements, listed in the entry's `changes` and shown below as a diff) and "
+                 "still asks the same question; their results are not directly comparable with earlier "
+                 "experiments.")
+        L.append("")
+        for r in qfixes:
+            e = data.get(r["key"])
+            L.append(f"### `{short_id(r['key'])}`")
+            L.append("")
+            L.append(md_escape(r["reason"]))
+            L.append("")
+            if e is None:
+                continue
+            for c in e["changes"]:
+                if c["field"] == "queryFix":
+                    L.extend(diff_block(c["replacements"]))
+                    if c.get("descriptionReplacements"):
+                        L.append("")
+                        L.append("Description: " + "; ".join(f"`{d['from']}` → `{d['to']}`"
+                                                             for d in c["descriptionReplacements"]))
+            L.append("")
+            if e["status"] == "needs-manual-fix":
+                L.append(f"- {fmt_expected_line(exp[r['key']], with_note=False)} It does not work yet: see "
+                         "*Queries that do not work yet*.")
+                L.append("")
+                continue
+            query_details(L, r["key"], e, exp[r["key"]], with_key=False)
     if removed:
         L.append(f"## Queries removed from the updated catalogue ({len(removed)})")
         L.append("")
@@ -1054,24 +2492,20 @@ def report(args):
         L.append("")
 
     manual = [(k, e) for k, e in data.items() if e["status"] == "needs-manual-fix"]
-    L.append(f"## Queries to fix or check by hand ({len(manual)})")
+    L.append(f"## Queries that do not work yet ({len(manual)})")
     L.append("")
     if not manual:
         L.append("None.")
+    else:
+        L.append("These were checked by HTTP request (see *Verification runs*) and by hand, and none gives "
+                 "a complete result on today's endpoints. Each lists every check, how the query compares "
+                 f"with upstream (sparql-examples@{UPSTREAM_COMMIT_CHECKED[:7]}), other versions that were "
+                 "tried and what could still be tried.")
+    L.append("")
     for k, e in sorted(manual, key=lambda kv: (kv[1]["target"], short_id(kv[0]))):
-        v = e.get("verification") or {}
         L.append(f"### `{short_id(k)}`")
         L.append("")
-        L.append(f"- Key: <{k}>")
-        L.append(f"- Target: `{e['target']}`"
-                 + (f" ({e['changeStatus']})" if e["changeStatus"] != "unchanged" else ""))
-        if v:
-            L.append(f"- Check: {fmt_check(v)}")
-        for pv in e.get("previousVerifications", []):
-            L.append(f"- Earlier check: {fmt_check(pv)}")
-        for n in e["manualFixNotes"]:
-            L.append(f"- {md_escape(n)}")
-        L.append("")
+        query_details(L, k, e, exp[k])
 
     unverified = [(k, e) for k, e in data.items() if e["status"] == "unverified"]
     L.append(f"## Queries not checked yet ({len(unverified)})")
@@ -1084,13 +2518,32 @@ def report(args):
         L.append("")
         for k, e in sorted(unverified, key=lambda kv: (kv[1]["target"], short_id(kv[0]))):
             reason = (e.get("verification") or {}).get("error", "never checked")
-            L.append(f"- `{short_id(k)}` → `{e['target']}`: {md_escape(reason)}")
+            L.append(f"### `{short_id(k)}`")
+            L.append("")
+            L.append(f"- Not checked: {md_escape(reason)}")
+            query_details(L, k, e, exp[k])
+    L.append("")
+
+    L.append(f"## Expected results ({len(data)})")
+    L.append("")
+    L.append(f"Also in `{os.path.basename(expected_path(args.catalogue))}`, with every check behind each "
+             "result. A query is expected to return the row count of the latest check of its current text "
+             "that returned results; otherwise a count computed from aggregate queries is used; otherwise the "
+             "latest check decides (0 rows, or fails). Counts are snapshots from November 2026 and can change "
+             "with the endpoints' data.")
+    L.append("")
+    L.append("| Query | Target | Expected | Based on |")
+    L.append("|---|---|---|---|")
+    for k, e in sorted(data.items(), key=lambda kv: (kv[1]["target"], short_id(kv[0]))):
+        L.append(f"| `{md_escape(short_id(k))}` | `{e['target']}` | {md_escape(fmt_expected(exp[k]))} | "
+                 f"{md_escape(exp[k]['basis'])} |")
     L.append("")
 
     L.append("## Verification runs")
     L.append("")
     if not runs:
         L.append("None yet.")
+        L.append("")
     for r in runs:
         s = r.get("settings", {})
         title = f"### Run {r.get('id', '?')}" + (f": {r['label']}" if r.get("label") else "")
@@ -1167,7 +2620,14 @@ def main():
     r.add_argument("-o", "--output", default="sib-swiss-federated-queries.updated-2026-11.md")
     r.set_defaults(func=report)
 
+    x = sub.add_parser("expected", help="write the expected result of each query, with the checks behind it")
+    x.add_argument("-c", "--catalogue", default="sib-swiss-federated-queries.updated-2026-11.json")
+    x.add_argument("-o", "--output", help="default: <catalogue>.expected-results.json")
+    x.set_defaults(func=expected)
+
     args = p.parse_args()
+    if args.cmd == "expected" and not args.output:
+        args.output = expected_path(args.catalogue)
     args.func(args)
 
 
